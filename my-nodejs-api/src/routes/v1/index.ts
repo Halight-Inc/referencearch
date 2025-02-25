@@ -12,6 +12,8 @@ export const setRoutes = (app: Express) => {
      * /v1/:
      *   get:
      *     summary: Retrieve a list of items
+     *     security:
+     *       - bearerAuth: []
      *     responses:
      *       200:
      *         description: A list of items
@@ -25,6 +27,8 @@ export const setRoutes = (app: Express) => {
      * /v1/item:
      *   post:
      *     summary: Create a new item
+     *     security:
+     *       - bearerAuth: []
      *     requestBody:
      *       required: true
      *       content:
