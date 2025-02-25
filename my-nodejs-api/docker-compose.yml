@@ -11,13 +11,16 @@ services:
       - /usr/src/app/node_modules
     depends_on:
       - db
-    watch:
-      - src
-      - package.json
-      - tsconfig.json
-    watch_options:
-      ignored: /node_modules/
-      persistent: true
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /src/app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+
   db:
     image: postgres:latest
     environment:

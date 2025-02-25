@@ -1,6 +1,10 @@
 import { createConnection, Connection } from 'typeorm';
 import { Item } from './models';
 
+export const initializeDatabase = async () => {
+    await createConnection();
+};
+
 export class Database {
     private connection!: Connection;
 
