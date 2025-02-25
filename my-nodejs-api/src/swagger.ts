@@ -10,6 +10,20 @@ const options = {
             version: '1.0.0',
             description: 'A simple API documentation',
         },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+        security: [
+            {
+                bearerAuth: [],
+            },
+        ],
     },
     apis: ['./src/routes/v1/*.ts'], // Path to the API docs
 };
