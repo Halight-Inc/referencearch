@@ -1,5 +1,3 @@
-#version: '3.8'
-
 services:
   app:
     build: .
@@ -13,7 +11,13 @@ services:
       - /usr/src/app/node_modules
     depends_on:
       - db
-
+    watch:
+      - src
+      - package.json
+      - tsconfig.json
+    watch_options:
+      ignored: /node_modules/
+      persistent: true
   db:
     image: postgres:latest
     environment:

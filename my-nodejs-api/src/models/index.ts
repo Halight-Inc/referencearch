@@ -9,6 +9,6 @@ export class Item {
     @Column()
     name!: string;
 
-    @Column()
+    @Column('text')
     description!: string;
 }
