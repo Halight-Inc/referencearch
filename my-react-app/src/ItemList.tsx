@@ -11,7 +11,11 @@ const ItemList: React.FC<{ token: string }> = ({ token }) => {
         const fetchItems = async () => {
             try {
                 const data = await getItems(token);
-                setItems(data);
+                if (Array.isArray(data)) {
+                    setItems(data);
+                } else {
+                    console.error('Expected an array of items');
+                }
             } catch (error) {
                 console.error('Error fetching items:', error);
             }

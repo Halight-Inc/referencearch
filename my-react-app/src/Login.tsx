@@ -16,6 +16,7 @@ const Login: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
             localStorage.setItem('jwtToken', token);
             onLogin(token);
         } catch (err) {
+            console.error('Login error:', err);
             setError('Invalid credentials');
         }
     };

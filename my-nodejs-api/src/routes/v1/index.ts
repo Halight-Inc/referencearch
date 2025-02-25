@@ -9,7 +9,7 @@ export const setRoutes = (app: Express) => {
 
     /**
      * @swagger
-     * /v1/:
+     * /v1/item:
      *   get:
      *     summary: Retrieve a list of items
      *     security:
@@ -18,7 +18,7 @@ export const setRoutes = (app: Express) => {
      *       200:
      *         description: A list of items
      */
-    app.get('/v1/', authenticateToken, (req, res) => {
+    app.get('/v1/item', authenticateToken, (req, res) => {
         indexController.getItems(req, res);
     });
 

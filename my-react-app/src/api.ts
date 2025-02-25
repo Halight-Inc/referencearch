@@ -9,7 +9,7 @@ export const getItems = async (token: string) => {
             Authorization: `Bearer ${token}`,
         },
     });
-    return response.data;
+    return response.data; // Ensure this returns an array
 };
 
 export const createItem = async (item: { name: string; description: string }, token: string) => {
@@ -18,5 +18,5 @@ export const createItem = async (item: { name: string; description: string }, to
             Authorization: `Bearer ${token}`,
         },
     });
-    return response.data;
+    return response.data; // Ensure this returns the created item
 };
