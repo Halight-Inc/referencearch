@@ -98,8 +98,10 @@ jobs:
             --resource-group my-resource-group \
             --image $api_image \
             --target-port 3000 \
-            --environment my-environment 
-
+            --environment my-environment \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }}
+            
       # Deploy React App to Azure Container Apps (DEV)
       - name: Deploy React App to Azure Container Apps (DEV)
         run: |
@@ -108,7 +110,9 @@ jobs:
             --resource-group my-resource-group \
             --image $react_image \
             --target-port 80 \
-            --environment my-environment 
+            --environment my-environment \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }}
 
   deploy-qa:
     runs-on: ubuntu-latest
