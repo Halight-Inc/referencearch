@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getItems, createItem } from './api';
 
-const ItemList: React.FC<{ token: string }> = ({ token }) => {
+const ItemList: React.FC<{ token: string; showNewFeature: boolean }> = ({ token, showNewFeature }) => {
     const [items, setItems] = useState<{ name: string; description: string }[]>([]);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -59,6 +59,7 @@ const ItemList: React.FC<{ token: string }> = ({ token }) => {
                 onChange={(e) => setDescription(e.target.value)}
             />
             <button onClick={handleCreateItem}>Create</button>
+            {showNewFeature && <p>New feature is enabled!</p>}
         </div>
     );
 };

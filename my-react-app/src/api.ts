@@ -1,22 +1,22 @@
 // filepath: /C:/code/referencearch/my-react-app/src/api.ts
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/v1';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const getItems = async (token: string) => {
-    const response = await axios.get(`${API_URL}/item`, {
+    const response = await axios.get(`${API_URL}/v1/item`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     });
-    return response.data; // Ensure this returns an array
+    return response.data;
 };
 
 export const createItem = async (item: { name: string; description: string }, token: string) => {
-    const response = await axios.post(`${API_URL}/item`, item, {
+    const response = await axios.post(`${API_URL}/v1/item`, item, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     });
-    return response.data; // Ensure this returns the created item
+    return response.data;
 };

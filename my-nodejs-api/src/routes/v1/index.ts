@@ -1,11 +1,11 @@
 import { Express } from 'express';
-import { IndexController } from '../../controllers/index';
+import { IndexController as V1IndexController } from '../../controllers/V1/index';
 import { User } from '../../models/user';
 import { generateToken, authenticateToken } from '../../auth';
 import { getRepository } from 'typeorm';
 
 export const setRoutes = (app: Express) => {
-    const indexController = new IndexController();
+    const indexController = new V1IndexController();
 
     /**
      * @swagger
@@ -19,7 +19,14 @@ export const setRoutes = (app: Express) => {
      *         description: A list of items
      */
     app.get('/v1/item', authenticateToken, (req, res) => {
-        indexController.getItems(req, res);
+        const showNewFeature = req.splitClient.getTreatment('user-key', 'show-new-feature');
+        if (showNewFeature === 'on') {
+            // New feature logic
+            indexController.getItems(req, res);
+        } else {
+            // Old feature logic
+            indexController.getItems(req, res);
+        }
     });
 
     /**
@@ -109,10 +116,10 @@ export const setRoutes = (app: Express) => {
     app.post('/v1/login', async (req, res) => {
         const userRepository = getRepository(User);
         const user = await userRepository.findOne({ username: req.body.username });
-        if (!user || !(await user.validatePassword(req.body.password))) {
-            return res.sendStatus(401);
-        }
-        const token = generateToken(user);
+    if (!user || !(await user.validatePassword(req.body.password))) {
+        return res.sendStatus(401);
+    }
+    const token = generateToken(user);
         res.json({ token });
     });
 };

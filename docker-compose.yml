@@ -1,19 +1,25 @@
 version: '3.8'
 
 services:
-  app:
-    build: ./my-nodejs-api
-    command: npm run dev
+  api:
+    build:
+      context: ./my-nodejs-api
+    env_file:
+      - ./my-nodejs-api/.env
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./my-nodejs-api:/usr/src/app
-      - /usr/src/app/node_modules
     depends_on:
       - db
 
+  react-app:
+    build:
+      context: ./my-react-app
+    env_file:
+      - ./my-react-app/.env
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
 
   db:
     image: postgres:latest
@@ -25,15 +31,6 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-
-  react-app:
-    build: ./my-react-app
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - app
 
 volumes:
   db_data:

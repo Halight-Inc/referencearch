@@ -1,20 +1,25 @@
 FROM node:latest
 
-# Create app directory
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# Copy package.json and package-lock.json
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Bundle app source
+# Copy the rest of the application code
 COPY . .
 
-# Build TypeScript code
+# Copy the .env file
+COPY .env .env
+
+# Build the application
 RUN npm run build
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run the app
-CMD ["npm", "start"]
+# Start the application
+CMD ["npm", "run", "start"]

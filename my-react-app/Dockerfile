@@ -14,6 +14,9 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Copy the .env file
+COPY .env .env
+
 # Build the React application
 RUN npm run build
 
@@ -24,4 +27,4 @@ RUN npm install -g serve
 EXPOSE 3000
 
 # Start the application
-CMD ["serve", "-s", "dist", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "3000"]
