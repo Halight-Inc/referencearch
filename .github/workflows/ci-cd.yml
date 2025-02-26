@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger on push to 'main' branch (for example, the 'release' or 'main' branch)
+      - main  # Trigger on push to 'main' branch
   pull_request:
     branches:
       - main  # Trigger on pull requests targeting 'main' branch
@@ -31,16 +31,16 @@ jobs:
         id: build_api
         run: |
           docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
-        outputs:
-          api_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}
+        # Define output for the API image
+        echo "::set-output name=api_image::${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}"
 
       # Build Docker image for the React service
       - name: Build Docker image for React App
         id: build_react
         run: |
           docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
-        outputs:
-          react_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}
+        # Define output for the React image
+        echo "::set-output name=react_image::${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}"
 
       # Log in to Azure Container Registry (ACR)
       - name: Log in to Azure Container Registry
@@ -71,7 +71,7 @@ jobs:
           az containerapp up \
             --name my-api-dev \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_api.outputs.api_image }} \
+            --image ${{ needs.build.outputs.api_image }} \
             --target-port 3000 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -82,7 +82,7 @@ jobs:
           az containerapp up \
             --name my-react-app-dev \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_react.outputs.react_image }} \
+            --image ${{ needs.build.outputs.react_image }} \
             --target-port 80 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -102,7 +102,7 @@ jobs:
           az containerapp up \
             --name my-api-qa \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_api.outputs.api_image }} \
+            --image ${{ needs.build.outputs.api_image }} \
             --target-port 3000 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -113,7 +113,7 @@ jobs:
           az containerapp up \
             --name my-react-app-qa \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_react.outputs.react_image }} \
+            --image ${{ needs.build.outputs.react_image }} \
             --target-port 80 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -133,17 +133,18 @@ jobs:
           az containerapp up \
             --name my-api-prod \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_api.outputs.api_image }} \
+            --image ${{ needs.build.outputs.api_image }} \
             --target-port 3000 \
             --environment my-environment \
             --cpu 1.0 --memory 2.0Gi
 
       # Deploy React App to Azure Container Apps (PROD)
+      - name: Deploy React App to Azure Container Apps (PROD)
         run: |
           az containerapp up \
             --name my-react-app-prod \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.build_react.outputs.react_image }} \
+            --image ${{ needs.build.outputs.react_image }} \
             --target-port 80 \
             --environment my-environment \
             --cpu 1.0 --memory 2.0Gi
