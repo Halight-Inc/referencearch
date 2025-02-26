@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      api_image: ${{ steps.build_api.outputs.api_image }}
+      api_image: ${{ steps.api_image.outputs.api_image }}
       react_image: ${{ steps.build_react.outputs.react_image }}
     steps:
       # Checkout the repository code
@@ -50,9 +50,14 @@ jobs:
       # Build Docker image for the API service
       - name: Build Docker image for API
         id: build_api
-        run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
-          echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+        run: docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
+      - name: Build Docker image for API (variable)
+        id: api_image
+        run: echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      - name: Get API IMAGE
+        env:
+          API_IMAGE_ENV: ${{ steps.api_image.outputs.api_image }}
+        run: echo "The selected color is $API_IMAGE_ENV"
 
       # Build Docker image for the React service
       - name: Build Docker image for React App
