@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      api_image: ${{ steps.api_image.outputs.api_image }}
+      api_image: $API_IMAGE_ENV"
       react_image: ${{ steps.build_react.outputs.react_image }}
     steps:
       # Checkout the repository code
