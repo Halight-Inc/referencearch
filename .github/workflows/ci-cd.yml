@@ -31,16 +31,16 @@ jobs:
         id: build_api
         run: |
           docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
-        # Define output for the API image
-        echo "::set-output name=api_image::${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}"
+          # Define output for the API image
+          echo "::set-output name=api_image::${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}"
 
       # Build Docker image for the React service
       - name: Build Docker image for React App
         id: build_react
         run: |
           docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
-        # Define output for the React image
-        echo "::set-output name=react_image::${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}"
+          # Define output for the React image
+          echo "::set-output name=react_image::${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}"
 
       # Log in to Azure Container Registry (ACR)
       - name: Log in to Azure Container Registry
