@@ -34,6 +34,16 @@ jobs:
           echo "CLIENT_URL=http://localhost:3001" >> .env
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
 
+      # Copy .env file to Node.js API directory
+      - name: Copy .env to Node.js API directory
+        run: |
+          cp .env ./my-nodejs-api/.env
+
+      # Copy .env file to React App directory
+      - name: Copy .env to React App directory
+        run: |
+          cp .env ./my-react-app/.env
+
       # Build Docker image for the API service
       - name: Build Docker image for API
         id: build_api
