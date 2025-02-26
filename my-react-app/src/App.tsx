@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Login from './Login';
 import ItemList from './ItemList';
+import Payment from './Payment';
 import { SplitFactory } from '@splitsoftware/splitio';
 
 const App: React.FC = () => {
@@ -53,7 +54,10 @@ const App: React.FC = () => {
             </p>
             <div className="App">
                 {token ? (
-                    <ItemList token={token} showNewFeature={showNewFeature} />
+                    <>
+                        <ItemList token={token} showNewFeature={showNewFeature} />
+                        <Payment />
+                    </>
                 ) : (
                     <Login onLogin={handleLogin} />
                 )}

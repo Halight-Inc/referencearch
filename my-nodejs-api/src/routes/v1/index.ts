@@ -1,11 +1,12 @@
 import { Express } from 'express';
-import { IndexController as V1IndexController } from '../../controllers/V1/index';
+import { IndexController } from '../../controllers/V1/index';
 import { User } from '../../models/user';
 import { generateToken, authenticateToken } from '../../auth';
 import { getRepository } from 'typeorm';
+import paymentRoutes from './payment';
 
 export const setRoutes = (app: Express) => {
-    const indexController = new V1IndexController();
+    const indexController = new IndexController();
 
     /**
      * @swagger
@@ -122,4 +123,6 @@ export const setRoutes = (app: Express) => {
     const token = generateToken(user);
         res.json({ token });
     });
+
+    app.use('/v1/payment', paymentRoutes);
 };
