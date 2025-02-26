@@ -98,8 +98,7 @@ jobs:
             --resource-group my-resource-group \
             --image $api_image \
             --target-port 3000 \
-            --environment my-environment \
-            --cpu 0.5 --memory 1.0Gi
+            --environment my-environment 
 
       # Deploy React App to Azure Container Apps (DEV)
       - name: Deploy React App to Azure Container Apps (DEV)
@@ -109,8 +108,7 @@ jobs:
             --resource-group my-resource-group \
             --image $react_image \
             --target-port 80 \
-            --environment my-environment \
-            --cpu 0.5 --memory 1.0Gi
+            --environment my-environment 
 
   deploy-qa:
     runs-on: ubuntu-latest
