@@ -26,6 +26,14 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Set environment variables
+      - name: Set environment variables
+        run: |
+          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> $GITHUB_ENV
+          echo "API_URL=http://localhost:3000" >> $GITHUB_ENV
+          echo "CLIENT_URL=http://localhost:3001" >> $GITHUB_ENV
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> $GITHUB_ENV
+
       # Build Docker image for the API service
       - name: Build Docker image for API
         id: build_api
@@ -133,5 +141,16 @@ jobs:
             --resource-group my-resource-group \
             --image ${{ env.api_image }} \
             --target-port 3000 \
+            --environment my-environment \
+            --cpu 1.0 --memory 2.0Gi
+
+      # Deploy React App to Azure Container Apps (PROD)
+- name: Deploy React App to Azure Container Apps (PROD)
+        run: |
+          az containerapp up \
+            --name my-react-app-prod \
+            --resource-group my-resource-group \
+            --image ${{ env.react_image }} \
+            --target-port 80 \
             --environment my-environment \
             --cpu 1.0 --memory 2.0Gi
