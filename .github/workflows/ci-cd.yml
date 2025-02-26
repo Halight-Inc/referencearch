@@ -145,7 +145,7 @@ jobs:
             --cpu 1.0 --memory 2.0Gi
 
       # Deploy React App to Azure Container Apps (PROD)
-- name: Deploy React App to Azure Container Apps (PROD)
+      - name: Deploy React App to Azure Container Apps (PROD)
         run: |
           az containerapp up \
             --name my-react-app-prod \
