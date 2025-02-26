@@ -79,10 +79,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - env:
-          api_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}
-          react_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}
-        run: echo '$react_image $api_image'
+      - name: Set Variables
+        id: vars
+        run: |
+          echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_ENV"
 
       - name: Log in to Azure
         uses: azure/login@v1
