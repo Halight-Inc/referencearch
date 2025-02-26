@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      api_image: $API_IMAGE_ENV
+      api_image: ${{ steps.build_api.outputs.api_image }}
       react_image: ${{ steps.build_react.outputs.react_image }}
     steps:
       # Checkout the repository code
@@ -50,15 +50,10 @@ jobs:
       # Build Docker image for the API service
       - name: Build Docker image for API
         id: build_api
-        run: docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
-      - name: Build Docker image for API (variable)
-        id: api_image
-        run: echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-      - name: Get API IMAGE
-        env:
-          API_IMAGE_ENV: ${{ steps.api_image.outputs.api_image }}
-        run: echo "The selected color is $API_IMAGE_ENV"
-
+        run: |
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
+          echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      
       # Build Docker image for the React service
       - name: Build Docker image for React App
         id: build_react
@@ -85,8 +80,8 @@ jobs:
     needs: [build]
     steps:
       - env:
-          api_image: ${{needs.build.outputs.api_image}}
-          react_image: ${{needs.build.outputs.react_image}}
+          api_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}
+          react_image: ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}
         run: echo '$react_image $api_image'
 
       - name: Log in to Azure
@@ -100,7 +95,7 @@ jobs:
           az containerapp up \
             --name my-api-dev \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.api_image }} \
+            --image $api_image \
             --target-port 3000 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -111,7 +106,7 @@ jobs:
           az containerapp up \
             --name my-react-app-dev \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.react_image }} \
+            --image $react_image \
             --target-port 80 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -131,7 +126,7 @@ jobs:
           az containerapp up \
             --name my-api-qa \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.api_image }} \
+            --image $api_image \
             --target-port 3000 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
@@ -142,7 +137,7 @@ jobs:
           az containerapp up \
             --name my-react-app-qa \
             --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.react_image }} \
+            --image $react_image \
             --target-port 80 \
             --environment my-environment \
             --cpu 0.5 --memory 1.0Gi
