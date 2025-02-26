@@ -26,13 +26,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Set environment variables
-      - name: Set environment variables
+      # Create .env file for Docker build
+      - name: Create .env file
         run: |
-          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> $GITHUB_ENV
-          echo "API_URL=http://localhost:3000" >> $GITHUB_ENV
-          echo "CLIENT_URL=http://localhost:3001" >> $GITHUB_ENV
-          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "API_URL=http://localhost:3000" >> .env
+          echo "CLIENT_URL=http://localhost:3001" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
 
       # Build Docker image for the API service
       - name: Build Docker image for API
