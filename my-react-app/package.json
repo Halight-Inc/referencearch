@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "start": "node src/server.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@splitsoftware/splitio": "^11.1.0",

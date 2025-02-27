@@ -102,6 +102,7 @@ jobs:
             --resource-group my-resource-group \
             --name my-postgres-dev \
             --image postgres:latest \
+            --os-type Linux \
             --cpu 1 \
             --memory 1.5 \
             --environment-variables POSTGRES_USER=user POSTGRES_PASSWORD=password POSTGRES_DB=mydatabase \
