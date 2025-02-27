@@ -33,8 +33,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
-          echo "API_URL=https://my-api-dev.purplemushroom-06b947f6.westus2.azurecontainerapps.io" >> .env
-          echo "CLIENT_URL=https://my-react-app-dev.purplemushroom-06b947f6.westus2.azurecontainerapps.io" >> .env
+          echo "API_URL=https://dev-api.energizelms.com" >> .env
+          echo "CLIENT_URL=https://dev-app.energizelms.com" >> .env
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
           echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
           echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
