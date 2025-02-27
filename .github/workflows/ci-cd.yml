@@ -109,30 +109,30 @@ jobs:
             --ports 5432 \
             --dns-name-label my-postgres-dev \
             --restart-policy Always
-
+#NOT READY YET
       # Wait for PostgreSQL to be ready
-      - name: Wait for PostgreSQL
-        run: |
-          while ! nc -z my-postgres-dev 5432; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
-          done
+      # - name: Wait for PostgreSQL
+      #   run: |
+      #     while ! nc -z my-postgres-dev 5432; do
+      #       echo "Waiting for PostgreSQL to be ready..."
+      #       sleep 5
+      #     done
 
-      # Run database migrations
-      - name: Run database migrations
-        run: |
-          docker run --rm \
-            --env-file .env \
-            ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
-            npm run typeorm migration:run
+      # # Run database migrations
+      # - name: Run database migrations
+      #   run: |
+      #     docker run --rm \
+      #       --env-file .env \
+      #       ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
+      #       npm run typeorm migration:run
 
-      # Seed the database
-      - name: Seed the database
-        run: |
-          docker run --rm \
-            --env-file .env \
-            ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
-            npm run seed
+      # # Seed the database
+      # - name: Seed the database
+      #   run: |
+      #     docker run --rm \
+      #       --env-file .env \
+      #       ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
+      #       npm run seed
 
       # Deploy API to Azure Container Apps (DEV)
       - name: Deploy API to Azure Container Apps (DEV)
