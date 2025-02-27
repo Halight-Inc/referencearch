@@ -17,7 +17,7 @@ services:
     env_file:
       - ./my-react-app/.env
     ports:
-      - "3001:3000"
+      - "5173:5173"
     depends_on:
       - api
 
