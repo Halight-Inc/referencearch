@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { json } from 'body-parser';
+import bodyParser from 'body-parser'; // Import body-parser as default
 import { setRoutes as setV1Routes } from './routes/v1/index.js';
 import { setupSwagger } from './swagger.js';
 import { initializeDatabase } from './database.js';
@@ -34,7 +34,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(json());
+app.use(bodyParser.json()); // Use json function from body-parser
 
 const startServer = async () => {
     try {
