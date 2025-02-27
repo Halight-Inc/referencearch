@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "ES2020",
-    "module": "commonjs",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "forceConsistentCasingInFileNames": false,
     "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
-    }, 
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    }
   },
-  "include": ["src/**/*.ts", "src/express.d.ts"],
-  "exclude": [    "node_modules", "dist"  ]
+  "include": ["src/**/*.ts","src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

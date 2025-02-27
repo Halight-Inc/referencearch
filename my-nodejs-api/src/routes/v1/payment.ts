@@ -1,7 +1,7 @@
 import express from 'express';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
-import { authenticateToken } from '../../auth';
+import { authenticateToken } from '../../auth.js';
 
 // Load environment variables from .env file
 dotenv.config();

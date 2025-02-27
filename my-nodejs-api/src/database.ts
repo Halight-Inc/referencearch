@@ -1,5 +1,5 @@
 import { createConnection, Connection } from 'typeorm';
-import { Item } from './models';
+import { Item } from './models/index.js';
 
 export const initializeDatabase = async () => {
     await createConnection();

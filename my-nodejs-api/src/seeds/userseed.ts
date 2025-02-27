@@ -1,5 +1,5 @@
 import { getRepository } from 'typeorm';
-import { User } from '../models/user';
+import { User } from '../models/user.js'; // Adjust the import path as necessary
 
 export const seedUsers = async () => {
     const userRepository = getRepository(User);

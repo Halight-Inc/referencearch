@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 
 export class IndexController {
-    async getItems(req: Request, res: Response) {
-        // Your logic here
-        res.send('Get Items');
+    getItems(_req: Request, res: Response) {
+        // Use req and res or remove them if not needed
+        res.send('Get items');
     }
 
-    async createItem(req: Request, res: Response) {
-        // Your logic here
-        res.send('Create Item');
+    createItem(_req: Request, res: Response) {
+        // Use req and res or remove them if not needed
+        res.send('Create item');
     }
 }

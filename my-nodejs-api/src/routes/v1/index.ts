@@ -1,9 +1,9 @@
 import { Express } from 'express';
-import { IndexController } from '../../controllers/index';
-import { User } from '../../models/user';
-import { generateToken, authenticateToken } from '../../auth';
+import { IndexController } from '../../controllers/index.js';
+import { User } from '../../models/user.js';
+import { generateToken, authenticateToken } from '../../auth.js';
 import { getRepository } from 'typeorm';
-import paymentRoutes from './payment';
+import paymentRoutes from './payment.js'; // Ensure this points to a specific file
 
 export const setRoutes = (app: Express) => {
     const indexController = new IndexController();
@@ -117,10 +117,10 @@ export const setRoutes = (app: Express) => {
     app.post('/v1/login', async (req, res) => {
         const userRepository = getRepository(User);
         const user = await userRepository.findOne({ username: req.body.username });
-    if (!user || !(await user.validatePassword(req.body.password))) {
-        return res.sendStatus(401);
-    }
-    const token = generateToken(user);
+        if (!user || !(await user.validatePassword(req.body.password))) {
+            return res.sendStatus(401);
+        }
+        const token = generateToken(user);
         res.json({ token });
     });
 

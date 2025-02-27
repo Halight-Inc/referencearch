@@ -36,6 +36,11 @@ jobs:
           echo "API_URL=https://my-api-dev.purplemushroom-06b947f6.westus2.azurecontainerapps.io" >> .env
           echo "CLIENT_URL=https://my-react-app-dev.purplemushroom-06b947f6.westus2.azurecontainerapps.io" >> .env
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
 
       # Copy .env file to Node.js API directory
       - name: Copy .env to Node.js API directory
@@ -89,6 +94,44 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy PostgreSQL to Azure Container Instances (ACI) for DEV
+      - name: Deploy PostgreSQL to Azure Container Instances (ACI)
+        run: |
+          az container create \
+            --resource-group my-resource-group \
+            --name my-postgres-dev \
+            --image postgres:latest \
+            --cpu 1 \
+            --memory 1.5 \
+            --environment-variables POSTGRES_USER=user POSTGRES_PASSWORD=password POSTGRES_DB=mydatabase \
+            --ports 5432 \
+            --dns-name-label my-postgres-dev \
+            --restart-policy Always
+
+      # Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL
+        run: |
+          while ! nc -z my-postgres-dev 5432; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+
+      # Run database migrations
+      - name: Run database migrations
+        run: |
+          docker run --rm \
+            --env-file .env \
+            ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
+            npm run typeorm migration:run
+
+      # Seed the database
+      - name: Seed the database
+        run: |
+          docker run --rm \
+            --env-file .env \
+            ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} \
+            npm run seed
 
       # Deploy API to Azure Container Apps (DEV)
       - name: Deploy API to Azure Container Apps (DEV)

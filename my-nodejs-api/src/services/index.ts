@@ -1,5 +1,5 @@
-import { Item } from '../models';
-import { Database } from '../database'; // Adjust the import path as necessary
+import { Item } from '../models/index.js';
+import { Database } from '../database.js'; // Adjust the import path as necessary
 
 export class ItemService {
     private db: Database;
