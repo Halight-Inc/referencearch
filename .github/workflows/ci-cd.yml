@@ -155,7 +155,7 @@ jobs:
             --resource-group my-resource-group \
             --image $react_image \
             --ingress 'external' \
-            --target-port 80 \
+            --target-port 3000 \
             --environment my-environment \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }}
