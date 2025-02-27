@@ -4,7 +4,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || '');
+const stripeKey = typeof process !== 'undefined' && process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ? process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY : '';
+
+const stripePromise = loadStripe(stripeKey);
 
 const CheckoutForm: React.FC = () => {
     const stripe = useStripe();

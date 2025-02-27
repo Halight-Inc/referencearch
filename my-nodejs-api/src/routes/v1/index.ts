@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { IndexController } from '../../controllers/V1/index';
+import { IndexController } from '../../controllers/index';
 import { User } from '../../models/user';
 import { generateToken, authenticateToken } from '../../auth';
 import { getRepository } from 'typeorm';

@@ -5,7 +5,7 @@ import { setRoutes as setV1Routes } from './routes/v1';
 import { setupSwagger } from './swagger';
 import { initializeDatabase } from './database';
 import { seedUsers } from './seeds/userseed';
-import { createConnection, getConnection } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { SplitFactory } from '@splitsoftware/splitio';
 import dotenv from 'dotenv';
 
