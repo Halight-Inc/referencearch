@@ -114,64 +114,64 @@ jobs:
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }}
 
-  deploy-qa:
-    runs-on: ubuntu-latest
-    needs: deploy-dev
-    steps:
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  # deploy-qa:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy-dev
+  #   steps:
+  #     - name: Log in to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Deploy API to Azure Container Apps (QA)
-      - name: Deploy API to Azure Container Apps (QA)
-        run: |
-          az containerapp up \
-            --name my-api-qa \
-            --resource-group my-resource-group \
-            --image $api_image \
-            --target-port 3000 \
-            --environment my-environment \
-            --cpu 0.5 --memory 1.0Gi
+  #     # Deploy API to Azure Container Apps (QA)
+  #     - name: Deploy API to Azure Container Apps (QA)
+  #       run: |
+  #         az containerapp up \
+  #           --name my-api-qa \
+  #           --resource-group my-resource-group \
+  #           --image $api_image \
+  #           --target-port 3000 \
+  #           --environment my-environment \
+  #           --cpu 0.5 --memory 1.0Gi
 
-      # Deploy React App to Azure Container Apps (QA)
-      - name: Deploy React App to Azure Container Apps (QA)
-        run: |
-          az containerapp up \
-            --name my-react-app-qa \
-            --resource-group my-resource-group \
-            --image $react_image \
-            --target-port 80 \
-            --environment my-environment \
-            --cpu 0.5 --memory 1.0Gi
+  #     # Deploy React App to Azure Container Apps (QA)
+  #     - name: Deploy React App to Azure Container Apps (QA)
+  #       run: |
+  #         az containerapp up \
+  #           --name my-react-app-qa \
+  #           --resource-group my-resource-group \
+  #           --image $react_image \
+  #           --target-port 80 \
+  #           --environment my-environment \
+  #           --cpu 0.5 --memory 1.0Gi
 
-  deploy-prod:
-    runs-on: ubuntu-latest
-    needs: deploy-qa
-    steps:
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  # deploy-prod:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy-qa
+  #   steps:
+  #     - name: Log in to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Deploy API to Azure Container Apps (PROD)
-      - name: Deploy API to Azure Container Apps (PROD)
-        run: |
-          az containerapp up \
-            --name my-api-prod \
-            --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.api_image }} \
-            --target-port 3000 \
-            --environment my-environment \
-            --cpu 1.0 --memory 2.0Gi
+  #     # Deploy API to Azure Container Apps (PROD)
+  #     - name: Deploy API to Azure Container Apps (PROD)
+  #       run: |
+  #         az containerapp up \
+  #           --name my-api-prod \
+  #           --resource-group my-resource-group \
+  #           --image ${{ needs.build.outputs.api_image }} \
+  #           --target-port 3000 \
+  #           --environment my-environment \
+  #           --cpu 1.0 --memory 2.0Gi
 
-      # Deploy React App to Azure Container Apps (PROD)
-      - name: Deploy REACT APP to Azure Container Apps (PROD)
-        run: |
-          az containerapp up \
-            --name my-react-app-prod \
-            --resource-group my-resource-group \
-            --image ${{ needs.build.outputs.react_image }} \
-            --target-port 80 \
-            --environment my-environment \
-            --cpu 1.0 --memory 2.0Gi
+  #     # Deploy React App to Azure Container Apps (PROD)
+  #     - name: Deploy REACT APP to Azure Container Apps (PROD)
+  #       run: |
+  #         az containerapp up \
+  #           --name my-react-app-prod \
+  #           --resource-group my-resource-group \
+  #           --image ${{ needs.build.outputs.react_image }} \
+  #           --target-port 80 \
+  #           --environment my-environment \
+  #           --cpu 1.0 --memory 2.0Gi
