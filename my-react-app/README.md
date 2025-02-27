@@ -1,3 +1,15 @@
+# Create .env file
+
+SPLIT_API_KEY=your_split_api_key
+API_URL=http://localhost:3000
+CLIENT_URL=http://localhost:3001
+STRIPE_SECRET_KEY=your_stripe_publishable_key
+DATABASE_HOST=yourhost
+DATABASE_PORT=yourport
+DATABASE_USERNAME=yourusername
+DATABASE_PASSWORD=yourpassword
+DATABASE_NAME=yourdatabasename
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

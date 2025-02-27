@@ -4,7 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
 
-const stripeKey = typeof process !== 'undefined' && process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ? process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY : '';
+const stripeKey = typeof process !== 'undefined' && process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY : '';
 
 const stripePromise = loadStripe(stripeKey);
 
@@ -37,7 +37,7 @@ const CheckoutForm: React.FC = () => {
         const cardElement = elements.getElement(CardElement);
 
         try {
-            const { data: { clientSecret } } = await axios.post<PaymentIntentResponse>(`${process.env.REACT_APP_API_URL}/v1/payment/create-payment-intent`, {
+            const { data: { clientSecret } } = await axios.post<PaymentIntentResponse>(`${process.env.API_URL}/v1/payment/create-payment-intent`, {
                 amount: 1000, // Amount in cents
             });
 
