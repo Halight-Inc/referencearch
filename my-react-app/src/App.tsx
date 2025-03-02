@@ -5,26 +5,17 @@ import './App.css'
 import Login from './Login';
 import ItemList from './ItemList';
 import Payment from './Payment';
-import { SplitFactory } from '@splitsoftware/splitio';
+import { useSplitTreatments } from '@splitsoftware/splitio-react';
+
 
 const App: React.FC = () => {
+    const featureName = 'hello-world';
+
     const [count, setCount] = useState(0)
     const [token, setToken] = useState(localStorage.getItem('jwtToken') || '');
-    const [showNewFeature, setShowNewFeature] = useState(false);
+    const { treatments, isReady } = useSplitTreatments({ names: [featureName] });
+    const { treatment, config } = treatments[featureName] || {};
 
-    useEffect(() => {
-        const factory = SplitFactory({
-            core: {
-                authorizationKey: 'YOUR_SPLIT_CLIENT_SIDE_API_KEY'
-            }
-        });
-        const splitClient = factory.client();
-
-        splitClient.on(splitClient.Event.SDK_READY, () => {
-            const showNewFeatureFlag = splitClient.getTreatment('user-key', 'show-new-feature');
-            setShowNewFeature(showNewFeatureFlag === 'on');
-        });
-    }, []);
 
     const handleLogin = (newToken: string) => {
         setToken(newToken);
@@ -32,30 +23,27 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div>
+            <div hidden={isReady && (treatment === 'off')}>
                 <a href="https://vite.dev" target="_blank">
                     <img src={viteLogo} className="logo" alt="Vite logo" />
                 </a>
                 <a href="https://react.dev" target="_blank">
                     <img src={reactLogo} className="logo react" alt="React logo" />
                 </a>
+                <h1>Hello World</h1>
+                <div className="card">
+                    <button onClick={() => setCount((count) => count + 1)}>
+                        count is {count}
+                    </button>
+                </div>
             </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>
-                    count is {count}
-                </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more
-            </p>
             <div className="App">
                 {token ? (
                     <>
-                        <ItemList token={token} showNewFeature={showNewFeature} />
+                        {isReady}
+                        <ItemList token={token} showNewFeature={isReady && (treatment === 'on')} />
+
+                        Credit Card Processing:
                         <Payment />
                     </>
                 ) : (
