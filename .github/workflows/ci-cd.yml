@@ -60,7 +60,10 @@ jobs:
       - name: Build Docker image for React App
         id: build_react
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
+          docker build \
+            --build-arg API_URL=https://dev-api.energizelms.com \
+            --build-arg CLIENT_URL=https://dev-app.energizelms.com \
+            -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
           echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
       # Log in to Azure Container Registry (ACR)

@@ -18,7 +18,10 @@ COPY . .
 COPY .env .env
 
 # Build the React application
-RUN npm run build
+ARG API_URL
+ARG CLIENT_URL
+RUN CLIENT_URL=$CLIENT_URL API_URL=$API_URL npm run build
+
 
 # Install a simple HTTP server to serve the static files
 RUN npm install -g serve
