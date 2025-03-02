@@ -6,11 +6,14 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 
 export default defineConfig({
     plugins: [react()],
+    preview: {
+        host: true
+    },
     build: {
         outDir: 'dist',
         rollupOptions: {
             plugins: [
-              nodePolyfills()
+                nodePolyfills()
             ]
         }
     },
