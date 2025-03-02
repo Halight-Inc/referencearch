@@ -24,6 +24,28 @@ const swaggerDefinition = {
                 bearerFormat: 'JWT',
             },
         },
+        schemas: {
+            Item: {
+                type: 'object',
+                properties: {
+                    id: {
+                        type: 'integer',
+                        description: 'The item ID',
+                        example: 1,
+                    },
+                    name: {
+                        type: 'string',
+                        description: 'The item name',
+                        example: 'Example Item',
+                    },
+                    description: {
+                        type: 'string',
+                        description: 'The item description',
+                        example: 'This is an example item.',
+                    },
+                },
+            },
+        },
     },
 };
 
