@@ -4,33 +4,33 @@ import config from './config/config';
 
 // Define the basic Swagger metadata
 const swaggerDefinition = {
-  openapi: '3.0.0',
-  info: {
-    title: 'Node API with Postgres and Versioned APIs',
-    version: '1.0.0',
-    description: 'A sample API for learning purposes',
-  },
-  servers: [
-    {
-      url: `http://localhost:${config.port}`,
-      description: 'Development server',
+    openapi: '3.0.0',
+    info: {
+        title: 'Node API with Postgres and Versioned APIs',
+        version: '1.0.0',
+        description: 'A sample API for learning purposes',
     },
-  ],
+    servers: [
+        {
+            url: config.apiUrl,
+            description: 'Development server',
+        },
+    ],
     components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            },
+        },
     },
-  },
 };
 
 // Options for swagger-jsdoc
 const options = {
-  swaggerDefinition,
-  apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts'], // Path to the API docs
+    swaggerDefinition,
+    apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts'], // Path to the API docs
 };
 
 // Generate the Swagger spec

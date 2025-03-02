@@ -12,19 +12,21 @@ interface Config {
     stripeSecretKey: string;
     stripeWebhookSecret: string;
     jwtSecret: string;
+    apiUrl: string;
 }
 
 const config: Config = {
     port: parseInt(process.env.PORT || '3000', 10),
     dbHost: process.env.DATABASE_HOST || 'localhost',
     dbPort: parseInt(process.env.DATABASE_PORT || '5432', 10),
-    dbUser: process.env.DATABASE_USERNAME || 'your_db_user',
-    dbPassword: process.env.DATABASE_PASSWORD || 'your_db_password',
-    dbName: process.env.DATABASE_NAME || 'your_db_name',
+    dbUser: process.env.DATABASE_USERNAME || 'user',
+    dbPassword: process.env.DATABASE_PASSWORD || 'password',
+    dbName: process.env.DATABASE_NAME || 'mydatabase',
     dbRetries: parseInt(process.env.DATABASE_RETRIES || '5', 10),
-    stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'your_stripe_secret_key',
-    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'your_stripe_webhook_secret',
-    jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret'
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret',
+    apiUrl: process.env.API_URL || 'http://localhost:3000'
 };
 
 export default config;
