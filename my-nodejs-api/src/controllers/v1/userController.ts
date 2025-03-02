@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import db from '../../database';
+import { User } from '../../database/models/user';
 
 /**
  * @swagger
@@ -7,6 +8,8 @@ import db from '../../database';
  *   get:
  *     summary: Get all users
  *     description: Retrieve a list of all users from the database (version 1).
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -30,14 +33,33 @@ import db from '../../database';
  *         description: Internal server error
  */
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const users = await db.User.findAll();
-    res.json(users);
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const users = await db.User.findAll();
+        res.json(users);
+    } catch (error) {
+        next(error);
+    }
 };
+const getUserByEmail = async (email: string): Promise<User | null> => {
+    try {
+        const user = await db.User.findOne({ where: { email } });
+        return user;
+    } catch (error) {
+        console.error('Error fetching user by email:', error);
+        throw error;
+    }
+};
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
 
 export default {
-  getAllUsers,
+    getAllUsers,
+    getUserByEmail,
 };

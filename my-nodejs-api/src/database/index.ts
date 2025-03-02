@@ -1,20 +1,22 @@
-import { Sequelize, DataTypes, Dialect } from 'sequelize';
-import dbConfig from './config/config';
-import UserFactory from './models/users';
+import { Sequelize } from 'sequelize';
+import config from '../config/config';
+import { initUser, User } from './models/user';
 
-const environment = 'development';
-const dbConfiguration = dbConfig[environment];
-
+// Sequelize instance
 const sequelize = new Sequelize({
-  ...dbConfiguration,
-  dialect: dbConfiguration.dialect as Dialect, //add this
-  logging: console.log,
+    dialect: 'postgres',
+    host: config.dbHost,
+    port: config.dbPort,
+    username: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName,
+    logging: false,
 });
 
-const db = {
-  Sequelize,
-  sequelize,
-  User: UserFactory(sequelize),
-};
+// Initialize models
+initUser(sequelize);
 
-export default db;
+export default {
+    sequelize,
+    User,
+};

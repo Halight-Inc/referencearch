@@ -2,6 +2,7 @@ import express from 'express';
 import v1UserRoutes from './routes/v1/userRoutes';
 import v2UserRoutes from './routes/v2/userRoutes';
 import v1StripeRoutes from './routes/v1/stripeRoutes';
+import v1AuthRoutes from './routes/v1/authRoutes'; // New import
 import errorHandler from './middlewares/errorHandler';
 import { swaggerSpec, swaggerUiSetup, swaggerUi } from './swagger';
 
@@ -20,6 +21,7 @@ app.use(express.raw({ type: 'application/json' })); // Add this line for raw bod
 app.use('/v1/users', v1UserRoutes);
 app.use('/v2/users', v2UserRoutes);
 app.use('/v1/stripe', v1StripeRoutes);
+app.use('/v1/auth', v1AuthRoutes); // New route
 app.use('/api-docs', swaggerUi.serve, swaggerUiSetup); // Add this line
 
 app.use(errorHandler);

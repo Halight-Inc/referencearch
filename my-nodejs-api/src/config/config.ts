@@ -11,6 +11,7 @@ interface Config {
     dbRetries: number;
     stripeSecretKey: string;
     stripeWebhookSecret: string;
+    jwtSecret: string;
 }
 
 const config: Config = {
@@ -23,6 +24,7 @@ const config: Config = {
     dbRetries: parseInt(process.env.DATABASE_RETRIES || '5', 10),
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'your_stripe_secret_key',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'your_stripe_webhook_secret',
+    jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret'
 };
 
 export default config;
