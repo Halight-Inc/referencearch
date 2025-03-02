@@ -5,13 +5,13 @@ import axios from 'axios';
 const API_URL = typeof process !== 'undefined' && process.env.API_URL ? process.env.API_URL : 'http://localhost:3000';
 
 const Login: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState(''); // Changed from username to email
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post(`${API_URL}/login`, { username, password });
+            const response = await axios.post(`${API_URL}/v1/auth/login`, { email, password }); // Updated request body
             const token = response.data.token;
             localStorage.setItem('jwtToken', token);
             onLogin(token);
@@ -27,9 +27,9 @@ const Login: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <input
                 type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Email" // Changed from Username to Email
+                value={email} // Changed from username to email
+                onChange={(e) => setEmail(e.target.value)} // Changed from setUsername to setEmail
             />
             <input
                 type="password"

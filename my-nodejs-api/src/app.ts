@@ -5,6 +5,7 @@ import v1StripeRoutes from './routes/v1/stripeRoutes';
 import v1AuthRoutes from './routes/v1/authRoutes'; // New import
 import errorHandler from './middlewares/errorHandler';
 import { swaggerSpec, swaggerUiSetup, swaggerUi } from './swagger';
+import cors from 'cors';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
     }
 });
 app.use(express.raw({ type: 'application/json' })); // Add this line for raw body parsing for webhooks
+app.use(cors()); // Enable CORS for all routes
 
 app.use('/v1/users', v1UserRoutes);
 app.use('/v2/users', v2UserRoutes);
