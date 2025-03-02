@@ -38,6 +38,11 @@ jobs:
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
           echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "VITE_API_URL=https://dev-api.energizelms.com" >> .env
+          echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env
+          echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
 
       # Copy .env file to Node.js API directory
       - name: Copy .env to Node.js API directory
@@ -61,9 +66,6 @@ jobs:
         id: build_react
         run: |
           docker build \
-            --build-arg VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }} \
-            --build-arg VITE_API_URL=https://dev-api.energizelms.com \
-            --build-arg VITE_CLIENT_URL=https://dev-app.energizelms.com \
             -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
           echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 

@@ -18,17 +18,14 @@ COPY . .
 COPY .env .env
 
 # Build the React application with environment variables
-ARG VITE_SPLIT_API_KEY
-ARG VITE_API_URL
-ARG VITE_CLIENT_URL
-RUN VITE_API_URL=$VITE_API_URL VITE_CLIENT_URL=$VITE_CLIENT_URL VITE_SPLIT_API_KEY=$VITE_SPLIT_API_KEY npm run build
+RUN npm run build
 
 
-# Install a simple HTTP server to serve the static files
-RUN npm install -g serve
+# Install the Vite preview tool (since it's part of the Vite CLI)
+RUN npm install -g vite
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Start the application using Vite preview
+CMD ["vite", "preview", "--port", "3000", "--host", "0.0.0.0"]

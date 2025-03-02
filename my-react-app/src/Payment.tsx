@@ -4,7 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
 
-const stripeKey = typeof process !== 'undefined' && process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY : '';
+const stripeKey = import.meta.env.VITE_STRIPE_SECRET_KEY;
 
 const stripePromise = loadStripe(stripeKey);
 

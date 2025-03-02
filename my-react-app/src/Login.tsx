@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = typeof process !== 'undefined' && process.env.VITE_API_URL ? process.env.VITE_API_URL : 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Login: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
     const [email, setEmail] = useState(''); // Changed from username to email
