@@ -1,36 +1,51 @@
-import express from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
-import { authenticateToken } from '../../auth.js';
 
-// Load environment variables from .env file
 dotenv.config();
 
-const router = express.Router();
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-if (!stripeSecretKey) {
-    throw new Error('Stripe secret key is not defined');
-}
-
-const stripe = new Stripe(stripeSecretKey, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2025-02-24.acacia',
 });
 
-router.post('/create-payment-intent', authenticateToken, async (req, res) => {
-    try {
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: req.body.amount,
-            currency: 'usd',
-        });
-        res.status(201).json({ clientSecret: paymentIntent.client_secret });
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'An unknown error occurred' });
-        }
-    }
-});
+const router = Router();
 
-export default router;
+export const setRoutes = (app: express.Application) => {
+    /**
+     * @swagger
+     * /api/v1/payment/create-payment-intent:
+     *   post:
+     *     summary: Create a payment intent
+     *     description: Create a payment intent for a given amount.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               amount:
+     *                 type: number
+     *     responses:
+     *       200:
+     *         description: The client secret for the payment intent.
+     */
+    app.post('/api/v1/payment/create-payment-intent', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { amount } = req.body;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+
+            res.json({
+                clientSecret: paymentIntent.client_secret,
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+};

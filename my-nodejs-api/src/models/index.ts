@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
@@ -6,7 +5,10 @@ export class Item {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({
+        type: 'varchar',
+        nullable: true
+      })
     name!: string;
 
     @Column('text')

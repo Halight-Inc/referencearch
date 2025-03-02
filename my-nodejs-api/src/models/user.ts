@@ -6,10 +6,16 @@ export class User {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({
+        type: 'varchar',
+        nullable: true
+      })
     username!: string;
 
-    @Column()
+    @Column({
+        type: 'varchar',
+        nullable: true
+      })
     password!: string;
 
     async setPassword(password: string) {

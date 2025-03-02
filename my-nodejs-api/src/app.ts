@@ -1,13 +1,16 @@
+import 'reflect-metadata'; // Import reflect-metadata at the top
 import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser'; // Import body-parser as default
+import pkg  from 'body-parser'; //Import the middlewares
 import { setRoutes as setV1Routes } from './routes/v1/index.js';
 import { setupSwagger } from './swagger.js';
 import { initializeDatabase } from './database.js';
 import { seedUsers } from './seeds/userseed.js';
-import { getConnection } from 'typeorm';
+import { createConnection, getConnection } from 'typeorm';
 import { SplitFactory } from '@splitsoftware/splitio';
 import dotenv from 'dotenv';
+
+const { json, urlencoded } = pkg;
 
 // Load environment variables from .env file
 dotenv.config();
@@ -34,7 +37,8 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(bodyParser.json()); // Use json function from body-parser
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 const startServer = async () => {
     try {
@@ -49,7 +53,7 @@ const startServer = async () => {
         });
 
         // Use feature flags in your routes
-        app.use((req, _, next) => {
+        app.use((req, res, next) => {
             req.splitClient = splitClient;
             next();
         });

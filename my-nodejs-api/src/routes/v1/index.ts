@@ -1,9 +1,8 @@
-import { Express } from 'express';
+import express, { Express, Request, Response } from 'express'; //Import Request and Response
 import { IndexController } from '../../controllers/index.js';
 import { User } from '../../models/user.js';
 import { generateToken, authenticateToken } from '../../auth.js';
 import { getRepository } from 'typeorm';
-import paymentRoutes from './payment.js'; // Ensure this points to a specific file
 
 export const setRoutes = (app: Express) => {
     const indexController = new IndexController();
@@ -19,7 +18,7 @@ export const setRoutes = (app: Express) => {
      *       200:
      *         description: A list of items
      */
-    app.get('/v1/item', authenticateToken, (req, res) => {
+    app.get('/v1/item', (req, res) => {
         const showNewFeature = req.splitClient.getTreatment('user-key', 'show-new-feature');
         if (showNewFeature === 'on') {
             // New feature logic
@@ -52,7 +51,7 @@ export const setRoutes = (app: Express) => {
      *       200:
      *         description: The created item
      */
-    app.post('/v1/item', authenticateToken, (req, res) => {
+    app.post('/v1/item', (req, res) => {
         indexController.createItem(req, res);
     });
 
@@ -85,44 +84,44 @@ export const setRoutes = (app: Express) => {
         res.sendStatus(201);
     });
 
-    /**
-     * @swagger
-     * /v1/login:
-     *   post:
-     *     summary: Log in a user
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               username:
-     *                 type: string
-     *               password:
-     *                 type: string
-     *     responses:
-     *       200:
-     *         description: User logged in successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 token:
-     *                   type: string
-     *       401:
-     *         description: Invalid credentials
-     */
-    app.post('/v1/login', async (req, res) => {
-        const userRepository = getRepository(User);
-        const user = await userRepository.findOne({ username: req.body.username });
-        if (!user || !(await user.validatePassword(req.body.password))) {
-            return res.sendStatus(401);
-        }
-        const token = generateToken(user);
-        res.json({ token });
-    });
+    // /**
+    //  * @swagger
+    //  * /v1/login:
+    //  *   post:
+    //  *     summary: Log in a user
+    //  *     requestBody:
+    //  *       required: true
+    //  *       content:
+    //  *         application/json:
+    //  *           schema:
+    //  *             type: object
+    //  *             properties:
+    //  *               username:
+    //  *                 type: string
+    //  *               password:
+    //  *                 type: string
+    //  *     responses:
+    //  *       200:
+    //  *         description: User logged in successfully
+    //  *         content:
+    //  *           application/json:
+    //  *             schema:
+    //  *               type: object
+    //  *               properties:
+    //  *                 token:
+    //  *                   type: string
+    //  *       401:
+    //  *         description: Invalid credentials
+    //  */
+    // app.post('/v1/login', async (req: Request, res: Response) => {
+    //     const userRepository = getRepository(User);
+    //     const user = await userRepository.findOne({ username: req.body.username });
+    //     if (!user || !(await user.validatePassword(req.body.password))) {
+    //         return res.sendStatus(401);
+    //     }
+    //     const token = generateToken(user);
+    //     res.json({ token });
+    // });
 
-    app.use('/v1/payment', paymentRoutes);
+    app.use('/v1/payment', setRoutes);
 };
