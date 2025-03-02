@@ -9,6 +9,8 @@ interface Config {
     dbPassword: string;
     dbName: string;
     dbRetries: number;
+    stripeSecretKey: string;
+    stripeWebhookSecret: string;
 }
 
 const config: Config = {
@@ -19,6 +21,8 @@ const config: Config = {
     dbPassword: process.env.DATABASE_PASSWORD || 'your_db_password',
     dbName: process.env.DATABASE_NAME || 'your_db_name',
     dbRetries: parseInt(process.env.DATABASE_RETRIES || '5', 10),
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'your_stripe_secret_key',
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'your_stripe_webhook_secret',
 };
 
 export default config;
