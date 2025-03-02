@@ -7,7 +7,13 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 export default defineConfig({
     plugins: [react()],
     preview: {
-        host: true
+        host: true,
+        allowedHosts: [
+            'localhost',
+            'dev-app.energizelms.com',
+            'test-app.energizelms.com',
+            'app.energizelms.com',
+        ]
     },
     build: {
         outDir: 'dist',
