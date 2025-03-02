@@ -17,10 +17,11 @@ COPY . .
 # Copy the .env file
 COPY .env .env
 
-# Build the React application
-ARG API_URL
-ARG CLIENT_URL
-RUN CLIENT_URL=$CLIENT_URL API_URL=$API_URL npm run build
+# Build the React application with environment variables
+ARG VITE_SPLIT_API_KEY
+ARG VITE_API_URL
+ARG VITE_CLIENT_URL
+RUN VITE_API_URL=$VITE_API_URL VITE_CLIENT_URL=$VITE_CLIENT_URL VITE_SPLIT_API_KEY=$VITE_SPLIT_API_KEY npm run build
 
 
 # Install a simple HTTP server to serve the static files
