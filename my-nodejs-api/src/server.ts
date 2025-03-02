@@ -1,0 +1,41 @@
+import app from './app';
+import config from './config/config';
+import db from './database';
+
+const MAX_RETRIES = config.dbRetries; // Maximum number of retries
+const RETRY_DELAY = 5000; // Delay between retries in milliseconds (5 seconds)
+let retryCount = 0;
+let databaseConnectionAvailable = false;
+
+const checkDatabaseConnection = async (): Promise<void> => {
+  try {
+    console.log('Checking database connection...');
+    await db.sequelize.authenticate();
+    console.log('Database connection successful.');
+    databaseConnectionAvailable = true; //update
+    await db.sequelize.sync(); // Sync the models with the database
+    console.log('Database synced successfully.');
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+    if (retryCount < MAX_RETRIES) {
+      retryCount++;
+      console.log(`Retrying in ${RETRY_DELAY / 1000} seconds... (Attempt ${retryCount}/${MAX_RETRIES})`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      await checkDatabaseConnection();
+    } else {
+      console.error('Max retries reached. Unable to connect to the database.');
+      // we removed process.exit(1)
+      return;
+    }
+  }
+};
+
+const startServer = async () => {
+  await checkDatabaseConnection();
+  // The server start always
+  app.listen(config.port, () => {
+    console.log(`Server is running on port ${config.port}`);
+  });
+};
+
+startServer();
