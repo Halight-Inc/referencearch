@@ -32,6 +32,7 @@ jobs:
       # Create .env file for Docker build
       - name: Create .env file
         run: |
+          echo "NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}" >> .env
           echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
           echo "API_URL=https://dev-api.energizelms.com" >> .env
           echo "CLIENT_URL=https://dev-app.energizelms.com" >> .env

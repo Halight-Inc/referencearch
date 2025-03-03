@@ -2,6 +2,7 @@ import app from './app';
 import config from './config/config';
 import db from './database';
 import seed from './seed';
+//import 'newrelic';
 
 const MAX_RETRIES = config.dbRetries; // Maximum number of retries
 const RETRY_DELAY = 5000; // Delay between retries in milliseconds (5 seconds)

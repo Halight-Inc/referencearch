@@ -40,8 +40,7 @@ const App: React.FC = () => {
             </div>
             <div className="App">
                 {token ? (
-                    <>
-                        Items: {isReady}
+                    <>                
                         <ItemList token={token} showNewFeature={isReady && (treatment === 'on')} />
 
                         Credit Card Processing:
