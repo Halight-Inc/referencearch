@@ -1,10 +1,13 @@
-import { Request, Response } from 'express';
-import Stripe from 'stripe';
-import config from '../../config/config';
+import { Request, Response } from "express";
+import Stripe from "stripe";
+import config from "../../config/config";
 
-const stripe = new Stripe(config.stripeSecretKey, {
-  apiVersion: '2025-02-24.acacia',
-});
+// const stripe = new Stripe(config.stripeSecretKey, {
+//   apiVersion: '2025-02-24.acacia',
+// });
+
+//temp placerholder to prevent crashes
+const stripe = null;
 
 /**
  * @swagger
@@ -46,7 +49,9 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
     const { amount, currency } = req.body;
 
     if (!amount || !currency) {
-      return res.status(400).json({ error: 'Amount and currency are required.' });
+      return res
+        .status(400)
+        .json({ error: "Amount and currency are required." });
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -57,8 +62,8 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
 
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Error creating payment intent:', error);
-    res.status(500).json({ error: 'Failed to create payment intent' });
+    console.error("Error creating payment intent:", error);
+    res.status(500).json({ error: "Failed to create payment intent" });
   }
 };
 
@@ -81,34 +86,39 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
  *         description: Webhook Error (invalid signature)
  */
 export const stripeWebhook = async (req: Request, res: Response) => {
-  const sig = req.headers['stripe-signature'];
+  const sig = req.headers["stripe-signature"];
 
   if (!sig) {
-    return res.status(400).send('Webhook Error: No signature header');
+    return res.status(400).send("Webhook Error: No signature header");
   }
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, config.stripeWebhookSecret);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      config.stripeWebhookSecret,
+    );
   } catch (err) {
-    console.error('Webhook signature verification failed.', err);
+    console.error("Webhook signature verification failed.", err);
     return res.status(400).send(`Webhook Error: ${err}`);
   }
-  
-  if(!event) {
+
+  if (!event) {
     console.error("No event found");
     return res.status(400).send("Webhook Error: No event found");
   }
 
   // Handle the event
   switch (event.type) {
-    case 'payment_intent.succeeded':
+    case "payment_intent.succeeded":
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log('PaymentIntent was successful!', paymentIntent);
+      console.log("PaymentIntent was successful!", paymentIntent);
       // Update your database, send emails, etc.
       break;
-    case 'subscription_schedule.created':
-      const subscriptionSchedule = event.data.object as Stripe.SubscriptionSchedule;
+    case "subscription_schedule.created":
+      const subscriptionSchedule = event.data
+        .object as Stripe.SubscriptionSchedule;
       console.log("Subscription schedule created:", subscriptionSchedule);
       break;
     // ... handle other event types

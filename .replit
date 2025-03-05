@@ -1,5 +1,6 @@
 modules = ["web", "nodejs-20"]
-run = "cd my-nodejs-api && npm run dev & cd my-react-app && npm run dev"
+run = "npm run start-all --prefix my-react-app"
+
 
 [nix]
 channel = "stable-24_05"
@@ -8,4 +9,13 @@ channel = "stable-24_05"
 run = [
   "sh",
   "-c",
-  "cd ~/workspace/my-nodejs-api && npm install && cd ../my-react-app && npm install && npx concurrently --kill-others-on-fail \"cd ~/workspace/my-nodejs-api && npm run dev\" \"cd ~/workspace/my-react-app && npm run dev\""]
+  "cd ~/workspace/my-nodejs-api && npm install && cd ../my-react-app && npm install && npx concurrently --kill-others-on-fail \"cd ~/workspace/my-nodejs-api && npm run dev\" \"cd ~/workspace/my-react-app && npm run dev\"",
+]
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 5173
+externalPort = 3000

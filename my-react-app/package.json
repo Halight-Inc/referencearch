@@ -4,22 +4,29 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start-all": "concurrently \"npm run dev --prefix ../my-nodejs-api\" \"vite\"",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.2",
+    "@shadcn/ui": "^0.0.4",
     "@splitsoftware/splitio": "^11.1.0",
     "@splitsoftware/splitio-react": "^2.0.1",
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.7.0",
     "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.7.9",
+    "class-variance-authority": "^0.7.1",
     "dotenv": "^16.4.7",
     "express": "^4.17.1",
+    "framer-motion": "^12.4.10",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-confetti": "^6.4.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.2.0"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
