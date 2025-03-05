@@ -3,7 +3,7 @@ services:
     build:
       context: ./my-nodejs-api
     env_file:
-      - ./my-nodejs-api/.env
+      - ./my-nodejs-api/.env.${ENV_MODE:-development}  # Use environment variable to specify the correct .env file
     ports:
       - "3000:3000"
     depends_on:
@@ -13,7 +13,7 @@ services:
     build:
       context: ./my-react-app
     env_file:
-      - ./my-react-app/.env
+      - ./my-react-app/.env.${ENV_MODE:-development}  # Use environment variable to specify the correct .env file
     ports:
       - "3001:3000"
     depends_on:

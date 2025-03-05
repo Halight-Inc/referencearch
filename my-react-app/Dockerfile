@@ -14,12 +14,14 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Copy the .env file
-COPY .env .env
+# Define a build argument for the environment file (default to development)
+ARG ENV_FILE=.env.development
+
+# Copy the environment file into the container
+COPY $ENV_FILE .env
 
 # Build the React application with environment variables
 RUN npm run build
-
 
 # Install the Vite preview tool (since it's part of the Vite CLI)
 RUN npm install -g vite

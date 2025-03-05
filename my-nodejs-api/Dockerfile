@@ -12,8 +12,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Copy the .env file
-COPY .env .env
+# Define a build argument for the environment file (default to development)
+ARG ENV_FILE=.env.development
+
+# Copy the environment file into the container
+COPY $ENV_FILE .env
 
 # Build the application
 RUN npm run build
