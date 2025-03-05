@@ -1,8 +1,9 @@
-import { defineConfig } from "vite";
+import { defineConfig, normalizePath } from "vite";
 import react from "@vitejs/plugin-react";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import nodePolyfills from "rollup-plugin-polyfill-node";
+import path from "path";
 
 export default defineConfig({
     plugins: [react()],
@@ -84,6 +85,7 @@ export default defineConfig({
             zlib: "rollup-plugin-node-polyfills/polyfills/zlib",
             tty: "rollup-plugin-node-polyfills/polyfills/tty",
             domain: "rollup-plugin-node-polyfills/polyfills/domain",
+            "@": path.resolve(__dirname, "src"),
         },
     },
 });

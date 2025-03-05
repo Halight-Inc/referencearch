@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback } from "react";
-import ReactConfetti from 'react-confetti';
-
+import ReactConfetti from "react-confetti";
+import "./Helloworld.css"; // Import the scoped styles
 export default function Home() {
   const [isWaving, setIsWaving] = useState(false);
   const [isConfetti, setIsConfetti] = useState(false);
@@ -14,24 +14,24 @@ export default function Home() {
       scale: 1,
       transition: {
         duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const item = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
-      opacity: 1
-    }
+      opacity: 1,
+    },
   };
 
   const wave = {
     wave: {
       rotate: [0, -20, 20, -20, 20, 0],
-      transition: { duration: 1.5, repeat: 1 }
-    }
+      transition: { duration: 1.5, repeat: 1 },
+    },
   };
 
   const handleWave = useCallback(() => {
@@ -41,7 +41,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center p-4 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-purple-400 flex items-center justify-center p-4 overflow-hidden">
       {isConfetti && (
         <ReactConfetti
           width={window.innerWidth}
@@ -56,11 +56,11 @@ export default function Home() {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
             w: 0,
-            h: 0
+            h: 0,
           }}
-          drawShape={ctx => {
+          drawShape={(ctx) => {
             const text = "👋";
-            ctx.font = "16px Arial"; 
+            ctx.font = "16px Arial";
             ctx.fillText(text, 0, 0);
           }}
         />
@@ -82,7 +82,7 @@ export default function Home() {
           👋
         </motion.div>
 
-        <motion.h1 
+        <motion.h1
           variants={item}
           className="text-4xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
         >

@@ -1,0 +1,3 @@
+.helloworld-container {
+  @apply bg-[#E6C8FF] text-[#4A148C] min-h-screen flex items-center justify-center p-4 overflow-hidden;
+}

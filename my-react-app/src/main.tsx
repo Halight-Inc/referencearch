@@ -1,4 +1,3 @@
-import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React from 'react';
 import "./index.css";
@@ -23,12 +22,15 @@ const sdkConfig: SplitIO.IBrowserSettings = {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/Home" element={<Home />} />
-        <Route path="/hello" element={<Helloworld />} />
-      </Routes>
-    </BrowserRouter>
-  </React.StrictMode>,
+    {/* ✅ Wrap the entire app in SplitFactoryProvider */}
+    <SplitFactoryProvider config={sdkConfig}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/hello" element={<Helloworld />} />
+        </Routes>
+      </BrowserRouter>
+    </SplitFactoryProvider>
+  </React.StrictMode>
 );
