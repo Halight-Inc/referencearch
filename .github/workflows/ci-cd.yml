@@ -29,65 +29,47 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Create .env files dynamically for Docker builds
-      - name: Create .env files for Docker build
+      # Create .env file for Docker build
+      - name: Create .env file
         run: |
-          echo "NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}" >> .env.development
-          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env.development
-          echo "API_URL=https://dev-api.energizelms.com" >> .env.development
-          echo "CLIENT_URL=https://dev-app.energizelms.com" >> .env.development
-          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.development
-          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.development
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.development
-          echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env.development
-          echo "VITE_API_URL=https://dev-api.energizelms.com" >> .env.development
-          echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env.development
-          echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.development
-          echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.development
-
-          echo "NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}" >> .env.test
-          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env.test
-          echo "API_URL=https://test-api.energizelms.com" >> .env.test
-          echo "CLIENT_URL=https://test-app.energizelms.com" >> .env.test
-          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.test
-          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.test
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
-          echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env.test
-          echo "VITE_API_URL=https://test-api.energizelms.com" >> .env.test
-          echo "VITE_CLIENT_URL=https://test-app.energizelms.com" >> .env.test
-          echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.test
-          echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.test
+          echo "NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}" >> .env
+          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "API_URL=https://dev-api.energizelms.com" >> .env
+          echo "CLIENT_URL=https://dev-app.energizelms.com" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "VITE_API_URL=https://dev-api.energizelms.com" >> .env
+          echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env
+          echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
 
       # Copy .env file to Node.js API directory
       - name: Copy .env to Node.js API directory
         run: |
-          cp .env.development ./my-nodejs-api/.env.development
-          cp .env.test ./my-nodejs-api/.env.test
+          cp .env ./my-nodejs-api/.env
 
       # Copy .env file to React App directory
       - name: Copy .env to React App directory
         run: |
-          cp .env.development ./my-react-app/.env.development
-          cp .env.test ./my-react-app/.env.test
+          cp .env ./my-react-app/.env
 
-      # Set the correct ENV_FILE to build with
+      # Build Docker image for the API service
       - name: Build Docker image for API
         id: build_api
         run: |
-          docker build \
-            --build-arg ENV_FILE=.env.development \
-            -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
           echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-
+      
       # Build Docker image for the React service
       - name: Build Docker image for React App
         id: build_react
         run: |
           docker build \
-            --build-arg ENV_FILE=.env.development \
             -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
           echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-      
+
       # Log in to Azure Container Registry (ACR)
       - name: Log in to Azure Container Registry
         uses: docker/login-action@v2
@@ -102,76 +84,69 @@ jobs:
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}
 
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Set Variables
+        id: vars
+        run: |
+          echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_ENV"
 
-deploy-dev:
-  runs-on: ubuntu-latest
-  needs: [build]
-  steps:
-    - name: Set Variables
-      id: vars
-      run: |
-        echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_ENV"
-        echo "app_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_ENV"
-
-    - name: Log in to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Deploy PostgreSQL to Azure Container Instances (ACI) for DEV
-    - name: Deploy PostgreSQL to Azure Container Instances (ACI)
-      run: |
-        az container create \
-          --resource-group my-resource-group \
-          --name my-postgres-dev \
-          --image postgres:latest \
-          --os-type Linux \
-          --cpu 1 \
-          --memory 1.5 \
-          --environment-variables POSTGRES_USER=${{ secrets.DATABASE_USERNAME }} POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }} POSTGRES_DB=${{ secrets.DATABASE_NAME }} \
-          --ports 5432 \
-          --dns-name-label my-postgres-dev \
-          --restart-policy Always
-      id: postgres
+      - name: Deploy PostgreSQL to Azure Container Instances (ACI)
+        run: |
+          az container create \
+            --resource-group my-resource-group \
+            --name my-postgres-dev \
+            --image postgres:latest \
+            --os-type Linux \
+            --cpu 1 \
+            --memory 1.5 \
+            --environment-variables POSTGRES_USER=${{ secrets.DATABASE_USERNAME }} POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }} POSTGRES_DB=${{ secrets.DATABASE_NAME }} \
+            --ports 5432 \
+            --dns-name-label my-postgres-dev \
+            --restart-policy Always
+        id: postgres
 
-    - name: Get Postgres IP
-      id: postgres_ip
-      run: |
-        IP=$(az container show --name my-postgres-dev --resource-group my-resource-group --query ipAddress.ip --output tsv)
-        echo "ip=$IP" >> "$GITHUB_OUTPUT"
-
-    - name: Set Environment File for Dev
-      id: set-env-file
-      run: |
-        echo "ENV_FILE=.env.development" >> "$GITHUB_ENV"
-
-    # Continue with Azure and Docker deployment steps
-    - name: Deploy API to Azure Container Apps (DEV)
-      run: |
-        az containerapp up \
-          --name my-api-dev \
-          --resource-group my-resource-group \
-          --image $api_image \
-          --target-port 3000 \
-          --ingress 'external' \
-          --environment my-environment \
-          --registry-username ${{ secrets.ACR_USERNAME }} \
-          --registry-password ${{ secrets.ACR_PASSWORD }} \
-          --env-vars NODE-ENV=development \
-          DATABASE_HOST=${{ steps.postgres_ip.outputs.ip }} \
-          DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
-          DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
-          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-
-    - name: Deploy React App to Azure Container Apps (DEV)
-      run: |
-        az containerapp up \
-          --name my-react-app-dev \
-          --resource-group my-resource-group \
-          --image $app_image \
-          --target-port 3000 \
-          --environment my-environment \
-          --registry-username ${{ secrets.ACR_USERNAME }} \
-          --registry-password ${{ secrets.ACR_PASSWORD }} \
-          --env-vars NODE-ENV=development
+      - name: Get Postgres IP
+        id: postgres_ip
+        run: |
+          IP=$(az container show --name my-postgres-dev --resource-group my-resource-group --query ipAddress.ip --output tsv)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+      # Deploy API to Azure Container Apps (DEV)
+      - name: Deploy API to Azure Container Apps (DEV)
+        run: |
+          az containerapp up \
+            --name my-api-dev \
+            --resource-group my-resource-group \
+            --image $api_image \
+            --target-port 3000 \
+            --ingress 'external' \
+            --environment my-environment \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --env-vars DATABASE_HOST=${{ steps.postgres_ip.outputs.ip }} \
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            
+      # Deploy React App to Azure Container Apps (DEV)
+      - name: Deploy React App to Azure Container Apps (DEV)
+        run: |
+          az containerapp up \
+            --name my-react-app-dev \
+            --resource-group my-resource-group \
+            --image $react_image \
+            --ingress 'external' \
+            --target-port 3000 \
+            --environment my-environment \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }}
