@@ -37,7 +37,7 @@ const Login: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
             />
-            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleLogin}>Login - Hi Team</button>
         </div>
     );
 };

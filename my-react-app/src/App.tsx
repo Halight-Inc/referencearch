@@ -28,6 +28,7 @@ const App: React.FC = () => {
             <nav>
                 <Link to="/">🏠 Home</Link> |{" "}
                 <Link to="/hello">🌎 Hello World</Link>
+                <a href="https://energizelms.com">Marketing Site</a>
             </nav>
             <div hidden={isReady && treatment === "off"}>
                 <a href="https://vite.dev" target="_blank">
