@@ -5,7 +5,7 @@ import App from "./App.tsx";
 import ReactDOM from "react-dom/client";
 import { SplitFactoryProvider } from "@splitsoftware/splitio-react";
 import Home from "./pages/Home.tsx";
-import Helloworld from "./pages/Helloworld.tsx";
+// import Helloworld from "./pages/Helloworld.tsx";
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -28,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/hello" element={<Helloworld />} />
+          {/* <Route path="/hello" element={<Helloworld />} /> */}
         </Routes>
       </BrowserRouter>
     </SplitFactoryProvider>

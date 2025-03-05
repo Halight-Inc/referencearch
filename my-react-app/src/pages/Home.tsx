@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import reactLogo from "../assets/react.svg"; // Adjust path if needed
 import viteLogo from "/vite.svg"; // Keep this as is
 import "../App.css"; // If you still want the default styling
