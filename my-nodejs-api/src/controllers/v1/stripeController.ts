@@ -2,12 +2,9 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 import config from "../../config/config";
 
-// const stripe = new Stripe(config.stripeSecretKey, {
-//   apiVersion: '2025-02-24.acacia',
-// });
-
-//temp placerholder to prevent crashes
-const stripe = null;
+const stripe = new Stripe(config.stripeSecretKey, {
+  apiVersion: '2025-02-24.acacia', // Use a real API version
+});
 
 /**
  * @swagger
@@ -99,9 +96,9 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       sig,
       config.stripeWebhookSecret,
     );
-  } catch (err) {
-    console.error("Webhook signature verification failed.", err);
-    return res.status(400).send(`Webhook Error: ${err}`);
+  } catch (err:any) {
+    console.error("Webhook signature verification failed.", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (!event) {
