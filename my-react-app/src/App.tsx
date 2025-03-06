@@ -27,7 +27,8 @@ const App: React.FC = () => {
             {/* ✅ Navigation Added */}
             <nav>
                 <Link to="/">🏠 Home</Link> |{" "}
-                <Link to="/hello">🌎 Hello World</Link>
+                <Link to="/hello">🌎 Hello World</Link> |{" "}
+                <Link to="/dashboard">Dashboard</Link> |{" "}
                 <a href="https://energizelms.com">Marketing Site</a>
             </nav>
             <div hidden={isReady && treatment === "off"}>

@@ -5,7 +5,9 @@ import App from "./App.tsx";
 import ReactDOM from "react-dom/client";
 import { SplitFactoryProvider } from "@splitsoftware/splitio-react";
 import Home from "./pages/Home.tsx";
-// import Helloworld from "./pages/Helloworld.tsx";
+import Dashboard from "./pages/DashboardPage.tsx";
+import store from "./store.tsx"; // Import your Redux store
+import { Provider } from 'react-redux'; // Import the Provider
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -22,15 +24,17 @@ const sdkConfig: SplitIO.IBrowserSettings = {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    {/* ✅ Wrap the entire app in SplitFactoryProvider */}
-    <SplitFactoryProvider config={sdkConfig}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/home" element={<Home />} />
-          {/* <Route path="/hello" element={<Helloworld />} /> */}
-        </Routes>
-      </BrowserRouter>
-    </SplitFactoryProvider>
+    {/* ✅ Wrap the entire app in Provider */}
+    <Provider store={store}>
+      <SplitFactoryProvider config={sdkConfig}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/home" element={<Home />} />
+          </Routes>
+        </BrowserRouter>
+      </SplitFactoryProvider>
+    </Provider>
   </React.StrictMode>
 );
