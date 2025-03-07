@@ -1,4 +1,4 @@
-// src/components/AppBreadcrumb.tsx
+
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react';

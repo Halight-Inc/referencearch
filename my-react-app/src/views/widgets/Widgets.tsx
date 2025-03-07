@@ -28,7 +28,7 @@ import {
   cilUserFollow,
 } from '@coreui/icons'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
-import { DocsExample } from 'src/components'
+import { DocsExample } from  '@/components/'
 
 import WidgetsBrand from './WidgetsBrand.tsx'
 import WidgetsDropdown from './WidgetsDropdown.tsx'
