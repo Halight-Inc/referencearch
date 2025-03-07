@@ -1,10 +1,16 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilCode, cilMediaPlay } from '@coreui/icons'
 
-const DocsExample = (props) => {
+interface DocsExampleProps {
+  children?: ReactNode;
+  href?: string;
+  tabContentClassName?: string;
+}
+
+const DocsExample = (props: DocsExampleProps) => {
   const { children, href, tabContentClassName } = props
 
   const _href = `https://coreui.io/react/docs/${href}`

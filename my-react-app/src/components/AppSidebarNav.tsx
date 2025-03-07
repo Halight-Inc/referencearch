@@ -13,7 +13,7 @@ interface INavBadge {
   text: string
 }
 
-interface INavLink {
+export interface INavLink {
   component?: typeof CNavItem
   name?: string
   badge?: INavBadge
@@ -23,7 +23,7 @@ interface INavLink {
   [key: string]: any
 }
 
-interface INavGroup extends INavLink {
+export interface INavGroup extends INavLink {
   items?: (INavLink | INavGroup)[] // Group items are nested links or groups
   component?: typeof CNavItem // Use CNavItem to represent a group
 }
@@ -80,7 +80,6 @@ export const AppSidebarNav: FC<AppSidebarNavProps> = ({ items }) => {
   // Function to render nav group with dropdown behavior using CCollapse
   const navGroup = (item: INavGroup, index: number) => {
     const { component = CNavItem, name, icon, items, ...rest } = item
-    const Component = component
     return (
       <div key={index} {...rest}>
         <div className="nav-group-toggler">
