@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import PropTypes from 'prop-types'
-
+import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import {
   CRow,
   CCol,
@@ -9,33 +8,51 @@ import {
   CDropdownItem,
   CDropdownToggle,
   CWidgetStatsA,
-} from '@coreui/react'
-import { getStyle } from '@coreui/utils'
-import { CChartBar, CChartLine } from '@coreui/react-chartjs'
-import CIcon from '@coreui/icons-react'
-import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
+} from '@coreui/react';
+import { getStyle } from '@coreui/utils';
+import { CChartBar, CChartLine } from '@coreui/react-chartjs';
+import CIcon from '@coreui/icons-react';
+import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons';
+import { Chart } from 'chart.js'; // Import Chart from chart.js
 
-const WidgetsDropdown = (props) => {
-  const widgetChartRef1 = useRef(null)
-  const widgetChartRef2 = useRef(null)
+// Define the props interface
+interface WidgetsDropdownProps {
+  className?: string;
+  withCharts?: boolean;
+}
+
+const WidgetsDropdown: React.FC<WidgetsDropdownProps> = (props) => {
+  const widgetChartRef1 = useRef<Chart | null>(null); // Correct type for widgetChartRef1
+  const widgetChartRef2 = useRef<Chart | null>(null); // Correct type for widgetChartRef2
 
   useEffect(() => {
-    document.documentElement.addEventListener('ColorSchemeChange', () => {
+    const handleColorSchemeChange = () => {
       if (widgetChartRef1.current) {
-        setTimeout(() => {
-          widgetChartRef1.current.data.datasets[0].pointBackgroundColor = getStyle('--cui-primary')
-          widgetChartRef1.current.update()
-        })
+        //Check if the chart has the dataset.
+        if (widgetChartRef1.current.data.datasets[0]) {
+          widgetChartRef1.current.data.datasets[0].backgroundColor = getStyle('--cui-primary');
+        }
+        widgetChartRef1.current.update();
       }
 
       if (widgetChartRef2.current) {
-        setTimeout(() => {
-          widgetChartRef2.current.data.datasets[0].pointBackgroundColor = getStyle('--cui-info')
-          widgetChartRef2.current.update()
-        })
+        //Check if the chart has the dataset.
+        if (widgetChartRef2.current.data.datasets[0]) {
+          widgetChartRef2.current.data.datasets[0].backgroundColor = getStyle('--cui-info');
+        }
+        widgetChartRef2.current.update();
       }
-    })
-  }, [widgetChartRef1, widgetChartRef2])
+    };
+
+    document.documentElement.addEventListener('ColorSchemeChange', handleColorSchemeChange);
+
+    return () => {
+      document.documentElement.removeEventListener(
+        'ColorSchemeChange',
+        handleColorSchemeChange,
+      );
+    };
+  }, []);
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
@@ -95,7 +112,6 @@ const WidgetsDropdown = (props) => {
                     },
                     grid: {
                       display: false,
-                      drawBorder: false,
                     },
                     ticks: {
                       display: false,
@@ -185,7 +201,6 @@ const WidgetsDropdown = (props) => {
                     },
                     grid: {
                       display: false,
-                      drawBorder: false,
                     },
                     ticks: {
                       display: false,
@@ -359,7 +374,6 @@ const WidgetsDropdown = (props) => {
                   x: {
                     grid: {
                       display: false,
-                      drawTicks: false,
                     },
                     ticks: {
                       display: false,
@@ -371,8 +385,6 @@ const WidgetsDropdown = (props) => {
                     },
                     grid: {
                       display: false,
-                      drawBorder: false,
-                      drawTicks: false,
                     },
                     ticks: {
                       display: false,
@@ -385,12 +397,12 @@ const WidgetsDropdown = (props) => {
         />
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
 WidgetsDropdown.propTypes = {
   className: PropTypes.string,
   withCharts: PropTypes.bool,
-}
+};
 
-export default WidgetsDropdown
+export default WidgetsDropdown;

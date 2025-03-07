@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { CChartLine } from '@coreui/react-chartjs'
 import { getStyle } from '@coreui/utils'
-import { Chart, ChartOptions } from 'chart.js' // Import the Chart type from chart.js
+import { Chart} from 'chart.js' // Import the Chart type from chart.js
 
 const MainChart = () => {
   const chartRef = useRef<Chart | null>(null) // Type the ref to the Chart instance

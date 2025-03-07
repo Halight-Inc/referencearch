@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   CCard,
   CCardBody,
@@ -31,11 +30,11 @@ import {
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import { DocsExample } from 'src/components'
 
-import WidgetsBrand from './WidgetsBrand'
-import WidgetsDropdown from './WidgetsDropdown'
+import WidgetsBrand from './WidgetsBrand.tsx'
+import WidgetsDropdown from './WidgetsDropdown.tsx'
 
 const Widgets = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  const random = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) + min)
 
   return (
     <CCard className="mb-4">

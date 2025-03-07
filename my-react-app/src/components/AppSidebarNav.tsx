@@ -1,14 +1,42 @@
-import React from 'react'
+import { FC } from 'react'
 import { NavLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
-
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
+import { CBadge, CNavLink, CSidebarNav, CNavItem, CCollapse } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { ComponentProps } from 'react'
 
-import { CBadge, CNavLink, CSidebarNav } from '@coreui/react'
+// Define the types for the sidebar navigation items
+interface INavBadge {
+  color: string
+  text: string
+}
 
-export const AppSidebarNav = ({ items }) => {
-  const navLink = (name, icon, badge, indent = false) => {
+interface INavLink {
+  component?: typeof CNavItem
+  name?: string
+  badge?: INavBadge
+  icon?: ComponentProps<typeof CIcon>
+  to?: string
+  href?: string
+  [key: string]: any
+}
+
+interface INavGroup extends INavLink {
+  items?: (INavLink | INavGroup)[] // Group items are nested links or groups
+  component?: typeof CNavItem // Use CNavItem to represent a group
+}
+
+type NavItem = INavLink | INavGroup
+
+interface AppSidebarNavProps {
+  items: NavItem[] // Items for navigation passed to the component
+}
+
+export const AppSidebarNav: FC<AppSidebarNavProps> = ({ items }) => {
+  // Function to render the badge and the navigation name and icon
+  const navLink = (name: string | undefined, icon: any, badge: INavBadge | undefined, indent = false) => {
     return (
       <>
         {icon
@@ -28,8 +56,9 @@ export const AppSidebarNav = ({ items }) => {
     )
   }
 
-  const navItem = (item, index, indent = false) => {
-    const { component, name, badge, icon, ...rest } = item
+  // Function to render each nav item
+  const navItem = (item: INavLink, index: number, indent = false) => {
+    const { component = CNavItem, name, badge, icon, ...rest } = item
     const Component = component
     return (
       <Component as="div" key={index}>
@@ -48,22 +77,28 @@ export const AppSidebarNav = ({ items }) => {
     )
   }
 
-  const navGroup = (item, index) => {
-    const { component, name, icon, items, to, ...rest } = item
+  // Function to render nav group with dropdown behavior using CCollapse
+  const navGroup = (item: INavGroup, index: number) => {
+    const { component = CNavItem, name, icon, items, ...rest } = item
     const Component = component
     return (
-      <Component compact as="div" key={index} toggler={navLink(name, icon)} {...rest}>
-        {items?.map((item, index) =>
-          item.items ? navGroup(item, index) : navItem(item, index, true),
-        )}
-      </Component>
+      <div key={index} {...rest}>
+        <div className="nav-group-toggler">
+          {navLink(name, icon, undefined, false)}
+        </div>
+        <CCollapse>
+          {items?.map((item, itemIndex) =>
+            item.items ? navGroup(item as INavGroup, itemIndex) : navItem(item as INavLink, itemIndex, true),
+          )}
+        </CCollapse>
+      </div>
     )
   }
 
   return (
     <CSidebarNav as={SimpleBar}>
       {items &&
-        items.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
+        items.map((item, index) => (item.items ? navGroup(item as INavGroup, index) : navItem(item as INavLink, index)))}
     </CSidebarNav>
   )
 }

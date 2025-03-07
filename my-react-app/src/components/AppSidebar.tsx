@@ -9,7 +9,6 @@ import {
   CSidebarToggler,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { Link, type LinkProps } from 'react-router-dom'; // Import Link and LinkProps from react-router-dom
 
 import { AppSidebarNav } from './AppSidebarNav';
 import { logo } from '@/assets/brand/logo';

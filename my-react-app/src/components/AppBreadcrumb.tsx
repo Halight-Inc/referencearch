@@ -6,8 +6,8 @@ import routes from '../routes';
 import { type IRoute } from '../types/routes';
 import { type IBreadCrumb } from '../types/breadcrumb';
 
-const AppBreadcrumb = () => { // Removed location prop from here
-  const location = useLocation(); // Used useLocation hook here
+const AppBreadcrumb = () => {
+  const location = useLocation();
 
   const getPathName = (pathname: string, routes: IRoute[]) => {
     const currentRoute = routes.find((route: IRoute) => {
@@ -17,7 +17,7 @@ const AppBreadcrumb = () => { // Removed location prop from here
     return currentRoute?.name || 'Unknown';
   };
 
-  const breadcrumbs: IBreadCrumb[] = location.pathname.split('/').reduce((prev: IBreadCrumb[], curr: string, index: number, array: string[]) => {
+  const breadcrumbs: IBreadCrumb[] = location.pathname.split('/').reduce((prev: IBreadCrumb[], _curr: string, index: number, array: string[]) => {
     const currentPathname = `/${array.slice(1, index + 1).join('/')}`;
     const routeName = getPathName(currentPathname, routes);
     prev.push({

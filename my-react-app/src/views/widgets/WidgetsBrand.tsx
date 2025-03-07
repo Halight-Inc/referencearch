@@ -1,11 +1,17 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { CWidgetStatsD, CRow, CCol } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cibFacebook, cibLinkedin, cibTwitter, cilCalendar } from '@coreui/icons'
-import { CChart } from '@coreui/react-chartjs'
+import React from 'react';
+import PropTypes from 'prop-types';
+import { CWidgetStatsD, CRow, CCol } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cibFacebook, cibLinkedin, cibTwitter, cilCalendar } from '@coreui/icons';
+import { CChart } from '@coreui/react-chartjs';
 
-const WidgetsBrand = (props) => {
+// Define the props interface
+interface WidgetsBrandProps {
+  className?: string;
+  withCharts?: boolean;
+}
+
+const WidgetsBrand: React.FC<WidgetsBrandProps> = (props) => {
   const chartOptions = {
     elements: {
       line: {
@@ -32,7 +38,14 @@ const WidgetsBrand = (props) => {
         display: false,
       },
     },
-  }
+  };
+
+    // Define the type for dynamic styles, to stop the typescript errors.
+    const cardCapBgStyles = {
+        facebook: { '--cui-card-cap-bg': '#3b5998' },
+        twitter: { '--cui-card-cap-bg': '#00aced' },
+        linkedin: { '--cui-card-cap-bg': '#4875b4' },
+    };
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
@@ -65,9 +78,7 @@ const WidgetsBrand = (props) => {
             { title: 'friends', value: '89K' },
             { title: 'feeds', value: '459' },
           ]}
-          style={{
-            '--cui-card-cap-bg': '#3b5998',
-          }}
+          style={cardCapBgStyles.facebook}
         />
       </CCol>
       <CCol sm={6} xl={4} xxl={3}>
@@ -99,9 +110,7 @@ const WidgetsBrand = (props) => {
             { title: 'followers', value: '973k' },
             { title: 'tweets', value: '1.792' },
           ]}
-          style={{
-            '--cui-card-cap-bg': '#00aced',
-          }}
+          style={cardCapBgStyles.twitter}
         />
       </CCol>
       <CCol sm={6} xl={4} xxl={3}>
@@ -133,9 +142,7 @@ const WidgetsBrand = (props) => {
             { title: 'contacts', value: '500' },
             { title: 'feeds', value: '1.292' },
           ]}
-          style={{
-            '--cui-card-cap-bg': '#4875b4',
-          }}
+          style={cardCapBgStyles.linkedin}
         />
       </CCol>
       <CCol sm={6} xl={4} xxl={3}>
@@ -171,12 +178,12 @@ const WidgetsBrand = (props) => {
         />
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
 WidgetsBrand.propTypes = {
   className: PropTypes.string,
   withCharts: PropTypes.bool,
-}
+};
 
-export default WidgetsBrand
+export default WidgetsBrand;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import {
   CButton,
   CCard,
@@ -20,7 +20,7 @@ import { DocsComponents, DocsExample } from 'src/components'
 
 const CustomStyles = () => {
   const [validated, setValidated] = useState(false)
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     const form = event.currentTarget
     if (form.checkValidity() === false) {
       event.preventDefault()
@@ -97,7 +97,7 @@ const CustomStyles = () => {
 
 const BrowserDefaults = () => {
   const [validated, setValidated] = useState(false)
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     const form = event.currentTarget
     if (form.checkValidity() === false) {
       event.preventDefault()
@@ -169,7 +169,7 @@ const BrowserDefaults = () => {
 
 const Tooltips = () => {
   const [validated, setValidated] = useState(false)
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     const form = event.currentTarget
     if (form.checkValidity() === false) {
       event.preventDefault()
