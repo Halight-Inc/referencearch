@@ -9,7 +9,7 @@ import {
   CSidebarToggler,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link, type LinkProps } from 'react-router-dom'; // Import Link and LinkProps from react-router-dom
 
 import { AppSidebarNav } from './AppSidebarNav';
 import { logo } from '@/assets/brand/logo';
@@ -40,10 +40,11 @@ const AppSidebar = () => {
       }}
     >
       <CSidebarHeader className="border-bottom">
-        <CSidebarBrand className='d-flex justify-content-center' to="/" component={Link}>
-          <CIcon className="sidebar-brand-full" icon={logo} height={32} />
-          <CIcon className="sidebar-brand-narrow" icon={sygnet} height={32} />
-        </CSidebarBrand>
+             <CSidebarBrand>
+                 <CIcon className="sidebar-brand-full" icon={logo} height={32} />
+                 <CIcon className="sidebar-brand-narrow" icon={sygnet} height={32} />
+             </CSidebarBrand>
+
         <CCloseButton
           className="d-lg-none"
           dark

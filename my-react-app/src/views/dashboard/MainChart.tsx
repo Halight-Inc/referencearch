@@ -1,32 +1,55 @@
 import React, { useEffect, useRef } from 'react'
-
 import { CChartLine } from '@coreui/react-chartjs'
 import { getStyle } from '@coreui/utils'
+import { Chart, ChartOptions } from 'chart.js' // Import the Chart type from chart.js
 
 const MainChart = () => {
-  const chartRef = useRef(null)
+  const chartRef = useRef<Chart | null>(null) // Type the ref to the Chart instance
 
   useEffect(() => {
-    document.documentElement.addEventListener('ColorSchemeChange', () => {
+    const handleColorSchemeChange = () => {
       if (chartRef.current) {
-        setTimeout(() => {
-          chartRef.current.options.scales.x.grid.borderColor = getStyle(
-            '--cui-border-color-translucent',
-          )
-          chartRef.current.options.scales.x.grid.color = getStyle('--cui-border-color-translucent')
-          chartRef.current.options.scales.x.ticks.color = getStyle('--cui-body-color')
-          chartRef.current.options.scales.y.grid.borderColor = getStyle(
-            '--cui-border-color-translucent',
-          )
-          chartRef.current.options.scales.y.grid.color = getStyle('--cui-border-color-translucent')
-          chartRef.current.options.scales.y.ticks.color = getStyle('--cui-body-color')
-          chartRef.current.update()
-        })
-      }
-    })
-  }, [chartRef])
+        const { options } = chartRef.current
 
-  const random = () => Math.round(Math.random() * 100)
+        // Check if scales and the necessary properties exist
+        if (options && options.scales) {
+          const { x, y } = options.scales
+
+          if (x && x.grid) {
+            // x.grid.borderColor = getStyle('--cui-border-color-translucent') // Grid line color
+            x.grid.color = getStyle('--cui-border-color-translucent') // Grid line color
+          }
+
+          if (x && x.ticks) {
+            x.ticks.color = getStyle('--cui-body-color') // Tick color
+          }
+
+          if (y && y.grid) {
+            // y.grid.borderColor = getStyle('--cui-border-color-translucent') // Grid line color
+            y.grid.color = getStyle('--cui-border-color-translucent') // Grid line color
+          }
+
+          if (y && y.ticks) {
+            y.ticks.color = getStyle('--cui-body-color') // Tick color
+          }
+
+          // Always update the chart after making changes
+          chartRef.current.update()
+        }
+      }
+    }
+
+    // Adding the event listener for color scheme change
+    document.documentElement.addEventListener('ColorSchemeChange', handleColorSchemeChange)
+
+    // Cleanup listener on unmount
+    return () => {
+      document.documentElement.removeEventListener('ColorSchemeChange', handleColorSchemeChange)
+    }
+  }, [])
+
+  // Modified random function to accept a min and max range
+  const random = (min: number, max: number) => Math.round(Math.random() * (max - min) + min)
 
   return (
     <>
@@ -90,11 +113,11 @@ const MainChart = () => {
           scales: {
             x: {
               grid: {
-                color: getStyle('--cui-border-color-translucent'),
+                color: getStyle('--cui-border-color-translucent'), // Set the grid line color
                 drawOnChartArea: false,
               },
               ticks: {
-                color: getStyle('--cui-body-color'),
+                color: getStyle('--cui-body-color'), // Set the tick color
               },
             },
             y: {
@@ -103,7 +126,7 @@ const MainChart = () => {
                 color: getStyle('--cui-border-color-translucent'),
               },
               grid: {
-                color: getStyle('--cui-border-color-translucent'),
+                color: getStyle('--cui-border-color-translucent'), // Set the grid line color
               },
               max: 250,
               ticks: {
