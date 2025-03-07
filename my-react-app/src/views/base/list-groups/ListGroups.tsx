@@ -12,6 +12,9 @@ import {
 import { DocsComponents, DocsExample } from 'src/components'
 
 const ListGroups = () => {
+    // Define the possible breakpoints
+    const breakpoints = ['', '-sm', '-md', '-lg', '-xl', '-xxl'];
+
   return (
     <CRow>
       <CCol xs={12}>
@@ -154,12 +157,16 @@ const ListGroups = () => {
               <strong>horizontal list groups cannot be combined with flush list groups.</strong>
             </p>
             <DocsExample href="components/list-group/#flush">
-              {['', '-sm', '-md', '-lg', '-xl', '-xxl'].map((breakpoint, index) => (
-                <CListGroup className="mb-2" layout={`horizontal${breakpoint}`} key={index}>
-                  <CListGroupItem>Cras justo odio</CListGroupItem>
-                  <CListGroupItem>Dapibus ac facilisis in</CListGroupItem>
-                  <CListGroupItem>Morbi leo risus</CListGroupItem>
-                </CListGroup>
+              {breakpoints.map((breakpoint, index) => (
+                  <CListGroup
+                      className="mb-2"
+                      layout={breakpoint ? `horizontal${breakpoint}` as "horizontal" | "horizontal-sm" | "horizontal-md" | "horizontal-lg" | "horizontal-xl" | "horizontal-xxl": "horizontal"}
+                      key={index}
+                  >
+                    <CListGroupItem>Cras justo odio</CListGroupItem>
+                    <CListGroupItem>Dapibus ac facilisis in</CListGroupItem>
+                    <CListGroupItem>Morbi leo risus</CListGroupItem>
+                  </CListGroup>
               ))}
             </DocsExample>
           </CCardBody>
