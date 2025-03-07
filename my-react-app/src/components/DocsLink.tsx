@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types'
-import React from 'react'
 import { CLink } from '@coreui/react'
 
 interface DocsLinkProps {
@@ -35,4 +34,4 @@ DocsLink.propTypes = {
   text: PropTypes.string,
 }
 
-export default React.memo(DocsLink)
+export default DocsLink

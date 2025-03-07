@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, { ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilCode, cilMediaPlay } from '@coreui/icons'
@@ -46,4 +46,4 @@ DocsExample.propTypes = {
   tabContentClassName: PropTypes.string,
 }
 
-export default React.memo(DocsExample)
+export default DocsExample

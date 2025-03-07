@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { CRow, CCol, CCard, CCardHeader, CCardBody } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
-import { DocsLink } from 'src/components'
+import  DocsLink  from '@/components/DocsLink'
 
 interface ThemeColorProps {
   className?: string;
