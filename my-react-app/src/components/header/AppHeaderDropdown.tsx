@@ -20,13 +20,21 @@ import {
   cilUser,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 import avatar8 from './../../assets/images/avatars/8.jpg';
 
 const AppHeaderDropdown = () => {
+  const navigate = useNavigate();
+
   const dropdownMenuProps = {
     className: 'pt-0',
     popper: false,
+  };
+
+  const handleLogout = () => {
+    localStorage.setItem('jwtToken', ''); // Clear the JWT token
+    window.location.href = '/'; // Redirect to the root path
   };
 
   return (
@@ -88,9 +96,9 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        <CDropdownItem href="#" onClick={handleLogout}>
           <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+          Log Out
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
