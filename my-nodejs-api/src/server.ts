@@ -1,7 +1,7 @@
 import app from './app';
 import config from './config/config';
 import db from './database';
-import seed from './seed';
+import seed from './database/seed/seed';
 //import 'newrelic';
 
 const MAX_RETRIES = config.dbRetries; // Maximum number of retries

@@ -1,5 +1,5 @@
-import db from './database';
-import { User } from './database/models/user';
+import db from '..';
+import { User } from '../models/user';
 
 const seed = async (): Promise<void> => {
   try {
