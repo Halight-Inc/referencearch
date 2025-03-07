@@ -28,20 +28,16 @@ const App: React.FC = () => {
             <nav>
                 <Link to="/">🏠 Home</Link> |{" "}
                 <Link to="/hello">🌎 Hello World</Link> |{" "}
-                <Link to="/dashboard">Dashboard</Link> |{" "}
+                <Link to="/main">Main</Link> |{" "}
                 <a href="https://energizelms.com">Marketing Site</a>
             </nav>
             <div hidden={isReady && treatment === "off"}>
-                <a href="https://vite.dev" target="_blank">
                     <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
                     <img
                         src={reactLogo}
                         className="logo react"
                         alt="React logo"
                     />
-                </a>
                 <h1>Hello World</h1>
                 <div className="card">
                     <button onClick={() => setCount((count) => count + 1)}>

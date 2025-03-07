@@ -1,51 +1,46 @@
-import React from 'react'
-import { useLocation } from 'react-router-dom'
+// src/components/AppBreadcrumb.tsx
+import React from 'react';
+import { useLocation, Link } from 'react-router-dom';
+import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react';
+import routes from '../routes';
+import { type IRoute } from '../types/routes';
+import { type IBreadCrumb } from '../types/breadcrumb';
 
-import routes from '../routes'
+const AppBreadcrumb = () => { // Removed location prop from here
+  const location = useLocation(); // Used useLocation hook here
 
-import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react'
+  const getPathName = (pathname: string, routes: IRoute[]) => {
+    const currentRoute = routes.find((route: IRoute) => {
+      return route.path === pathname;
+    });
 
-const AppBreadcrumb = () => {
-  const currentLocation = useLocation().pathname
+    return currentRoute?.name || 'Unknown';
+  };
 
-  const getRouteName = (pathname, routes) => {
-    const currentRoute = routes.find((route) => route.path === pathname)
-    return currentRoute ? currentRoute.name : false
-  }
+  const breadcrumbs: IBreadCrumb[] = location.pathname.split('/').reduce((prev: IBreadCrumb[], curr: string, index: number, array: string[]) => {
+    const currentPathname = `/${array.slice(1, index + 1).join('/')}`;
+    const routeName = getPathName(currentPathname, routes);
+    prev.push({
+      name: routeName,
+      to: currentPathname,
+    });
+    return prev;
+  }, []);
 
-  const getBreadcrumbs = (location) => {
-    const breadcrumbs = []
-    location.split('/').reduce((prev, curr, index, array) => {
-      const currentPathname = `${prev}/${curr}`
-      const routeName = getRouteName(currentPathname, routes)
-      routeName &&
-        breadcrumbs.push({
-          pathname: currentPathname,
-          name: routeName,
-          active: index + 1 === array.length ? true : false,
-        })
-      return currentPathname
-    })
-    return breadcrumbs
-  }
-
-  const breadcrumbs = getBreadcrumbs(currentLocation)
+  const breadcrumbItems: IBreadCrumb[] = breadcrumbs.filter((item: IBreadCrumb) => item.name);
 
   return (
-    <CBreadcrumb className="my-0">
-      <CBreadcrumbItem href="/">Home</CBreadcrumbItem>
-      {breadcrumbs.map((breadcrumb, index) => {
-        return (
-          <CBreadcrumbItem
-            {...(breadcrumb.active ? { active: true } : { href: breadcrumb.pathname })}
-            key={index}
-          >
-            {breadcrumb.name}
-          </CBreadcrumbItem>
-        )
-      })}
+    <CBreadcrumb className="m-0 ms-2">
+      <CBreadcrumbItem>
+        <Link to="/">Home</Link>
+      </CBreadcrumbItem>
+      {breadcrumbItems.map((item, index) => (
+        <CBreadcrumbItem key={index} active={index === breadcrumbItems.length - 1}>
+          {item.to ? <Link to={item.to}>{item.name}</Link> : item.name}
+        </CBreadcrumbItem>
+      ))}
     </CBreadcrumb>
-  )
-}
+  );
+};
 
-export default React.memo(AppBreadcrumb)
+export default React.memo(AppBreadcrumb);
