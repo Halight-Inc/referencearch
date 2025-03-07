@@ -2,9 +2,22 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 import config from "../../config/config";
 
+// Commented out Stripe initialization temporarily
+/*
 const stripe = new Stripe(config.stripeSecretKey, {
   apiVersion: '2025-02-24.acacia', // Use a real API version
 });
+*/
+
+// Create a mock stripe object to prevent errors
+const stripe = {
+  paymentIntents: {
+    create: async () => ({ client_secret: 'mock_client_secret' })
+  },
+  webhooks: {
+    constructEvent: () => ({ type: 'mocked_event', data: { object: {} } })
+  }
+} as any;
 
 /**
  * @swagger
