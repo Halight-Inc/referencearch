@@ -16,6 +16,7 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilLockLocked, cilUser } from '@coreui/icons';
+import "../../../App.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,7 +52,8 @@ const Login: React.FC = () => {
 
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
-      <CContainer>
+      <CContainer className='bg-login'>
+        <img src="https://energizelms.com/wp-content/uploads/2025/03/logo.png" alt="EnergizeLMS Logo" />         
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>

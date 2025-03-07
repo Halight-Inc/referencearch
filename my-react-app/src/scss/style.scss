@@ -65,3 +65,20 @@ body {
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
+
+.bg-primary {
+  background-color: #3F424D !important;
+  color: white;
+}
+
+.bg-login {
+  width: 80%;
+  background-color: #1d19196b !important;
+  color: white;
+  border-radius: 1%;
+  padding-bottom: 45px;
+}
+
+.btn {
+  background-color: #d7df23
+}

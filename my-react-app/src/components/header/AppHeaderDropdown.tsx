@@ -20,12 +20,10 @@ import {
   cilUser,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import { useNavigate } from 'react-router-dom';
 
 import avatar8 from './../../assets/images/avatars/8.jpg';
 
 const AppHeaderDropdown = () => {
-  const navigate = useNavigate();
 
   const dropdownMenuProps = {
     className: 'pt-0',
