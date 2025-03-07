@@ -47,16 +47,25 @@ const App: React.FC = () => {
                         height={window.innerHeight}
                         recycle={false}
                         numberOfPieces={200}
+                        confettiSource={{
+                            x: window.innerWidth / 2,
+                            y: window.innerHeight / 2 + 50,
+                            w: 0,
+                            h: 0
+                        }}
                         onConfettiComplete={() => {
                             setTimeout(() => setShowConfetti(false), 3000);
                         }}
                     />
                 )}
                 <div className="card">
-                    <button onClick={() => {
-                        setCount((count) => count + 1);
-                        setShowConfetti(true);
-                    }}>
+                    <button 
+                        onClick={() => {
+                            setCount((count) => count + 1);
+                            setShowConfetti(true);
+                        }}
+                        style={{ backgroundColor: 'orange' }}
+                    >
                         count is {count}
                     </button>
                 </div>
