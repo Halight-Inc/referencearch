@@ -4,6 +4,7 @@ import { CWidgetStatsD, CRow, CCol } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cibFacebook, cibLinkedin, cibTwitter, cilCalendar } from '@coreui/icons';
 import { CChart } from '@coreui/react-chartjs';
+import { CSSProperties } from 'react';
 
 // Define the props interface
 interface WidgetsBrandProps {
@@ -40,12 +41,12 @@ const WidgetsBrand: React.FC<WidgetsBrandProps> = (props) => {
     },
   };
 
-    // Define the type for dynamic styles, to stop the typescript errors.
-    const cardCapBgStyles = {
-        facebook: { '--cui-card-cap-bg': '#3b5998' },
-        twitter: { '--cui-card-cap-bg': '#00aced' },
-        linkedin: { '--cui-card-cap-bg': '#4875b4' },
-    };
+  // Define the type for dynamic styles.
+  const cardCapBgStyles: { [key: string]: CSSProperties } = {
+    facebook: { '--cui-card-cap-bg': '#3b5998' } as CSSProperties,
+    twitter: { '--cui-card-cap-bg': '#00aced' } as CSSProperties,
+    linkedin: { '--cui-card-cap-bg': '#4875b4' } as CSSProperties,
+  };
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
