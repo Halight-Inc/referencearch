@@ -3,11 +3,15 @@ import CIcon from '@coreui/icons-react'
 import { brandSet } from '@coreui/icons'
 import { DocsIcons } from 'src/components'
 
-const toKebabCase = (str) => {
+const toKebabCase = (str: string) => {
   return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
 }
+// Define a type for the icon set
+interface IconSet {
+  [key: string]: string | string[];
+}
 
-export const getIconsView = (iconset) => {
+export const getIconsView = (iconset: IconSet) => {
   return Object.entries(iconset).map(([name, value]) => (
     <CCol className="mb-5" xs={6} sm={4} md={3} xl={2} key={name}>
       <CIcon icon={value} size="xxl" />
