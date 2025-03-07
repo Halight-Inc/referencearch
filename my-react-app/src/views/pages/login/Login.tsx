@@ -43,7 +43,7 @@ const Login: React.FC = () => {
       });
       const token = response.data.token;
       localStorage.setItem('jwtToken', token);
-      navigate(location?.state?.from || '/main', { replace: true });
+      window.location.href = '/main';
     } catch (err) {
       console.error('Login error:', err);
       setError('Invalid credentials');
