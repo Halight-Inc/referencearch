@@ -34,7 +34,7 @@ const startServer = async () => {
   await seed(); // Run the seed script
   // The server start always
   app.listen(config.port, () => {
-    console.log(`Server is running on port ${config.port}`);
+    console.log(`API Server is running on port ${config.port}`);
   });
 };
 
