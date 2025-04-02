@@ -4,7 +4,7 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import path from "path";
-import autoprefixer from 'autoprefixer';
+import autoprefixer from "autoprefixer";
 
 export default defineConfig({
     plugins: [react()],
@@ -17,7 +17,7 @@ export default defineConfig({
             "dev-app.energizelms.com",
             "test-app.energizelms.com",
             "app.energizelms.com",
-            "2bb3298d-cd51-4802-9471-370f0862c772-00-1drf3o68jzv9b.worf.replit.dev", // Add Replit's domain here
+            "149e9bae-6a8d-47fe-80ab-723c1bd78466-00-13s23g10v4q13.picard.replit.dev", // Add Replit's domain here
         ],
     },
     preview: {

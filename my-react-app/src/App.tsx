@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {Link} from "react-router-dom"
+import ReactConfetti from 'react-confetti';
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -12,6 +13,7 @@ const App: React.FC = () => {
     const featureName = "hello-world";
 
     const [count, setCount] = useState(0);
+    const [showConfetti, setShowConfetti] = useState(false);
     const [token, setToken] = useState(localStorage.getItem("jwtToken") || "");
     const { treatments, isReady } = useSplitTreatments({
         names: [featureName],
@@ -39,8 +41,31 @@ const App: React.FC = () => {
                         alt="React logo"
                     />
                 <h1>Hello World</h1>
+                {showConfetti && (
+                    <ReactConfetti
+                        width={window.innerWidth}
+                        height={window.innerHeight}
+                        recycle={false}
+                        numberOfPieces={200}
+                        confettiSource={{
+                            x: window.innerWidth / 2,
+                            y: window.innerHeight / 2 + 50,
+                            w: 0,
+                            h: 0
+                        }}
+                        onConfettiComplete={() => {
+                            setTimeout(() => setShowConfetti(false), 3000);
+                        }}
+                    />
+                )}
                 <div className="card">
-                    <button onClick={() => setCount((count) => count + 1)}>
+                    <button 
+                        onClick={() => {
+                            setCount((count) => count + 1);
+                            setShowConfetti(true);
+                        }}
+                        style={{ backgroundColor: 'orange' }}
+                    >
                         count is {count}
                     </button>
                 </div>
