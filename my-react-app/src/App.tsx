@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import Drawer from '@mui/material/Drawer';
+import Button from '@mui/material/Button';
+import SidebarChat from "./components/chat/SidebarChat";
 import {Link} from "react-router-dom"
 import ReactConfetti from 'react-confetti';
 import reactLogo from "./assets/react.svg";
@@ -19,6 +22,11 @@ const App: React.FC = () => {
         names: [featureName],
     });
     const { treatment, config } = treatments[featureName] || {};
+    const [open, setOpen] = React.useState(false);
+
+    const toggleDrawer = (newOpen: boolean) => () => {
+      setOpen(newOpen);
+    };
 
     const handleLogin = (newToken: string) => {
         setToken(newToken);
@@ -41,6 +49,11 @@ const App: React.FC = () => {
                         alt="React logo"
                     />
                 <h1>Hello World</h1>
+                <Button onClick={toggleDrawer(true)}>Open Chat</Button>
+<Drawer open={open} onClose={toggleDrawer(false)}>
+    <SidebarChat />
+</Drawer>
+
                 {showConfetti && (
                     <ReactConfetti
                         width={window.innerWidth}
