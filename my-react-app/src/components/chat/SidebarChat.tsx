@@ -4,11 +4,6 @@ const SidebarChat: React.FC = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
 
-  interface SidebarChatProps {}
-
-  interface Message {
-    text: string;
-  }
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (input.trim()) {
