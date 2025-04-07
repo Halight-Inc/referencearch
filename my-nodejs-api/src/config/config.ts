@@ -13,6 +13,10 @@ interface Config {
     stripeWebhookSecret: string;
     jwtSecret: string;
     apiUrl: string;
+    aiAwsAgentId: string;
+    aiAwsAgentAliasId: string;
+    aiAwsAccessKeyId: string;
+    aiAwsSecretAccessKey: string;
 }
 
 const config: Config = {
@@ -26,7 +30,11 @@ const config: Config = {
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret',
-    apiUrl: process.env.API_URL || 'http://localhost:3000'
+    apiUrl: process.env.API_URL || 'http://localhost:3000',
+    aiAwsAccessKeyId: process.env.AI_AWS_ACCESS_KEY_ID || '',
+    aiAwsSecretAccessKey: process.env.AI_AWS_SECRET_ACCESS_KEY || '',
+    aiAwsAgentId: process.env.AI_AWS_AGENT_ID || 'AJBHXXILZN',
+    aiAwsAgentAliasId: process.env.AI_AWS_AGENT_ALIAS_ID || '',
 };
 
 export default config;
