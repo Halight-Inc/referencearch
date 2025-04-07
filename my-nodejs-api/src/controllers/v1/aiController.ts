@@ -1,12 +1,17 @@
 // src/controllers/v1/aiController.ts
 import { Request, Response, NextFunction } from 'express';
-import { IAIAgent } from '../../clients/IAIAgent'
+import { IAIAgent } from '../../clients/IAIAgent';
 import { BedrockClient } from '../../clients/BedrockClient';
 import { AzureClient } from '../../clients/AzureClient';
 
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     AIRequest:
  *       type: object
@@ -50,6 +55,8 @@ class AIController {
    *     summary: Run a prompt with an AI agent.
    *     description: Sends a prompt to either the Bedrock or Azure AI agent and returns the completion.
    *     tags: [AI]
+   *     security:
+   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:

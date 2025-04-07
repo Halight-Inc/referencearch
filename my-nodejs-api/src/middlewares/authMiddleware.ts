@@ -13,7 +13,7 @@ const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextF
   if (token == null) return res.status(401).json({ error: 'Unauthorized' }); // No token
 
   jwt.verify(token, config.jwtSecret, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Forbidden' }); // Invalid token
+    if (err) return res.status(403).json({ error: 'Forbidden - Invalid Token' }); // Invalid token
 
     req.user = user; // Add the user to the request object
     next();
