@@ -17,6 +17,9 @@ interface Config {
     aiAwsAgentAliasId: string;
     aiAwsAccessKeyId: string;
     aiAwsSecretAccessKey: string;
+    aiAzureApiKey: string;
+    aiAzureEndpoint: string;
+    aiAzureModel: string;
 }
 
 const config: Config = {
@@ -35,6 +38,8 @@ const config: Config = {
     aiAwsSecretAccessKey: process.env.AI_AWS_SECRET_ACCESS_KEY || '',
     aiAwsAgentId: process.env.AI_AWS_AGENT_ID || 'AJBHXXILZN',
     aiAwsAgentAliasId: process.env.AI_AWS_AGENT_ALIAS_ID || '',
-};
+    aiAzureApiKey: process.env.AI_AZURE_APIKEY || '',
+    aiAzureEndpoint: process.env.AI_AZURE_ENDPOINT || '',
+    aiAzureModel: process.env.AI_AZURE_MODEL || '',};
 
 export default config;
