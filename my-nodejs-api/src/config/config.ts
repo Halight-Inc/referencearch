@@ -20,6 +20,7 @@ interface Config {
     aiAzureApiKey: string;
     aiAzureEndpoint: string;
     aiAzureModel: string;
+    aiAzureModelVersion: string;
 }
 
 const config: Config = {
@@ -40,6 +41,8 @@ const config: Config = {
     aiAwsAgentAliasId: process.env.AI_AWS_AGENT_ALIAS_ID || '',
     aiAzureApiKey: process.env.AI_AZURE_APIKEY || '',
     aiAzureEndpoint: process.env.AI_AZURE_ENDPOINT || '',
-    aiAzureModel: process.env.AI_AZURE_MODEL || '',};
+    aiAzureModel: process.env.AI_AZURE_MODEL || '',
+    aiAzureModelVersion: process.env.AI_AZURE_MODEL_VERSION || '',
+};
 
 export default config;

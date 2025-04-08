@@ -6,7 +6,7 @@ import config from '../config/config';
 export class AzureClient implements IAIAgent {
   private apiKey = config.aiAzureApiKey;
   private endpoint = config.aiAzureEndpoint;
-  private apiVersion = "2024-04-01-preview";
+  private apiVersion = config.aiAzureModelVersion;
   private modelName = config.aiAzureModel;
   private deployment = config.aiAzureModel;
   private options = { endpoint: this.endpoint, apiKey: this.apiKey, deployment: this.deployment, apiVersion: this.apiVersion }

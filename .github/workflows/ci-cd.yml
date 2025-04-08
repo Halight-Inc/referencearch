@@ -44,6 +44,14 @@ jobs:
           echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env
           echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
           echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
+          echo "AI_AWS_AGENTID=${{ secrets.AI_AWS_AGENTID }}" >> .env
+          echo "AI_AWS_AGENTALIASID=${{ secrets.AI_AWS_AGENTALIASID }}" >> .env
+          echo "AI_AWS_ACCESSKEYID=${{ secrets.AI_AWS_ACCESSKEYID }}" >> .env
+          echo "AI_AWS_SECRETACCESSKEY=${{ secrets.AI_AWS_SECRETACCESSKEY }}" >> .env
+          echo "AI_AZURE_APIKEY=${{ secrets.AI_AZURE_APIKEY }}" >> .env
+          echo "AI_AZURE_ENDPOINT=${{ secrets.AI_AZURE_ENDPOINT }}" >> .env
+          echo "AI_AZURE_MODEL=${{ secrets.AI_AZURE_MODEL }}" >> .env
+          echo "AI_AZURE_MODEL_VERSION=${{ secrets.AI_AZURE_MODEL_VERSION }}" >> .env
 
       # Copy .env file to Node.js API directory
       - name: Copy .env to Node.js API directory
