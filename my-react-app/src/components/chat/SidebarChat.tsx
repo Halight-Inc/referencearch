@@ -1,6 +1,7 @@
 // filepath: c:\code\referencearch\my-react-app\src\components\chat\SidebarChat.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Added useEffect and useRef
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown'; // Import react-markdown
 const API_URL = import.meta.env.VITE_API_URL;
 
 import './SidebarChat.css';
@@ -12,29 +13,37 @@ interface ChatMessage {
 }
 
 const SidebarChat: React.FC = () => {
-  // Update state to hold ChatMessage objects
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [token] = useState(localStorage.getItem("jwtToken") || "");
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Optional: Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for scrolling
+
+  // Function to scroll to the bottom of the chat messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to bottom whenever messages update
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userMessageText = input.trim();
-    if (!userMessageText || isLoading) return; // Prevent sending empty messages or during loading
+    if (!userMessageText || isLoading) return;
 
-    // Add user's message immediately
     const userMessage: ChatMessage = { sender: 'user', text: userMessageText };
     setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInput(''); // Clear input field
-    setIsLoading(true); // Set loading state
+    setInput('');
+    setIsLoading(true);
 
     try {
-      // Hardcoded request for now, consider making sessionId dynamic
       const request = {
-        "systemContext": "you are a helpful assistant", // Example context
-        "prompt": userMessageText, // Use the actual user input
-        "sessionId": "chat-session-123", // Generate or manage session IDs properly
+        "systemContext": "you are a helpful assistant, respond in markdown format", // Updated context
+        "prompt": userMessageText,
+        "sessionId": "chat-session-123", // Manage session IDs properly
         "agentType": "azure"
       };
 
@@ -44,7 +53,7 @@ const SidebarChat: React.FC = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json' // Good practice to set Content-Type
+            'Content-Type': 'application/json'
           },
         }
       );
@@ -52,24 +61,20 @@ const SidebarChat: React.FC = () => {
       console.log("API Response:", response);
 
       if (response.data && response.data.completion) {
-        // Add AI's response
         const aiMessage: ChatMessage = { sender: 'ai', text: response.data.completion };
         setMessages(prevMessages => [...prevMessages, aiMessage]);
       } else {
         console.error("Invalid response structure:", response.data);
-        // Optionally add an error message to the chat
         const errorMessage: ChatMessage = { sender: 'ai', text: "Sorry, I couldn't get a response." };
         setMessages(prevMessages => [...prevMessages, errorMessage]);
       }
 
     } catch (error) {
       console.error('Error sending message:', error);
-      // Optionally add an error message to the chat
       const errorMessage: ChatMessage = { sender: 'ai', text: "Sorry, something went wrong." };
-      // Use functional update to ensure you're updating based on the latest state
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
 
@@ -79,15 +84,19 @@ const SidebarChat: React.FC = () => {
         <h2>Chat</h2>
       </div>
       <div className="chat-messages">
-        {/* Update map to handle ChatMessage objects */}
         {messages.map((message, index) => (
           <div key={index} className={`chat-message ${message.sender}`}>
-            {/* Optionally add sender label or style differently */}
-            {/* <strong>{message.sender === 'user' ? 'You' : 'AI'}:</strong> */}
-            {message.text}
+            {/* Conditionally render using ReactMarkdown for AI messages */}
+            {message.sender === 'ai' ? (
+              <ReactMarkdown>{message.text}</ReactMarkdown>
+            ) : (
+              message.text // Render user text directly
+            )}
           </div>
         ))}
-        {isLoading && <div className="chat-message ai">Thinking...</div>} {/* Show loading indicator */}
+        {/* Add a div at the end to scroll to */}
+        <div ref={messagesEndRef} />
+        {isLoading && <div className="chat-message ai">Thinking...</div>}
       </div>
       <form className="chat-input" onSubmit={handleSendMessage}>
         <input
@@ -95,7 +104,7 @@ const SidebarChat: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          disabled={isLoading} // Disable input while loading
+          disabled={isLoading}
         />
         <button type="submit" disabled={isLoading}>Send</button>
       </form>
