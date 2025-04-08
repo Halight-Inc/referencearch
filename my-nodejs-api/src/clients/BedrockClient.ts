@@ -23,12 +23,12 @@ import {
       this.agentAliasId = config.aiAwsAgentAliasId;
     }
   
-    async runPrompt(prompt: string, sessionId: string): Promise<string> {
+    async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
       const command = new InvokeAgentCommand({
         agentId: this.agentId,
         agentAliasId: this.agentAliasId,
         sessionId,
-        inputText: prompt,
+        inputText: systemContext + "\n" + prompt,
       });
   
       try {

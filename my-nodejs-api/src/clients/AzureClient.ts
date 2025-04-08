@@ -1,44 +1,55 @@
-// src/clients/BedrockClient.ts
-  import { IAIAgent } from './IAIAgent';
-  import { AzureOpenAI } from 'openai'; // Ensure this package is installed
-  
-  export class AzureClient implements IAIAgent {
-    private endpoint = "https://halightlms0683300658.openai.azure.com/";
-    private modelName = "gpt-4o-mini";
-    private deployment = "gpt-4o-mini";
-    private apiKey = "<your-api-key>";
-    private apiVersion = "2024-04-01-preview";
-    private options = { endpoint: this.endpoint, apiKey: this.apiKey, deployment: this.deployment, apiVersion: this.apiVersion }
-    private client: AzureOpenAI;
-  
-    constructor() {
-      this.client = new AzureOpenAI(this.options);
-    }
-  
-    async runPrompt(prompt: string, sessionId: string): Promise<string> {
-      try {
-        let completion = "";
-        const response = await this.client.chat.completions.create({
-            messages: [
-              { role:"system", content: prompt },
-              { role:"user", content: sessionId }
-            ],
-            stream: true,
-            max_tokens: 4096,
-              temperature: 1,
-              top_p: 1,
-              model: this.modelName
-          });
-          
-        for await (const part of response.toReadableStream()){
-            completion += (part.choices[0]?.delta?.content || '');
-          }
-  
-        return completion;
-      } catch (err) {
-        console.error(err);
-        throw err;
+// src/clients/AzureClient.ts
+import { IAIAgent } from './IAIAgent';
+import { AzureOpenAI } from 'openai'; // Ensure this package is installed
+import config from '../config/config';
+
+export class AzureClient implements IAIAgent {
+  private apiKey = config.aiAzureApiKey;
+  private endpoint = config.aiAzureEndpoint;
+  private apiVersion = "2024-04-01-preview";
+  private modelName = config.aiAzureModel;
+  private deployment = config.aiAzureModel;
+  private options = { endpoint: this.endpoint, apiKey: this.apiKey, deployment: this.deployment, apiVersion: this.apiVersion }
+  private client: AzureOpenAI;
+
+  constructor() {
+    this.client = new AzureOpenAI(this.options);
+  }
+
+  async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
+    try {
+      
+      const response = await this.client.chat.completions.create({
+        messages: [
+          { role:"system", content: systemContext },
+          { role:"user", content: prompt }
+        ],
+          max_completion_tokens: 800,
+          temperature: 1,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+          model: this.modelName
+      });
+        
+      if (response.choices === undefined) {
+        throw new Error("Choices is undefined in the response");
       }
+      if (response.choices.length === 0) {
+        throw new Error("No choices in the response");
+      }
+      if (response.choices[0].message === undefined) {
+        throw new Error("Message is undefined in the first choice of the response");  
+      }
+      if (response.choices[0].message.content === null) {
+        throw new Error("Content is null in the first choice of the response");
+      }
+
+      return response.choices[0].message.content;
+      
+    } catch (err) {
+      console.error("Error in runPrompt:" + sessionId, err);
+      throw err;
     }
   }
-  
+}

@@ -25,6 +25,7 @@ const stripe = {
  *   post:
  *     summary: Create a PaymentIntent
  *     description: Creates a Stripe PaymentIntent for a one-time payment.
+ *     tags: [Payment Processing]
  *     requestBody:
  *       required: true
  *       content:
@@ -83,6 +84,7 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
  *   post:
  *     summary: Stripe Webhook
  *     description: Endpoint to handle Stripe webhook events.
+ *     tags: [Payment Processing]
  *     requestBody:
  *       required: true
  *       content:

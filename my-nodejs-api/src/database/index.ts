@@ -11,7 +11,7 @@ const sequelize = new Sequelize({
     username: config.dbUser,
     password: config.dbPassword,
     database: config.dbName,
-    logging: false,
+    logging: true,
 });
 
 // Initialize models
@@ -22,4 +22,4 @@ export default {
     sequelize,
     User,
     Item
-};
+}; 

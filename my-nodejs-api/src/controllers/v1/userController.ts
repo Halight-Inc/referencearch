@@ -8,6 +8,7 @@ import { User } from '../../database/models/user';
  *   get:
  *     summary: Get all users
  *     description: Retrieve a list of all users from the database (version 1).
+ *     tags: [Security]
  *     security:
  *       - bearerAuth: []
  *     responses:

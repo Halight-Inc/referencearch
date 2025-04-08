@@ -16,10 +16,14 @@ import { AzureClient } from '../../clients/AzureClient';
  *     AIRequest:
  *       type: object
  *       required:
+ *         - systemContext
  *         - prompt
  *         - sessionId
  *         - agentType
  *       properties:
+ *         systemContext:
+ *           type: string
+ *           description: The AI Agent Context or Persona.
  *         prompt:
  *           type: string
  *           description: The prompt to send to the AI agent.
@@ -91,7 +95,7 @@ class AIController {
    */
   async runPrompt(req: Request, res: Response, next: NextFunction) {
     try {
-      const { prompt, sessionId, agentType } = req.body;
+      const {systemContext, prompt, sessionId, agentType } = req.body;
 
       if (!prompt || !sessionId || !agentType) {
         return res.status(400).json({ error: 'Prompt, sessionId, and agentType are required.' });
@@ -102,7 +106,7 @@ class AIController {
         return res.status(400).json({ error: `Invalid agentType: ${agentType}` });
       }
 
-      const completion = await agent.runPrompt(prompt, sessionId);
+      const completion = await agent.runPrompt(systemContext, prompt, sessionId);
       res.status(201).json({ sessionId, completion });
     } catch (error) {
       next(error);

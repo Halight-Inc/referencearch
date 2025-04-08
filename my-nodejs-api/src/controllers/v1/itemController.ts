@@ -7,6 +7,7 @@ import db from '../../database';
  *   get:
  *     summary: Get all items
  *     description: Retrieve a list of all items from the database.
+ *     tags: [Content]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -36,6 +37,7 @@ const getAllItems = async (req: Request, res: Response, next: NextFunction) => {
  *   post:
  *     summary: Create an item
  *     description: Create a new item in the database.
+ *     tags: [Content]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

@@ -9,6 +9,7 @@ import userController from './userController';
  *   post:
  *     summary: Authenticate a user
  *     description: Authenticate a user and generate a JWT token.
+ *     tags: [Security]
  *     requestBody:
  *       required: true
  *       content:

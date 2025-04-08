@@ -7,6 +7,9 @@ import db from '../../database';
  *   get:
  *     summary: Get all users (version 2)
  *     description: Retrieve a list of all users from the database (version 2).
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -34,7 +37,15 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
-
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
 export default {
   getAllUsers,
 };

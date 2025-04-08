@@ -6,9 +6,9 @@ import config from './config/config';
 const swaggerDefinition = {
     openapi: '3.0.0',
     info: {
-        title: 'Node API with Postgres and Versioned APIs',
+        title: 'Reference Architecture API',
         version: '1.0.0',
-        description: 'A sample API for learning purposes',
+        description: 'Endpoints for the Reference Architecture API',
     },
     servers: [
         {
