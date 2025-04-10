@@ -7,7 +7,10 @@ const Home = () => {
   const [count, setCount] = useState(0);
 
   return (
-    <div>
+    <div style={{
+        maxWidth: '250px',
+        margin: '0 auto',
+    }}>
         <img src={viteLogo} className="logo" alt="Vite logo" />
         <img src={reactLogo} className="logo react" alt="React logo" />
       <h1>Vite + React</h1>

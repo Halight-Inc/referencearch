@@ -18,5 +18,9 @@
       "jsx": "preserve",
       "esModuleInterop": true,
       "skipLibCheck": true,
+      "paths": {
+        "@/*": ["./src/*"],
+        "@shared/*": ["./shared/*"]
+      }
   }
 }
