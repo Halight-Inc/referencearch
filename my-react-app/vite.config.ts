@@ -57,9 +57,11 @@ export default defineConfig({
             },
             // Enable esbuild polyfill plugins
             plugins: [
+                // @ts-ignore
                 NodeGlobalsPolyfillPlugin({
                     buffer: true,
                 }),
+                // @ts-ignore
                 NodeModulesPolyfillPlugin(),
             ],
         },
