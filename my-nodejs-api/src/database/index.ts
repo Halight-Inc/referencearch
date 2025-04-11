@@ -21,8 +21,6 @@ initItem(sequelize);
 initCoachonCuePersona(sequelize);
 initCoachonCueScenario(sequelize);
 
-
-
 // Final model registration (ensures Sequelize knows about them)
 sequelize.models.User = User;
 sequelize.models.Item = Item;

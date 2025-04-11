@@ -1,4 +1,4 @@
-import db from '..';
+import db from './../../database/index';
 
 const { sequelize, User, CoachonCuePersona, CoachonCueScenario } = db;
 
@@ -95,6 +95,7 @@ const seed = async (): Promise<void> => {
 
 export default seed;
 
+// Run the seed script if it's executed directly
 if (require.main === module) {
   seed();
 }
