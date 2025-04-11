@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import "./index.css";
 import App from "./App.tsx";
 import ReactDOM from "react-dom/client";
@@ -27,12 +27,7 @@ const sdkConfig: SplitIO.IBrowserSettings = {
 };
 
 const Root = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-    setIsLoggedIn(!!token);
-  }, []);
+  const isLoggedIn = localStorage.getItem('jwtToken') !== null;
 
   return (
       <BrowserRouter>
