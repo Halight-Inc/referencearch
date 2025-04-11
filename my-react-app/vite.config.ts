@@ -4,10 +4,15 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import path from "path";
-import autoprefixer from "autoprefixer";
+import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        runtimeErrorOverlay(),
+        themePlugin(),
+    ],
     server: {
         port: 5173, // Ensure Vite runs on 5173
         strictPort: true, // Prevent it from switching ports
@@ -31,11 +36,12 @@ export default defineConfig({
         ],
     },
     css: {
-        postcss: {
-            plugins: [
-                autoprefixer({}), // add options if needed
-            ],
-        },
+        // using postcss.config.js instead
+        // postcss: {
+        //     plugins: [
+        //         autoprefixer({}), // add options if needed
+        //     ],
+        // },
     },
     build: {
         outDir: "dist",
@@ -51,9 +57,11 @@ export default defineConfig({
             },
             // Enable esbuild polyfill plugins
             plugins: [
+                // @ts-ignore
                 NodeGlobalsPolyfillPlugin({
                     buffer: true,
                 }),
+                // @ts-ignore
                 NodeModulesPolyfillPlugin(),
             ],
         },

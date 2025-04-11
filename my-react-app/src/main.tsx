@@ -1,15 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import "./index.css";
 import App from "./App.tsx";
 import ReactDOM from "react-dom/client";
 import { SplitFactoryProvider } from "@splitsoftware/splitio-react";
 import Home from "./pages/Home.tsx";
+import TemplateBuilder from "./pages/TemplateBuilder.tsx";
 import MainPage from "./pages/MainPage.tsx";
 import store from "./store.tsx"; // Import your Redux store
 import { Provider } from 'react-redux'; // Import the Provider
 import Login from "./views/pages/login/Login.js"; // Import the Login component
 import Register from './views/pages/register/Register.js';
+import { Toaster } from "@/components/ui/toaster";
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -25,12 +27,7 @@ const sdkConfig: SplitIO.IBrowserSettings = {
 };
 
 const Root = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-    setIsLoggedIn(!!token);
-  }, []);
+  const isLoggedIn = localStorage.getItem('jwtToken') !== null;
 
   return (
       <BrowserRouter>
@@ -40,13 +37,17 @@ const Root = () => {
           <Route path="/app" element={<App />} />
           <Route path="/home" element={<Home />} />
           <Route
-            path="/main/*"
-            element={
-              isLoggedIn ? <MainPage /> : <Navigate to="/login" replace />
-            }
+              path="/admin"
+              element={isLoggedIn ? <TemplateBuilder /> : <Navigate to="/login" replace />}
           />
-            {/* Catch all route should redirect to login if not logged in. */}
-            <Route path="*" element={isLoggedIn ? <Navigate to="/main" replace /> : <Navigate to="/login" replace />} />
+          <Route
+              path="/main/*"
+              element={
+                isLoggedIn ? <MainPage /> : <Navigate to="/login" replace />
+              }
+          />
+          {/* Catch all route should redirect to login if not logged in. */}
+          <Route path="*" element={isLoggedIn ? <Navigate to="/main" replace /> : <Navigate to="/login" replace />} />
 
         </Routes>
       </BrowserRouter>
@@ -59,6 +60,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <SplitFactoryProvider config={sdkConfig}>
         <Root />
+        <Toaster />
       </SplitFactoryProvider>
     </Provider>
   </React.StrictMode>

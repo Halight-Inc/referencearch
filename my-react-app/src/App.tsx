@@ -33,7 +33,9 @@ const App: React.FC = () => {
     };
 
     return (
-        <>    
+        <div
+            className="app"
+        >
             {/* ✅ Navigation Added */}
             <nav>
                 <Link to="/">🏠 Home</Link> |{" "}
@@ -98,7 +100,7 @@ const App: React.FC = () => {
                     <Login onLogin={handleLogin} />
                 )}
             </div>
-        </>
+        </div>
     );
 };
 
