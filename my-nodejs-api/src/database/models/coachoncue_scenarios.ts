@@ -1,8 +1,6 @@
-// coachoncue_scenarios.ts
-
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-interface CoachonCueScenarioAttributes {
+export interface CoachonCueScenarioAttributes {
   id?: number;
 
   // --- Scenario fields ---
@@ -16,13 +14,14 @@ interface CoachonCueScenarioAttributes {
   };
   supportingMaterials?: string[];
 
-  // --- Persona fields ---
-  name: string;
-  role: string;
-  disposition: string;
-  background: string;
-  communicationStyle: string;
-  emotionalState: string;
+  persona: {
+    name: string;
+    role: string;
+    disposition: string;
+    background: string;
+    communicationStyle: string;
+    emotionalState: string;
+  }
 }
 
 class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements CoachonCueScenarioAttributes {
@@ -33,16 +32,20 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
   public keyTopics!: string[];
   public competenciesAndGoals!: string[];
   public guidelines?: string[];
-  public coachingFramework!: { name: string; description: string };
+  public coachingFramework!: {
+      name: string;
+      description: string;
+  };
   public supportingMaterials?: string[];
 
-  // Persona fields
-  public name!: string;
-  public role!: string;
-  public disposition!: string;
-  public background!: string;
-  public communicationStyle!: string;
-  public emotionalState!: string;
+  public persona!: {
+    name: string;
+    role: string;
+    disposition: string;
+    background: string;
+    communicationStyle: string;
+    emotionalState: string;
+  }
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -83,30 +86,8 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
         type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
       },
-
-      // Persona fields
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      disposition: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-      },
-      background: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-      },
-      communicationStyle: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-      },
-      emotionalState: {
-        type: DataTypes.STRING,
+      persona: {
+        type: DataTypes.JSONB,
         allowNull: false,
       },
     },
