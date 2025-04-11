@@ -1,18 +1,18 @@
 import db from './../../database/index';
 
-const { sequelize, User, CoachonCuePersona, CoachonCueScenario } = db;
+const { sequelize, User, CoachonCueScenario } = db;
 
-console.log('Models known to Sequelize:', Object.keys(sequelize.models)); // added to debug why the new coachoncue tables arent being seeded 
+console.log('Models known to Sequelize:', Object.keys(sequelize.models)); // debugging
 
 const seed = async (): Promise<void> => {
   try {
-    console.log('Models before sync:', Object.keys(sequelize.models)); //debugging seeding issues with the new coachoncue tables  - Mikey
+    console.log('Models before sync:', Object.keys(sequelize.models));
     console.log('Starting seed process...');
     await sequelize.authenticate();
-    await sequelize.sync({ force: true }); // Sync models, drop and recreate
+    await sequelize.sync({ force: true }); // Drop and recreate tables
     console.log('Database synced successfully.');
 
-    // Seed Admin User
+    // --- Seed Admin User ---
     const adminExists = await User.findOne({ where: { email: 'admin@example.com' } });
     if (!adminExists) {
       await User.create({
@@ -25,7 +25,7 @@ const seed = async (): Promise<void> => {
       console.log('Admin User already exists.');
     }
 
-    // Seed Regular User
+    // --- Seed Regular User ---
     const userExists = await User.findOne({ where: { email: 'user@example.com' } });
     if (!userExists) {
       await User.create({
@@ -38,26 +38,7 @@ const seed = async (): Promise<void> => {
       console.log('User already exists.');
     }
 
-    // Seed Persona
-    const personaExists = await CoachonCuePersona.findOne({ where: { name: 'Alex', role: 'New Manager' } });
-    let persona;
-
-    if (!personaExists) {
-      persona = await CoachonCuePersona.create({
-        name: 'Alex',
-        role: 'New Manager',
-        disposition: 'Enthusiastic but anxious',
-        background: 'Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.',
-        communicationStyle: 'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
-        emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
-      });
-      console.log('CoachonCue Persona created.');
-    } else {
-      persona = personaExists;
-      console.log('CoachonCue Persona already exists.');
-    }
-
-    // Seed Scenario
+    // --- Seed Scenario: Conducting 1-on-1 ---
     const scenarioExists = await CoachonCueScenario.findOne({
       where: {
         scenarioType: 'conducting-1-on-1',
@@ -73,21 +54,106 @@ const seed = async (): Promise<void> => {
           'Maintain professionalism under pressure',
           'De-escalate tense situations',
         ],
-        guidelines: ['dont use aggressive language'],
+        guidelines: ['keep the conversation focused'],
         coachingFramework: {
-          name: 'C.L.E.A.R.',
+          name: 'G.R.O.W.',
           description:
-            'Contracting, Listening, Exploring, Action, Review. A coaching model that emphasizes establishing clear expectations and structured follow-up.',
+            'A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.',
         },
         supportingMaterials: [],
-        // personaId: persona.id,
+        persona: {
+          name: 'Alex',
+          role: 'New Manager',
+          disposition: 'Enthusiastic but anxious',
+          background:
+            'Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.',
+          communicationStyle:
+            'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
+          emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
+        },
       });
-      console.log('CoachonCue Scenario created.');
+      console.log('CoachonCue Scenario (conducting-1-on-1) created.');
     } else {
-      console.log('CoachonCue Scenario already exists.');
+      console.log('CoachonCue Scenario (conducting-1-on-1) already exists.');
     }
 
-    console.log('Seed process completed.');
+    // --- Seed Scenario: Difficult Teammates ---
+    const difficultTeammatesExists = await CoachonCueScenario.findOne({
+      where: { scenarioType: 'difficult-teammates' },
+    });
+
+    if (!difficultTeammatesExists) {
+      await CoachonCueScenario.create({
+        scenarioType: 'difficult-teammates',
+        keyTopics: ['Empathy', 'Setting boundaries', 'Managing emotional responses'],
+        competenciesAndGoals: [
+          'Demonstrate active listening',
+          'Maintain professionalism under pressure',
+          'De-escalate tense situations',
+        ],
+        guidelines: ['Pretend to be an irate coworker'],
+        coachingFramework: {
+          name: 'G.R.O.W.',
+          description:
+            'A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.',
+        },
+        supportingMaterials: [],
+        persona: {
+          name: 'Taylor',
+          role: 'Team Lead',
+          disposition: 'Authoritative and direct',
+          background:
+            'Experienced professional with high standards. Values efficiency and clear communication above all else.',
+          communicationStyle:
+            'Direct, concise, and sometimes blunt. Prefers facts over feelings. Limited patience for tangents.',
+          emotionalState:
+            'Calm and focused. Can appear cold when stressed or when facing project delays.',
+        },
+      });
+      console.log('CoachonCue Scenario (difficult-teammates) created.');
+    } else {
+      console.log('CoachonCue Scenario (difficult-teammates) already exists.');
+    }
+
+    // --- Seed Scenario: Performance Review ---
+    const performanceReviewExists = await CoachonCueScenario.findOne({
+      where: { scenarioType: 'performance-review' },
+    });
+
+    if (!performanceReviewExists) {
+      await CoachonCueScenario.create({
+        scenarioType: 'performance-review',
+        keyTopics: ['Active listening', 'Setting expectations', 'Critical feedback'],
+        competenciesAndGoals: [
+          'Use effective questioning techniques',
+          'Show empathy and understanding',
+        ],
+        guidelines: [
+          'focus on the employees strengths while provided some targeted constructive feedback',
+        ],
+        coachingFramework: {
+          name: 'O.S.K.A.R.',
+          description:
+            'Outcome, Scaling, Know-how, Affirm & Action, Review. A solution-focused coaching approach that emphasizes positive outcomes.',
+        },
+        supportingMaterials: [],
+        persona: {
+          name: 'Alex',
+          role: 'New Manager',
+          disposition: 'Enthusiastic but anxious',
+          background:
+            'Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.',
+          communicationStyle:
+            'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
+          emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
+        },
+      });
+      console.log('CoachonCue Scenario (performance-review) created.');
+    } else {
+      console.log('CoachonCue Scenario (performance-review) already exists.');
+    }
+
+    console.log('Seeding complete.');
   } catch (error) {
     console.error('Error during seed process:', error);
   }
@@ -95,7 +161,6 @@ const seed = async (): Promise<void> => {
 
 export default seed;
 
-// Run the seed script if it's executed directly
 if (require.main === module) {
   seed();
 }
