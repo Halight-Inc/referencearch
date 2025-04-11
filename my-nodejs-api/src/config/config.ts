@@ -35,14 +35,14 @@ const config: Config = {
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret',
     apiUrl: process.env.API_URL || 'http://localhost:3000',
-    aiAwsAccessKeyId: process.env.AI_AWS_ACCESS_KEY_ID || '',
-    aiAwsSecretAccessKey: process.env.AI_AWS_SECRET_ACCESS_KEY || '',
-    aiAwsAgentId: process.env.AI_AWS_AGENT_ID || 'AJBHXXILZN',
-    aiAwsAgentAliasId: process.env.AI_AWS_AGENT_ALIAS_ID || '',
-    aiAzureApiKey: process.env.AI_AZURE_APIKEY || '',
-    aiAzureEndpoint: process.env.AI_AZURE_ENDPOINT || '',
-    aiAzureModel: process.env.AI_AZURE_MODEL || '',
-    aiAzureModelVersion: process.env.AI_AZURE_MODEL_VERSION || '',
+    aiAwsAgentId: process.env.AI_AWS_AGENTID || 'AJBHXXILZN',
+    aiAwsAgentAliasId: process.env.AI_AWS_AGENTALIASID || 'Fake',
+    aiAwsAccessKeyId: process.env.AI_AWS_ACCESSKEYID || 'fake',
+    aiAwsSecretAccessKey: process.env.AI_AWS_SECRETACCESSKEY || 'fake',
+    aiAzureApiKey: process.env.AI_AZURE_APIKEY || 'fake',
+    aiAzureEndpoint: process.env.AI_AZURE_ENDPOINT || 'fake',
+    aiAzureModel: process.env.AI_AZURE_MODEL || 'fake',
+    aiAzureModelVersion: process.env.AI_AZURE_MODEL_VERSION || 'fake',
 };
 
 export default config;
