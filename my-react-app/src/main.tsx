@@ -7,13 +7,14 @@ import { SplitFactoryProvider } from "@splitsoftware/splitio-react";
 import Home from "./pages/Home.tsx";
 import TemplateBuilder from "./pages/TemplateBuilder.tsx";
 import MainPage from "./pages/MainPage.tsx";
-import store from "./store.tsx"; // Import your Redux store
-import { Provider } from 'react-redux'; // Import the Provider
-import Login from "./views/pages/login/Login.js"; // Import the Login component
+import store from "./store.tsx";
+import { Provider } from 'react-redux';
+import Login from "./views/pages/login/Login.js";
 import Register from './views/pages/register/Register.js';
 import { Toaster } from "@/components/ui/toaster";
 import ScenarioBrowse from '@/pages/ScenarioBrowse.tsx';
 import Simulation from '@/pages/Simulation.tsx';
+import Logout from '@/Logout.tsx';
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -35,6 +36,7 @@ const Root = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
           <Route path="/register" element={<Register />} />
           <Route path="/app" element={<App />} />
           <Route path="/home" element={<Home />} />
