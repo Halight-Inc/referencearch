@@ -31,7 +31,7 @@ const Login: React.FC = () => {
     // Check for existing token on component mount
     const token = localStorage.getItem('jwtToken');
     if (token) {
-      navigate(location?.state?.from || '/main', { replace: true });
+      navigate(location?.state?.from || '/', { replace: true });
     }
   }, [navigate, location?.state?.from]);
 
@@ -43,7 +43,7 @@ const Login: React.FC = () => {
       });
       const token = response.data.token;
       localStorage.setItem('jwtToken', token);
-      window.location.href = '/main';
+      window.location.href = '/';
     } catch (err) {
       console.error('Login error:', err);
       setError('Invalid credentials');
