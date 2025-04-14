@@ -33,6 +33,7 @@ import MultiSelectInput from "@/components/MultiSelectInput";
 import FileUpload from "@/components/FileUpload";
 import JsonDisplay from "@/components/JsonDisplay";
 import { useFileParser } from "@/hooks/useFileParser";
+import { createScenario } from '@/api';
 
 export default function TemplateBuilder() {
   const { toast } = useToast();
@@ -68,7 +69,7 @@ export default function TemplateBuilder() {
   });
 
   // Handle form submission and generate JSON
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     // Format guidelines from textarea into array
     const guidelinesArray = data.guidelines
       .split("\n")
@@ -78,6 +79,12 @@ export default function TemplateBuilder() {
       ...data,
       guidelines: guidelinesArray,
     };
+
+    const token = localStorage.getItem('jwtToken') as string;
+
+    await createScenario({
+      ...formattedData,
+    }, token);
 
     const jsonOutput = JSON.stringify(formattedData, null, 2);
     setGeneratedJson(jsonOutput);
