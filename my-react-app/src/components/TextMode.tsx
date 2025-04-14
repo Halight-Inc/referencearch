@@ -62,7 +62,7 @@ export default function TextMode({
             return (
               <div key={index} className="flex items-start flex-row-reverse mb-4 fade-in">
                 <div className="bg-primary text-white rounded-lg rounded-tr-none py-2 px-3 max-w-[80%]">
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-sm m-0">{message.text}</p>
                 </div>
               </div>
             );
@@ -78,7 +78,7 @@ export default function TextMode({
                   />
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg rounded-tl-none py-2 px-3 max-w-[80%] shadow-sm">
-                  <p className="text-sm">
+                  <p className="text-sm m-0">
                     <ReactMarkdown>
                       {message.text}
                     </ReactMarkdown>
