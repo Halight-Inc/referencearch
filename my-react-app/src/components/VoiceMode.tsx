@@ -11,7 +11,8 @@ interface VoiceModeProps {
 export default function VoiceMode({ aiPersonality, onSendMessage }: VoiceModeProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(true);
-  const [progress, setProgress] = useState(66); // Mock progress for UI demonstration
+  // const [progress, setProgress] = useState(66); // Mock progress for UI demonstration
+  const progress = 66;
 
   const toggleRecording = () => {
     const newRecordingState = !isRecording;
