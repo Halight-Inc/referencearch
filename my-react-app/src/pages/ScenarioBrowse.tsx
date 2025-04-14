@@ -18,6 +18,12 @@ export default function ScenarioBrowse() {
         setScenarios(await getAllScenarios(token));
       } catch (error) {
         console.error('Error fetching scenarios:', error);
+        // @ts-ignore
+        if (('response' in error) && error.response && ('status' in error.response) && error.response.status === 403) {
+          // probably an invalid token, so just remove it and redirect to login
+          localStorage.removeItem('jwtToken');
+          window.location.href = '/'; // Redirect to the root path
+        }
       } finally {
         setIsLoading(false);
       }
