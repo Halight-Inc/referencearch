@@ -31,7 +31,7 @@ const AppHeaderDropdown = () => {
   };
 
   const handleLogout = () => {
-    localStorage.setItem('jwtToken', ''); // Clear the JWT token
+    localStorage.removeItem('jwtToken');
     window.location.href = '/'; // Redirect to the root path
   };
 
