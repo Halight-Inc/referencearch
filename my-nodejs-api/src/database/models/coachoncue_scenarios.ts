@@ -1,6 +1,6 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-export interface CoachonCueScenarioAttributes {
+interface CoachonCueScenarioAttributes {
   id?: number;
 
   // --- Scenario fields ---

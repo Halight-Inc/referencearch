@@ -80,7 +80,7 @@ export default function TemplateBuilder() {
       guidelines: guidelinesArray,
     };
 
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('jwtToken') as string;
 
     await createScenario({
       ...formattedData,
