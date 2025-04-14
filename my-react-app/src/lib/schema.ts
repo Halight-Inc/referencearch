@@ -36,3 +36,28 @@ export const scenarioSchema = z.object({
 
 // Infer the type
 export type ScenarioFormValues = z.infer<typeof scenarioSchema>;
+
+// TODO: use the same one from the api
+export interface CoachonCueScenarioAttributes {
+  id?: number;
+
+  // --- Scenario fields ---
+  scenarioType: string;
+  keyTopics: string[];
+  competenciesAndGoals: string[];
+  guidelines?: string[];
+  coachingFramework: {
+    name: string;
+    description: string;
+  };
+  supportingMaterials?: string[];
+
+  persona: {
+    name: string;
+    role: string;
+    disposition: string;
+    background: string;
+    communicationStyle: string;
+    emotionalState: string;
+  }
+}

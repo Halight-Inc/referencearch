@@ -46,3 +46,21 @@ export const createScenario = async (scenario: {
     });
     return response.data;
 };
+
+export const getAllScenarios = async (token: string) => {
+    const response = await axios.get(`${API_URL}/v1/scenarios`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+export const getScenario = async (scenarioId: string | number, token: string) => {
+    const response = await axios.get(`${API_URL}/v1/scenarios/${scenarioId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};

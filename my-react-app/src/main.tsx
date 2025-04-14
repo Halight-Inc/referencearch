@@ -12,6 +12,8 @@ import { Provider } from 'react-redux'; // Import the Provider
 import Login from "./views/pages/login/Login.js"; // Import the Login component
 import Register from './views/pages/register/Register.js';
 import { Toaster } from "@/components/ui/toaster";
+import ScenarioBrowse from '@/pages/ScenarioBrowse.tsx';
+import Simulation from '@/pages/Simulation.tsx';
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -36,6 +38,8 @@ const Root = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/app" element={<App />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/browse" element={<ScenarioBrowse />} />
+          <Route path="/simulation/:id" element={<Simulation />} />
           <Route
               path="/admin"
               element={isLoggedIn ? <TemplateBuilder /> : <Navigate to="/login" replace />}
