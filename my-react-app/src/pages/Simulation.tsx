@@ -9,8 +9,16 @@ import TextMode from "@/components/TextMode.tsx";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getScenario } from '@/api.ts';
 import { CoachonCueScenarioAttributes } from "@/lib/schema";
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 type InteractionMode = "voice" | "text";
+
+export interface ChatMessage {
+  sender: 'user' | 'ai' | 'system';
+  text: string;
+}
 
 export default function Simulation() {
   const navigate = useNavigate();
@@ -22,11 +30,14 @@ export default function Simulation() {
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
 
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
-  const [messages, setMessages] = useState<Array<{sender: string, content: string}>>([]);
+
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const token = localStorage.getItem('jwtToken') as string;
 
   // Fetch scenario data
   useEffect(() => {
-    const token = localStorage.getItem('jwtToken') as string;
     const fetchScenario = async () => {
       try {
         setScenario(await getScenario(scenarioId, token));
@@ -67,28 +78,76 @@ export default function Simulation() {
         {
           sender: "system",
           // content: `Simulation started. You're having a ${scenario.scenarioType} with ${aiPersonality.role.toLowerCase()} ${aiPersonality.name}.`
-          content: `Simulation started. You're having a ${scenario.scenarioType}.`,
+          text: `Simulation started. You're having a ${scenario.scenarioType}.`,
         }
       ]);
     }
   }, [scenario]);
   // }, [scenario, aiPersonality]);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (userMessageText: string) => {
     // Add user message
-    const newMessages = [...messages, { sender: "user", content }];
-    setMessages(newMessages);
+    // const newMessages = [...messages, { sender: "user", content }];
+    // setMessages(newMessages);
 
     // Simulate AI response (would be replaced with API call)
-    setTimeout(() => {
-      setMessages([
-        ...newMessages,
+    // setTimeout(() => {
+    //   setMessages([
+    //     ...newMessages,
+    //     {
+    //       sender: "ai",
+    //       content: "This is a placeholder for the AI response. In the real implementation, this would come from the API."
+    //     }
+    //   ]);
+    // }, 1500);
+
+    // e.preventDefault();
+    // const userMessageText = content.trim();
+    if (!userMessageText || isAiLoading) return;
+
+    const userMessage: ChatMessage = { sender: 'user', text: userMessageText };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    // setInput('');
+    setIsAiLoading(true);
+
+    try {
+      const request = {
+        "systemContext": "you are a helpful assistant, respond in markdown format", // Updated context
+        "prompt": userMessageText,
+        // send something like the jwt, base encode it (Buffer?) - try gemini
+        "sessionId": "chat-session-123", // Manage session IDs properly
+        "agentType": "azure"
+      };
+
+      const response = await axios.post<{ sessionId: string; completion: string }>(
+        `${API_URL}/v1/ai/run-prompt`,
+        request,
         {
-          sender: "ai",
-          content: "This is a placeholder for the AI response. In the real implementation, this would come from the API."
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
         }
-      ]);
-    }, 1500);
+      );
+
+      console.log("API Response:", response);
+
+      if (response.data && response.data.completion) {
+        const aiMessage: ChatMessage = { sender: 'ai', text: response.data.completion };
+        setMessages(prevMessages => [...prevMessages, aiMessage]);
+      } else {
+        console.error("Invalid response structure:", response.data);
+        const errorMessage: ChatMessage = { sender: 'ai', text: "Sorry, I couldn't get a response." };
+        setMessages(prevMessages => [...prevMessages, errorMessage]);
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: ChatMessage = { sender: 'ai', text: "Sorry, something went wrong." };
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   // Show loading state
@@ -183,6 +242,7 @@ export default function Simulation() {
               messages={messages}
               aiPersonality={scenario.persona}
               onSendMessage={handleSendMessage}
+              isAiLoading={isAiLoading}
             />
           )}
         </div>

@@ -1,17 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 // import { AiPersonality } from "@shared/schema";
 import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
+import ReactMarkdown from 'react-markdown';
+import { ChatMessage } from '@/pages/Simulation.tsx';
 
 interface TextModeProps {
-  messages: Array<{sender: string, content: string}>;
+  messages: Array<ChatMessage>;
   // aiPersonality: AiPersonality;
   aiPersonality: CoachonCueScenarioAttributes['persona'];
   onSendMessage: (message: string) => void;
+  isAiLoading: boolean;
 }
 
-export default function TextMode({ messages, aiPersonality, onSendMessage }: TextModeProps) {
+export default function TextMode({
+  messages,
+  aiPersonality,
+  onSendMessage,
+  isAiLoading,
+}: TextModeProps) {
   const [inputValue, setInputValue] = useState("");
-  const [isAiTyping, setIsAiTyping] = useState(false);
+  // const [isAiTyping, setIsAiTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Scroll to bottom whenever messages change
@@ -23,15 +31,16 @@ export default function TextMode({ messages, aiPersonality, onSendMessage }: Tex
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (inputValue.trim()) {
       onSendMessage(inputValue);
       setInputValue("");
       
-      // Simulate AI typing indicator
-      setIsAiTyping(true);
-      setTimeout(() => {
-        setIsAiTyping(false);
-      }, 1500);
+      // // Simulate AI typing indicator
+      // setIsAiTyping(true);
+      // setTimeout(() => {
+      //   setIsAiTyping(false);
+      // }, 1500);
     }
   };
 
@@ -47,15 +56,13 @@ export default function TextMode({ messages, aiPersonality, onSendMessage }: Tex
               <div 
                 key={index}
                 className="bg-neutral-100 text-neutral-600 text-sm py-2 px-3 rounded-md mx-auto max-w-xs text-center fade-in"
-              >
-                {message.content}
-              </div>
+              >{message.text}</div>
             );
           } else if (message.sender === "user") {
             return (
               <div key={index} className="flex items-start flex-row-reverse mb-4 fade-in">
                 <div className="bg-primary text-white rounded-lg rounded-tr-none py-2 px-3 max-w-[80%]">
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm">{message.text}</p>
                 </div>
               </div>
             );
@@ -71,14 +78,18 @@ export default function TextMode({ messages, aiPersonality, onSendMessage }: Tex
                   />
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg rounded-tl-none py-2 px-3 max-w-[80%] shadow-sm">
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm">
+                    <ReactMarkdown>
+                      {message.text}
+                    </ReactMarkdown>
+                  </p>
                 </div>
               </div>
             );
           }
         })}
         
-        {isAiTyping && (
+        {isAiLoading && (
           <div className="flex items-start mb-4 fade-in">
             <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden mr-2">
               <img
