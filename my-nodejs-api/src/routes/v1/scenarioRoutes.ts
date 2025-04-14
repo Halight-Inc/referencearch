@@ -5,7 +5,7 @@ import authenticateToken from '../../middlewares/authMiddleware';
 const router = express.Router();
 
 router.post('/', authenticateToken, scenarioController.createScenario);
-router.get('/', scenarioController.getAllScenarios);
-router.get('/:scenarioId', scenarioController.getScenario);
+router.get('/', authenticateToken, scenarioController.getAllScenarios);
+router.get('/:scenarioId', authenticateToken, scenarioController.getScenario);
 
 export default router;

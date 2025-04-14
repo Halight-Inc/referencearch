@@ -38,8 +38,14 @@ const Root = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/app" element={<App />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/browse" element={<ScenarioBrowse />} />
-          <Route path="/simulation/:id" element={<Simulation />} />
+          <Route
+              path="/"
+              element={isLoggedIn ? <ScenarioBrowse /> : <Navigate to="/login" replace />}
+          />
+          <Route
+              path="/simulation/:id"
+              element={isLoggedIn ? <Simulation /> : <Navigate to="/login" replace />}
+          />
           <Route
               path="/admin"
               element={isLoggedIn ? <TemplateBuilder /> : <Navigate to="/login" replace />}
@@ -51,7 +57,7 @@ const Root = () => {
               }
           />
           {/* Catch all route should redirect to login if not logged in. */}
-          <Route path="*" element={isLoggedIn ? <Navigate to="/main" replace /> : <Navigate to="/login" replace />} />
+          <Route path="*" element={isLoggedIn ? <Navigate to="/" replace /> : <Navigate to="/login" replace />} />
 
         </Routes>
       </BrowserRouter>
