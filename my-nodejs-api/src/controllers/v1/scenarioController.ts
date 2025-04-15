@@ -28,6 +28,31 @@ const addScenarioFile = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+const getScenarioFiles = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const scenarioId = req.params.scenarioId; // Get scenarioId from URL parameter
+
+    const files = await db.ScenarioFile.findAll({
+      where: {
+        scenarioId: scenarioId, // Use the extracted scenarioId here
+      },
+      // Optional: You might want to exclude the large base64 field
+      // if you only need metadata (like path or id) in some contexts.
+      // attributes: { exclude: ['base64'] }
+    });
+
+    if (!files || files.length === 0) {
+      return res.status(404).json({ message: 'No files found for this scenario.' });
+    }
+
+    // Send the array of found file records back to the client
+    res.json(files);
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
 
 const getScenario = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -53,6 +78,7 @@ const getAllScenarios = async (req: Request, res: Response, next: NextFunction) 
 export default {
     createScenario,
     addScenarioFile,
+    getScenarioFiles,
     getScenario,
     getAllScenarios,
 };
