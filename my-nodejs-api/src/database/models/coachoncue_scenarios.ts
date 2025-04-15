@@ -67,8 +67,7 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
       // Scenario fields
       scenarioType: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
+        allowNull: false
       },
       keyTopics: {
         type: DataTypes.ARRAY(DataTypes.STRING),
