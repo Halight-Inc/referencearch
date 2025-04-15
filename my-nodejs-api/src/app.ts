@@ -11,13 +11,13 @@ import v1ScenarioRoutes from './routes/v1/scenarioRoutes';
 import v1AiRoutes from './routes/v1/aiRoutes';
 
 const app = express();
-
+const bodyParserLimit = '50mb'; // Set the body parser limit to 10mb
 // app.use(express.json()); will cause issue for stripe webhooks
 app.use((req, res, next) => {
     if (req.originalUrl === '/v1/stripe/webhook') {
       next();
     } else {
-      express.json()(req, res, next);
+      express.json({ limit: bodyParserLimit })(req, res, next);
     }
 });
 app.use(express.raw({ type: 'application/json' })); // Add this line for raw body parsing for webhooks

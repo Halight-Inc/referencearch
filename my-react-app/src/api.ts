@@ -37,6 +37,8 @@ export const createScenario = async (scenario: {
         background: string;
         communicationStyle: string;
         emotionalState: string;
+        avatar: string;
+        avatarUrl: string;
     }
 }, token: string) => {
     const response = await axios.post(`${API_URL}/v1/scenarios`, scenario, {

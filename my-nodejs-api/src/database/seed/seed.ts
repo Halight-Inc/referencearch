@@ -1,3 +1,4 @@
+// c:\code\referencearch\my-nodejs-api\src\database\seed\seed.ts
 import db from './../../database/index';
 
 const { sequelize, User, CoachonCueScenario } = db;
@@ -18,7 +19,7 @@ const seed = async (): Promise<void> => {
       await User.create({
         name: 'Admin User',
         email: 'admin@example.com',
-        password: 'adminpassword',
+        password: 'adminpassword', // Consider hashing passwords in a real application
       });
       console.log('Admin User created.');
     } else {
@@ -31,7 +32,7 @@ const seed = async (): Promise<void> => {
       await User.create({
         name: 'User',
         email: 'user@example.com',
-        password: 'password123',
+        password: 'password123', // Consider hashing passwords in a real application
       });
       console.log('User created.');
     } else {
@@ -70,6 +71,10 @@ const seed = async (): Promise<void> => {
           communicationStyle:
             'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
           emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
+          // --- Add missing properties ---
+          avatar: '',
+          avatarUrl: '',
+          // --- End missing properties ---
         },
       });
       console.log('CoachonCue Scenario (conducting-1-on-1) created.');
@@ -108,6 +113,10 @@ const seed = async (): Promise<void> => {
             'Direct, concise, and sometimes blunt. Prefers facts over feelings. Limited patience for tangents.',
           emotionalState:
             'Calm and focused. Can appear cold when stressed or when facing project delays.',
+          // --- Add missing properties ---
+          avatar: '',
+          avatarUrl: '',
+          // --- End missing properties ---
         },
       });
       console.log('CoachonCue Scenario (difficult-teammates) created.');
@@ -138,7 +147,7 @@ const seed = async (): Promise<void> => {
         },
         supportingMaterials: [],
         persona: {
-          name: 'Alex',
+          name: 'Alex', // Note: Reusing Alex persona here
           role: 'New Manager',
           disposition: 'Enthusiastic but anxious',
           background:
@@ -146,6 +155,10 @@ const seed = async (): Promise<void> => {
           communicationStyle:
             'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
           emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
+          // --- Add missing properties ---
+          avatar: '',
+          avatarUrl: '',
+          // --- End missing properties ---
         },
       });
       console.log('CoachonCue Scenario (performance-review) created.');
@@ -161,6 +174,11 @@ const seed = async (): Promise<void> => {
 
 export default seed;
 
+// Only run seed if this script is executed directly
 if (require.main === module) {
-  seed();
+  seed().catch((error) => {
+    console.error('Unhandled error running seed script:', error);
+    process.exit(1);
+  });
 }
+
