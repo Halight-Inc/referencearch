@@ -159,11 +159,12 @@ export default function TemplateBuilder() {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
+
       // Validate file type
-      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
+      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md') && !file.name.endsWith('.pdf')) {
         toast({
           title: "Unsupported file format",
-          description: "Only .txt and .md files are accepted",
+          description: "Only .txt, .md, and .pdf files are accepted",
           variant: "destructive",
         });
         continue;
