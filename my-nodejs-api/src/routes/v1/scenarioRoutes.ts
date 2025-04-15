@@ -5,6 +5,7 @@ import authenticateToken from '../../middlewares/authMiddleware';
 const router = express.Router();
 
 router.post('/', authenticateToken, scenarioController.createScenario);
+router.post('/:scenarioId/files', authenticateToken, scenarioController.addScenarioFile);
 router.get('/', authenticateToken, scenarioController.getAllScenarios);
 router.get('/:scenarioId', authenticateToken, scenarioController.getScenario);
 

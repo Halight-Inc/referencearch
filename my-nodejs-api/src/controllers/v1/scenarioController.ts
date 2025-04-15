@@ -11,9 +11,27 @@ const createScenario = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
+const addScenarioFile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const scenarioId = req.params.scenarioId;
+    await db.ScenarioFile.create({
+      scenarioId: scenarioId,
+      path: null,
+      base64: req.body.base64,
+    });
+    res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+
 const getScenario = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const scenarioId = req.params.scenarioId; // Access the ID here
+        const scenarioId = req.params.scenarioId;
         const scenario = await db.CoachonCueScenario.findByPk(scenarioId);
         res.status(200).json(scenario);
     } catch (error) {
@@ -34,6 +52,7 @@ const getAllScenarios = async (req: Request, res: Response, next: NextFunction) 
 
 export default {
     createScenario,
+    addScenarioFile,
     getScenario,
     getAllScenarios,
 };
