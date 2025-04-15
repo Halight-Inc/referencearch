@@ -84,7 +84,7 @@ export default function TemplateBuilder() {
     // but the API interface CoachonCueScenarioAttributes expects string[].
     // You'll need to decide how to map this, e.g., just send titles or parsedContent.
     // Example: Map to just parsed content strings
-    const apiSupportingMaterials = data.supportingMaterials?.map(m => m.parsedContent);
+    const apiSupportingMaterials = data.supportingMaterials?.map((m: any) => m.parsedContent);
 
     const formattedData = {
       ...data,
@@ -842,9 +842,9 @@ export default function TemplateBuilder() {
                              <p className="text-xs text-slate-500">Max 2MB (JPG, PNG, GIF, WEBP)</p>
                            </div>
                          </div>
-                         {/* Display validation error for avatarUrl if needed */}
+                         { /* @ts-ignore */}
                          <FormMessage>{form.formState.errors.persona?.avatarUrl?.message}</FormMessage>
-                      </div>
+                         </div>
                       {/* --- End Avatar Upload Section --- */}
 
 
