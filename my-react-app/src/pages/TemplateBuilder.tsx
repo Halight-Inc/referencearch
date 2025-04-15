@@ -44,7 +44,7 @@ interface SupportingMaterial {
 
 export default function TemplateBuilder() {
   const { toast } = useToast();
-  const { parseFile, loading: parsingTextFile, error: textFileError } = useFileParser(); // Destructure loading/error if needed
+  const { parseFile, loading: parsingTextFile } = useFileParser();
   const [parsingPdf, setParsingPdf] = useState(false); // Separate loading state for PDFs
   const [showJsonOutput, setShowJsonOutput] = useState(false);
   const [generatedJson, setGeneratedJson] = useState<string>("");
@@ -103,11 +103,20 @@ export default function TemplateBuilder() {
       guidelines: guidelinesArray,
     };
 
-    const pdfFiles = formattedData.supportingMaterials ? formattedData.supportingMaterials.filter(material => material.contentType === 'application/pdf') : [];
-    const txtFiles = formattedData.supportingMaterials ? formattedData.supportingMaterials.filter(material => material.contentType === 'text/plain') : [];
+    const pdfFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+        (material: SupportingMaterial) => material.contentType === 'application/pdf'
+        )
+      : [];
+
+    const txtFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+          (material: SupportingMaterial) => material.contentType === 'text/plain'
+        )
+      : [];
 
     formattedData.supportingMaterials = [];
-    txtFiles.forEach((file) => {
+    txtFiles.forEach((file: SupportingMaterial) => {
       formattedData.supportingMaterials.push(file.content);
     });
 
