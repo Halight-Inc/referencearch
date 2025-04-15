@@ -39,7 +39,7 @@ export class BedrockClient implements IAIAgent {
 
   // --- AWS SDK Implementation ---
   async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
-    const command = new InvokeInlineAgentCommand({
+    const command = new InvokeAgentCommand({
       agentId: this.agentId,
       agentAliasId: this.agentAliasId,
       sessionId, // Ensure sessionId is unique per session and ideally user

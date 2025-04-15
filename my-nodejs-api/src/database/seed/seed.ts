@@ -70,6 +70,8 @@ const seed = async (): Promise<void> => {
           communicationStyle:
             'Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.',
           emotionalState: 'Excited but nervous. Eager to prove themselves worthy of the promotion.',
+          avatar: '',
+          avatarUrl: '',
         },
       });
       console.log('CoachonCue Scenario (conducting-1-on-1) created.');
