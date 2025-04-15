@@ -116,7 +116,7 @@ export default function Simulation() {
         "prompt": userMessageText,
         // send something like the jwt, base encode it (Buffer?) - try gemini
         "sessionId": "chat-session-123", // Manage session IDs properly
-        "agentType": "azure"
+        "agentType": "bedrock"
       };
 
       const response = await axios.post<{ sessionId: string; completion: string }>(

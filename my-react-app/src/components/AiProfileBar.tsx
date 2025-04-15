@@ -18,8 +18,8 @@ export default function AiProfileBar({
         <div className="relative">
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <img 
-              // src={aiPersonality.avatarUrl}
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
+              src={aiPersonality.avatarUrl}
+              //src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
               alt={`${aiPersonality.name} avatar`}
               className="w-full h-full object-cover"
             />

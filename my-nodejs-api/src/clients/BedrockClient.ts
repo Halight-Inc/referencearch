@@ -6,6 +6,7 @@ import config from '../config/config'; // Ensure config is correctly imported an
 import {
   BedrockAgentRuntimeClient,
   InvokeAgentCommand,
+  InvokeInlineAgentCommand,
   ResponseStream, // Import the type for the stream
 } from "@aws-sdk/client-bedrock-agent-runtime";
 // --- End AWS SDK Imports ---
@@ -38,7 +39,7 @@ export class BedrockClient implements IAIAgent {
 
   // --- AWS SDK Implementation ---
   async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
-    const command = new InvokeAgentCommand({
+    const command = new InvokeInlineAgentCommand({
       agentId: this.agentId,
       agentAliasId: this.agentAliasId,
       sessionId, // Ensure sessionId is unique per session and ideally user
@@ -47,6 +48,12 @@ export class BedrockClient implements IAIAgent {
       inputText: `${systemContext}\n\nUser: ${prompt}`,
       enableTrace: false, // Set to true for debugging if needed
     });
+
+    //ORGINAL _ InvokeAgentCommand
+    //InvokeInlineAgentCommand
+    //instruction 
+    //model
+    //agentname
 
     try {
       const response = await this.client.send(command);

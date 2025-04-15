@@ -21,6 +21,8 @@ interface CoachonCueScenarioAttributes {
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 }
 
@@ -45,6 +47,8 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 
   public readonly createdAt!: Date;
