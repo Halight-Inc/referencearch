@@ -37,6 +37,8 @@ export const scenarioSchema = z.object({
     background: z.string().min(1, "Persona background is required"),
     communicationStyle: z.string().min(1, "Persona communication style is required"),
     emotionalState: z.string().min(1, "Persona emotional state is required"),
+    avatar: z.string().optional(), // Store filename or identifier
+    avatarUrl: z.string().url("Please enter a valid URL or leave empty").optional(), // Store the actual URL (could be data URL initially)
   }),
 });
 
@@ -65,5 +67,7 @@ export interface CoachonCueScenarioAttributes {
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar: string;
+    avatarUrl: string;
   }
 }

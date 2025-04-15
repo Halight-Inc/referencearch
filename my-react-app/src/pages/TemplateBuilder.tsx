@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +49,8 @@ export default function TemplateBuilder() {
   const [generatedJson, setGeneratedJson] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
   const totalSteps = 7; // Total number of steps in the form
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null); // State for avatar preview URL
+  const avatarInputRef = useRef<HTMLInputElement>(null); // Ref for file input
 
   // Update the form type to use the SupportingMaterial interface
   const form = useForm<{
@@ -66,6 +67,8 @@ export default function TemplateBuilder() {
       background: string;
       communicationStyle: string;
       emotionalState: string;
+      avatar: "", // Default value for avatar
+      avatarUrl: "", // Default value for avatarUrl
     };
   }>({ // Add the explicit type here
     resolver: zodResolver(scenarioSchema),
@@ -86,6 +89,8 @@ export default function TemplateBuilder() {
         background: "",
         communicationStyle: "",
         emotionalState: "",
+        avatar: "", // Default value for avatar
+        avatarUrl: "", // Default value for avatarUrl
       },
     },
     mode: "onChange",
@@ -181,7 +186,6 @@ export default function TemplateBuilder() {
     const selectedFramework = CoachingFrameworks.find(
       (framework) => framework.value === value
     );
-
     if (selectedFramework) {
       form.setValue("coachingFramework.name", selectedFramework.name);
       form.setValue("coachingFramework.description", selectedFramework.description);
@@ -194,6 +198,14 @@ export default function TemplateBuilder() {
       (persona) => persona.value === value
     );
 
+    // Clear existing avatar preview and form values when changing persona
+    setAvatarPreview(null);
+    form.setValue("persona.avatar", "");
+    form.setValue("persona.avatarUrl", "");
+    if (avatarInputRef.current) {
+        avatarInputRef.current.value = ""; // Clear file input
+    }
+
     if (selectedPersona) {
       form.setValue("persona.name", selectedPersona.name);
       form.setValue("persona.role", selectedPersona.role);
@@ -201,17 +213,27 @@ export default function TemplateBuilder() {
       form.setValue("persona.background", selectedPersona.background);
       form.setValue("persona.communicationStyle", selectedPersona.communicationStyle);
       form.setValue("persona.emotionalState", selectedPersona.emotionalState);
+      // --- Set default avatar if available in Personas data ---
+      // Example: Assuming Personas have avatarUrl property
+      // if (selectedPersona.avatarUrl) {
+      //   form.setValue("persona.avatarUrl", selectedPersona.avatarUrl);
+      //   setAvatarPreview(selectedPersona.avatarUrl);
+      // }
+      // if (selectedPersona.avatar) { // If storing an identifier
+      //    form.setValue("persona.avatar", selectedPersona.avatar);
+      // }
+      // --- End default avatar handling ---
     } else if (value === "custom") {
-      form.setValue("persona.name", "");
-      form.setValue("persona.role", "");
-      form.setValue("persona.disposition", "");
-      form.setValue("persona.background", "");
-      form.setValue("persona.communicationStyle", "");
-      form.setValue("persona.emotionalState", "");
+      // Clear all fields for custom persona entry
+      form.resetField("persona"); // Resets the entire persona object to defaults
+      // Ensure defaults are set correctly after reset if needed
+       form.setValue("persona", {
+            name: "", role: "", disposition: "", background: "",
+            communicationStyle: "", emotionalState: "", avatar: "", avatarUrl: ""
+       });
     }
   };
 
-  // --- MODIFIED handleFileUpload ---
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -327,13 +349,78 @@ export default function TemplateBuilder() {
     const removedFile = materials[index];
     materials.splice(index, 1);
     form.setValue("supportingMaterials", [...materials]); // Spread the modified array
-
     toast({
       title: "File removed",
       description: `${removedFile.title} has been removed`,
       variant: "default",
     });
   };
+
+  // --- Handle Avatar Image Selection ---
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      // Clear if no file selected or selection cancelled
+      setAvatarPreview(null);
+      form.setValue("persona.avatar", "");
+      form.setValue("persona.avatarUrl", "");
+      return;
+    }
+
+    // Basic validation (type and size)
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a JPG, PNG, GIF, or WEBP image.",
+        variant: "destructive",
+      });
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Avatar image must be smaller than 2MB.",
+        variant: "destructive",
+      });
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    // Read file for preview and set form values
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setAvatarPreview(dataUrl);
+      form.setValue("persona.avatar", file.name); // Store filename
+      // Store data URL for preview/potential direct use.
+      // In a real app, you might upload here and set a server URL.
+      form.setValue("persona.avatarUrl", dataUrl, { shouldValidate: true });
+    };
+    reader.onerror = () => {
+       toast({ title: "Error reading file", variant: "destructive" });
+       setAvatarPreview(null);
+       form.setValue("persona.avatar", "");
+       form.setValue("persona.avatarUrl", "");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // --- Clear Avatar Selection ---
+  const clearAvatar = () => {
+    setAvatarPreview(null);
+    form.setValue("persona.avatar", "");
+    form.setValue("persona.avatarUrl", "");
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ""; // Clear the file input visually
+    }
+    toast({ title: "Avatar cleared" });
+  };
+  // --- End Avatar Handlers ---
+
 
   // Navigation for steps
   const goToNextStep = () => {
@@ -402,7 +489,7 @@ export default function TemplateBuilder() {
 
           {/* Scenario Builder Form */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-8">
 
               {/* Step 1: Scenario Type */}
               {activeStep === 0 && (
@@ -811,6 +898,7 @@ export default function TemplateBuilder() {
                 </div>
               )}
 
+
               {/* Step 7: Persona */}
               {activeStep === 6 && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
@@ -826,11 +914,10 @@ export default function TemplateBuilder() {
                     </div>
 
                     <div className="space-y-6">
+                      {/* Persona Selection Dropdown */}
                       <div className="space-y-1">
                         <label className="text-slate-600 text-sm font-medium">Choose a persona</label>
-                        <Select
-                          onValueChange={handlePersonaChange}
-                        >
+                        <Select onValueChange={handlePersonaChange}>
                           <SelectTrigger className="h-12">
                             <SelectValue placeholder="Choose a persona..." />
                           </SelectTrigger>
@@ -845,124 +932,72 @@ export default function TemplateBuilder() {
                         </Select>
                       </div>
 
+                      {/* --- Avatar Upload Section --- */}
+                      <div className="space-y-2">
+                         <FormLabel className="text-slate-600">Avatar Image (Optional)</FormLabel>
+                         <div className="flex items-center gap-4">
+                           <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                             {avatarPreview ? (
+                               <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+                             ) : (
+                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image text-slate-400"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                             )}
+                           </div>
+                           <div className="flex flex-col gap-2">
+                             <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                                Upload Image
+                             </Button>
+                             {avatarPreview && (
+                                <Button type="button" variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={clearAvatar}>
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x mr-1"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+                                   Clear
+                                </Button>
+                             )}
+                             <Input
+                                ref={avatarInputRef}
+                                type="file"
+                                accept="image/png, image/jpeg, image/gif, image/webp"
+                                onChange={handleAvatarChange}
+                                className="hidden" // Hide the default input, trigger via button
+                                // We don't use FormField here as direct file input handling is often simpler
+                             />
+                             <p className="text-xs text-slate-500">Max 2MB (JPG, PNG, GIF, WEBP)</p>
+                           </div>
+                         </div>
+                         { /* @ts-ignore */}
+                         <FormMessage>{form.formState.errors.persona?.avatarUrl?.message}</FormMessage>
+                         </div>
+                      {/* --- End Avatar Upload Section --- */}
+
+
+                      {/* Persona Detail Fields */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <FormField
-                          control={form.control}
-                          name="persona.name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.role"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Role</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.disposition"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Disposition</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.emotionalState"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Emotional State</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <FormField control={form.control} name="persona.name" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Name</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.role" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Role</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.disposition" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Disposition</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.emotionalState" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Emotional State</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
                       </div>
+                      <FormField control={form.control} name="persona.background" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Background</FormLabel> <FormControl><Textarea className="min-h-[100px]" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="persona.communicationStyle" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Communication Style</FormLabel> <FormControl><Textarea className="min-h-[100px]" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
 
-                      <FormField
-                        control={form.control}
-                        name="persona.background"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-slate-600">Background</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                className="min-h-[100px]"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="persona.communicationStyle"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-slate-600">Communication Style</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                className="min-h-[100px]"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </div>
                   </div>
 
+                  {/* Footer with Back and Submit Buttons */}
                   <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-between">
-                    <Button
-                      type="button"
-                      onClick={goToPrevStep}
-                      variant="outline"
-                      className="flex items-center gap-2"
-                    >
+                    <Button type="button" onClick={goToPrevStep} variant="outline" className="flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg>
                       Back
                     </Button>
                     <Button
                       type="submit"
-                      disabled={
-                        !form.getValues("persona.name") ||
-                        !form.getValues("persona.role") ||
-                        !form.getValues("persona.disposition") ||
-                        !form.getValues("persona.emotionalState") ||
-                        !form.getValues("persona.background") ||
-                        !form.getValues("persona.communicationStyle")
-                      }
+                      // Disable if the form is invalid OR if it's currently submitting
+                      disabled={!form.formState.isValid || form.formState.isSubmitting}
                       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
                     >
-                      Generate Template
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>
+                      {form.formState.isSubmitting ? "Generating..." : "Generate Template"}
+                      {!form.formState.isSubmitting && <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>}
                     </Button>
                   </div>
                 </div>

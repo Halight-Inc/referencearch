@@ -21,6 +21,8 @@ interface CoachonCueScenarioAttributes {
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 }
 
@@ -45,6 +47,8 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 
   public readonly createdAt!: Date;
@@ -63,8 +67,7 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
       // Scenario fields
       scenarioType: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
+        allowNull: false
       },
       keyTopics: {
         type: DataTypes.ARRAY(DataTypes.STRING),
