@@ -73,6 +73,15 @@ export const addScenarioFile = async (scenario: {
   return response.data;
 };
 
+export const getScenarioFiles = async (scenarioId: string, token: string) => {
+  const response = await axios.get(`${API_URL}/v1/scenarios/${scenarioId}/files`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 export const getAllScenarios = async (token: string) => {
   const response = await axios.get(`${API_URL}/v1/scenarios`, {
     headers: {

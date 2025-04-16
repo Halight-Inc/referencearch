@@ -5,6 +5,9 @@ import config from '../config/config'; // Ensure config is correctly imported an
 // --- AWS SDK Imports ---
 import {
   BedrockAgentRuntimeClient,
+  FileSourceType,
+  FileUseCase,
+  InputFile,
   InvokeAgentCommand,
   InvokeInlineAgentCommand,
   ResponseStream, // Import the type for the stream
@@ -38,13 +41,34 @@ export class BedrockClient implements IAIAgent {
   }
 
   // --- AWS SDK Implementation ---
-  async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
+  async runPrompt(systemContext: string, prompt: string, sessionId: string, fileUrls: string[] | null | undefined = []): Promise<string> {
+    const inlineSessionStateFiles: InputFile[] = [];
+    if (fileUrls) {
+      const s3BucketName = config.awsS3BucketName;
+      fileUrls.forEach((url) => {
+        const s3Uri = `s3://${s3BucketName}/${url}`;
+        inlineSessionStateFiles.push({
+          name: url.split('/').pop(),
+            source: {
+                sourceType: FileSourceType.S3, // Specify S3 source
+                s3Location: {
+                    uri: s3Uri, // Provide the full S3 URI
+                },
+            },
+            useCase: FileUseCase.CHAT,
+        });
+      });
+    }
+
     const command = new InvokeInlineAgentCommand({
       foundationModel: 'amazon.nova-pro-v1:0',
       sessionId: sessionId, // Ensure sessionId is unique per session and ideally user
       instruction: `${systemContext}`,
       inputText: `${prompt}`,
       enableTrace: true, // Set to true for debugging if needed
+      inlineSessionState: {
+        files: inlineSessionStateFiles.length > 0 ? inlineSessionStateFiles : undefined,
+      },
     });
 
     // TODO: extract Trace data and save to S3
