@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from "react-router";
 import ScenarioCard from "@/components/ScenarioCard.tsx";
 import ScenarioCardSkeleton from "@/components/ScenarioCardSkeleton.tsx";
 import { getAllScenarios } from '@/api';
 import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
 
 export default function ScenarioBrowse() {
-  const navigate = useNavigate();
-
   const [isLoading, setIsLoading] = useState(true);
   const [scenarios, setScenarios] = useState<Array<CoachonCueScenarioAttributes>>([]);
 
@@ -66,7 +63,6 @@ export default function ScenarioBrowse() {
               <ScenarioCard
                 key={scenario.id}
                 scenario={scenario}
-                onClick={() => navigate(`/simulation/${scenario.id}`)}
               />
             ))
           )}
