@@ -65,12 +65,12 @@ export default function SimulationDrawer({
   }, [open, scenario.id, token]);
 
   // Helper function to determine status based on score (example logic)
-  const getStatus = (score: string): string => {
-    const numericScore = parseInt(score, 10);
-    if (isNaN(numericScore)) return "Unknown";
-    // Adjust the threshold as needed
-    return numericScore >= 80 ? "Passed" : "Needs Improvement";
-  };
+  // const getStatus = (score: string): string => {
+  //   const numericScore = parseInt(score, 10);
+  //   if (isNaN(numericScore)) return "Unknown";
+  //   // Adjust the threshold as needed
+  //   return numericScore >= 80 ? "Passed" : "Needs Improvement";
+  // };
 
   // Helper function to format date string
   const formatDate = (dateString: string): string => {
