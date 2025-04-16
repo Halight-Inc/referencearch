@@ -274,9 +274,9 @@ const getAllScenarios = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export default {
-    createScenario,
-    addScenarioFile,
-    getScenarioFiles,
-    getScenario,
-    getAllScenarios,
+  createScenario,
+  addScenarioFile,
+  getScenarioFiles,
+  getScenario,
+  getAllScenarios,
 };

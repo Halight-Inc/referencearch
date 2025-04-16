@@ -6,10 +6,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
-import { Skeleton } from "@/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton";
 import { getScenario } from '@/api.ts';
 import { CoachonCueScenarioAttributes } from "@/lib/schema";
 import axios from 'axios';
+import SimulationBuilder from "@/components/SimulationBuilder";
+import ScenarioContext from "@/components/ScenarioContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -30,6 +32,8 @@ export default function Simulation() {
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
 
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
+  const [isBuilding, setIsBuilding] = useState(true);
+  const [isContextShown, setIsContextShown] = useState(true);
 
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -51,7 +55,6 @@ export default function Simulation() {
     void fetchScenario();
   }, []);
 
-
   // Fetch AI personality for this scenario
   // const {
   //   data: aiPersonalities,
@@ -71,6 +74,12 @@ export default function Simulation() {
   // const isLoading = isLoadingScenarios || isLoadingPersonality;
 
   useEffect(() => {
+    // Reset building state when scenario changes
+    setIsBuilding(true);
+    setIsContextShown(true);
+  }, [scenarioId]);
+
+  useEffect(() => {
     // Initialize with system message
     // if (scenario && aiPersonality) {
     if (scenario) {
@@ -82,7 +91,7 @@ export default function Simulation() {
         }
       ]);
     }
-  }, [scenario]);
+  }, [scenario, isBuilding, isContextShown]);
   // }, [scenario, aiPersonality]);
 
   const handleSendMessage = async (userMessageText: string) => {
@@ -150,36 +159,74 @@ export default function Simulation() {
     }
   };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto min-h-screen flex flex-col">
-        <header className="py-4 px-4 bg-white border-b border-neutral-200 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
-              className="text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
-                <path d="m12 19-7-7 7-7" />
-                <path d="M19 12H5" />
-              </svg>
-            </button>
-            <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
-            <div className="w-6"></div>
-          </div>
-        </header>
+  const handleBuildComplete = () => {
+    setIsBuilding(false);
+  };
 
-        <main className="flex-1 p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-16 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-          </div>
-        </main>
-      </div>
+  const handleSelectMode = (mode: "voice" | "text") => {
+    setInteractionMode(mode);
+    setIsContextShown(false);
+  };
+
+  // Handle ending the scenario and going to results
+  const handleEndScenario = () => {
+    // In a real implementation, you would save the conversation to the server
+    // before navigating to the results page
+    if (scenario) {
+      navigate(`/results/${scenario.id}`);
+    }
+  };
+
+  if (isLoading || isBuilding) {
+    return (
+      <SimulationBuilder
+        // scenario={scenario}
+        // aiPersonality={scenario.persona}
+        onComplete={handleBuildComplete}
+      />
     );
   }
+
+  if (isContextShown && scenario) {
+    return (
+      <ScenarioContext
+        scenario={scenario}
+        aiPersonality={scenario.persona}
+        onSelectMode={handleSelectMode}
+      />
+    );
+  }
+
+  // Show loading state
+  // if (isLoading) {
+  //   return (
+  //     <div className="max-w-4xl mx-auto min-h-screen flex flex-col">
+  //       <header className="py-4 px-4 bg-white border-b border-neutral-200 sticky top-0 z-10">
+  //         <div className="flex items-center justify-between">
+  //           <button
+  //             onClick={() => navigate("/")}
+  //             className="text-neutral-600 hover:text-neutral-900 transition-colors"
+  //           >
+  //             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
+  //               <path d="m12 19-7-7 7-7" />
+  //               <path d="M19 12H5" />
+  //             </svg>
+  //           </button>
+  //           <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
+  //           <div className="w-6"></div>
+  //         </div>
+  //       </header>
+  //
+  //       <main className="flex-1 p-6">
+  //         <div className="space-y-4">
+  //           <Skeleton className="h-16 w-full rounded-md" />
+  //           <Skeleton className="h-48 w-full rounded-md" />
+  //           <Skeleton className="h-48 w-full rounded-md" />
+  //         </div>
+  //       </main>
+  //     </div>
+  //   );
+  // }
 
   // Show error state if data is missing
   // if (!scenario || !aiPersonality) {
@@ -214,13 +261,24 @@ export default function Simulation() {
             </svg>
           </button>
           <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
-          <button className="text-neutral-600 hover:text-neutral-900 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleEndScenario}
+              className="py-1.5 px-3 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded-lg transition-colors"
+            >
+              End Scenario
+            </button>
+            <button
+              onClick={() => setIsContextShown(true)}
+              className="text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -228,7 +286,6 @@ export default function Simulation() {
         <AiProfileBar
           aiPersonality={scenario.persona}
           interactionMode={interactionMode}
-          onModeChange={setInteractionMode}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
