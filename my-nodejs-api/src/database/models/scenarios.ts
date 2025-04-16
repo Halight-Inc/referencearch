@@ -2,6 +2,7 @@ import { Model, DataTypes, Sequelize } from 'sequelize';
 
 interface ScenarioAttributes {
   id?: string;
+  title: string;
 
   // --- Scenario fields ---
   scenarioType: string;
@@ -30,6 +31,7 @@ class Scenario extends Model<ScenarioAttributes> implements ScenarioAttributes {
   public id!: string;
 
   // Scenario fields
+  public title!: string;
   public scenarioType!: string;
   public keyTopics!: string[];
   public competenciesAndGoals!: string[];
@@ -64,9 +66,11 @@ const initScenario = (sequelize: Sequelize): void => {
         allowNull: false,
         unique: true,
         primaryKey: true,
-            },
-
-      // Scenario fields
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       scenarioType: {
         type: DataTypes.STRING,
         allowNull: false

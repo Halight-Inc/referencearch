@@ -133,7 +133,7 @@ export default function SimulationDrawer({
         {/* Content Area */}
         <div className="flex-1 py-4">
           {/* Scenario Info */}
-          <h2 className="text-lg font-semibold">{scenario.scenarioType}</h2>
+          <h2 className="text-lg font-semibold">{scenario.title}</h2>
           {/* Placeholder for duration/attempts - requires data */}
           {/* <div className="flex items-center gap-4 mt-2 text-sm text-neutral-600">
             <div>1h</div>
