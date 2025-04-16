@@ -104,6 +104,11 @@ export interface CreateSimulationInput {
   score?: string; // Optional score, backend might default it
 }
 
+export interface ChatMessage {
+  sender: 'user' | 'ai' | 'system';
+  text: string;
+}
+
 export interface SimulationAttributes {
   id?: string;
   status: string;
