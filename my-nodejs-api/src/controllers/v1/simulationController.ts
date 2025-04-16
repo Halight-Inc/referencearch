@@ -152,8 +152,113 @@ const getAllSimulation = async (req: Request, res: Response, next: NextFunction)
     }
 };
 
+/**
+ * @swagger
+ * /v1/simulation/{simulationId}:
+ *   patch:
+ *     summary: Update an existing simulation record
+ *     description: Updates specific fields of a simulation record by its UUID. Only provided fields will be updated.
+ *     tags: [Simulations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: simulationId
+ *         required: true
+ *         description: The UUID of the simulation to update.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SimulationUpdateInput' # Define this schema if needed, or use a partial Simulation schema
+ *           example:
+ *             status: "Completed"
+ *             simulationResult: { "competencyEvaluation": [], "generalFeedback": "Good job!" }
+ *     responses:
+ *       200:
+ *         description: Simulation updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Simulation'
+ *       400:
+ *         description: Bad request (e.g., validation error)
+ *       401:
+ *         description: Unauthorized (Missing or invalid token)
+ *       404:
+ *         description: Simulation not found
+ *       500:
+ *         description: Internal server error
+ * components: # Add this section if not already present at the file/controller level for Swagger
+ *   schemas:
+ *     SimulationUpdateInput: # Example schema for update payload
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           description: The new status of the simulation.
+ *         interactionMode:
+ *           type: string
+ *           description: The interaction mode used.
+ *         simulationResult:
+ *           type: object
+ *           description: The results of the simulation.
+ *           properties:
+ *             competencyEvaluation:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   competency:
+ *                     type: string
+ *                   rating:
+ *                     type: string # Or number, depending on your scale
+ *                   notes:
+ *                     type: string
+ *             generalFeedback:
+ *               type: string
+ *       # Add other updatable fields as needed
+ */
+const updateSimulation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const simulationId = req.params.simulationId;
+        const updateData = req.body;
+
+        // Optional: Add validation for simulationId format (UUID)
+        // Optional: Add input validation for updateData (e.g., using Zod or Joi)
+        //           Ensure only allowed fields are being updated.
+
+        const simulation = await db.Simulation.findByPk(simulationId);
+
+        if (!simulation) {
+            return res.status(404).json({ message: `Simulation with ID ${simulationId} not found.` });
+        }
+
+        // Prevent updating certain fields if necessary (e.g., id, scenarioId, userId)
+        delete updateData.id;
+        delete updateData.scenarioId;
+        delete updateData.userId;
+        delete updateData.createdAt; // Usually shouldn't be updated manually
+        delete updateData.updatedAt; // Sequelize handles this automatically
+
+        const updatedSimulation = await simulation.update(updateData);
+
+        res.status(200).json(updatedSimulation);
+    } catch (error) {
+        console.error(`Error updating simulation ${req.params.simulationId}:`, error);
+        // Consider more specific error handling (e.g., validation errors vs. DB errors)
+        next(error);
+    }
+};
+
+
 export default {
     createSimulation,
     getSimulation,
     getAllSimulation,
+    updateSimulation, // Add the new function here
 };
