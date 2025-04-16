@@ -1,7 +1,7 @@
 // c:\code\referencearch\my-nodejs-api\src\database\seed\seed.ts
 import db from './../../database/index';
 
-const { sequelize, User, CoachonCueScenario } = db;
+const { sequelize, User, Scenario } = db;
 
 console.log('Models known to Sequelize:', Object.keys(sequelize.models)); // debugging
 
@@ -40,14 +40,14 @@ const seed = async (): Promise<void> => {
     }
 
     // --- Seed Scenario: Conducting 1-on-1 ---
-    const scenarioExists = await CoachonCueScenario.findOne({
+    const scenarioExists = await Scenario.findOne({
       where: {
         scenarioType: 'conducting-1-on-1',
       },
     });
 
     if (!scenarioExists) {
-      await CoachonCueScenario.create({
+      await Scenario.create({
         scenarioType: 'conducting-1-on-1',
         keyTopics: ['Active listening', 'Psychological safety', 'Empathy'],
         competenciesAndGoals: [
@@ -83,12 +83,12 @@ const seed = async (): Promise<void> => {
     }
 
     // --- Seed Scenario: Difficult Teammates ---
-    const difficultTeammatesExists = await CoachonCueScenario.findOne({
+    const difficultTeammatesExists = await Scenario.findOne({
       where: { scenarioType: 'difficult-teammates' },
     });
 
     if (!difficultTeammatesExists) {
-      await CoachonCueScenario.create({
+      await Scenario.create({
         scenarioType: 'difficult-teammates',
         keyTopics: ['Empathy', 'Setting boundaries', 'Managing emotional responses'],
         competenciesAndGoals: [
@@ -125,12 +125,12 @@ const seed = async (): Promise<void> => {
     }
 
     // --- Seed Scenario: Performance Review ---
-    const performanceReviewExists = await CoachonCueScenario.findOne({
+    const performanceReviewExists = await Scenario.findOne({
       where: { scenarioType: 'performance-review' },
     });
 
     if (!performanceReviewExists) {
-      await CoachonCueScenario.create({
+      await Scenario.create({
         scenarioType: 'performance-review',
         keyTopics: ['Active listening', 'Setting expectations', 'Critical feedback'],
         competenciesAndGoals: [

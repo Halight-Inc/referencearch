@@ -24,7 +24,7 @@ export default function Simulation() {
   const navigate = useNavigate();
 
   const { id } = useParams();
-  const scenarioId = id ? parseInt(id) : 1;
+  const scenarioId = id as string;
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);

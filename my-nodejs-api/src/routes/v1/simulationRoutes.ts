@@ -1,11 +1,11 @@
 import express from 'express';
-import scenarioController from '../../controllers/v1/scenarioController';
+import simulationController from '../../controllers/v1/simulationController';
 import authenticateToken from '../../middlewares/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', authenticateToken, scenarioController.createScenario);
-router.get('/', authenticateToken, scenarioController.getAllScenarios);
-router.get('/:simulationId', authenticateToken, scenarioController.getScenario);
+router.post('/', authenticateToken, simulationController.createSimulation);
+router.get('/', authenticateToken, simulationController.getAllSimulation);
+router.get('/:simulationId', authenticateToken, simulationController.getSimulation);
 
 export default router;

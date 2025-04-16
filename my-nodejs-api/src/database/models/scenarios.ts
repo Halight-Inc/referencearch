@@ -1,7 +1,7 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
 interface ScenarioAttributes {
-  id?: number;
+  id?: string;
 
   // --- Scenario fields ---
   scenarioType: string;
@@ -27,7 +27,7 @@ interface ScenarioAttributes {
 }
 
 class Scenario extends Model<ScenarioAttributes> implements ScenarioAttributes {
-  public id!: number;
+  public id!: string;
 
   // Scenario fields
   public scenarioType!: string;
@@ -59,10 +59,12 @@ const initScenario = (sequelize: Sequelize): void => {
   Scenario.init(
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4, // Generates a random UUID
+        allowNull: false,
+        unique: true,
         primaryKey: true,
-      },
+            },
 
       // Scenario fields
       scenarioType: {

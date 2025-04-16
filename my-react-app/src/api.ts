@@ -49,6 +49,20 @@ export const createScenario = async (scenario: {
     return response.data;
 };
 
+export const addScenarioFile = async (scenario: {
+    scenarioId: string;
+    base64: string;
+}, token: string) => {
+    const response = await axios.post(`${API_URL}/v1/scenarios/${scenario.scenarioId}/files`, {
+      base64: scenario.base64,
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
 export const getAllScenarios = async (token: string) => {
     const response = await axios.get(`${API_URL}/v1/scenarios`, {
         headers: {
@@ -58,7 +72,7 @@ export const getAllScenarios = async (token: string) => {
     return response.data;
 };
 
-export const getScenario = async (scenarioId: string | number, token: string) => {
+export const getScenario = async (scenarioId: string, token: string) => {
     const response = await axios.get(`${API_URL}/v1/scenarios/${scenarioId}`, {
         headers: {
             Authorization: `Bearer ${token}`,

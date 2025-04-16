@@ -9,17 +9,18 @@ import cors from 'cors';
 import v1ItemRoutes from './routes/v1/itemRoutes';
 import v1ScenarioRoutes from './routes/v1/scenarioRoutes';
 import v1AiRoutes from './routes/v1/aiRoutes';
+import v1simulationRoutes from './routes/v1/simulationRoutes'; // New import
 
 // add this to the swagger definition in app.ts
 /**
  * @swagger
  * components:
  *   schemas:
- *     CoachonCueScenario:
+ *     Scenario:
  *       type: object
  *       properties:
  *         id:
- *           type: integer
+ *           type: UUID
  *           description: The auto-generated ID of the scenario.
  *         scenarioType:
  *           type: string
@@ -109,7 +110,7 @@ app.use('/v1/stripe', v1StripeRoutes);
 app.use('/v1/auth', v1AuthRoutes);
 app.use('/v1/items', v1ItemRoutes)
 app.use('/v1/scenarios', v1ScenarioRoutes)
-app.use('/v1/simulation', v2simulationRoutes);
+app.use('/v1/simulation', v1simulationRoutes);
 app.use('/v1/ai', v1AiRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUiSetup);
 
