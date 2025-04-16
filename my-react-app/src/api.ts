@@ -1,16 +1,5 @@
 import axios from 'axios';
-
-// Define Simulation type based on backend model (adjust if necessary)
-export interface Simulation {
-    id: string; // Assuming UUID from your model
-    status: string;
-    interactionMode: string;
-    compentencyEvaluation: string;
-    scenarioId: string; // Assuming UUID
-    userId: string; // Assuming UUID
-    createdAt: string; // ISO Date string
-    updatedAt: string; // ISO Date string
-}
+import { Simulation, SimulationAttributes } from '@/lib/schema';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -119,12 +108,6 @@ export const getSimulations = async (token: string, scenarioId?: string) => {
     return response.data;
 };
 
-// Define input type for creating a simulation
-export interface CreateSimulationInput {
-    scenarioId: string;
-    score?: string; // Optional score, backend might default it
-}
-
 /**
  * Creates a new simulation record for the given scenario.
  * The backend should associate it with the logged-in user via the token.
@@ -132,7 +115,7 @@ export interface CreateSimulationInput {
  * @param token - The JWT authentication token.
  * @returns A promise that resolves to the newly created Simulation object.
  */
-export const createSimulation = async (data: CreateSimulationInput, token: string): Promise<Simulation> => {
+export const createSimulation = async (data: Simulation, token: string): Promise<Simulation> => {
     const response = await axios.post<Simulation>(`${API_URL}/v1/simulation`, data, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -142,14 +125,6 @@ export const createSimulation = async (data: CreateSimulationInput, token: strin
     return response.data;
 };
 
-// Define input type for updating a simulation
-export interface UpdateSimulationInput {
-    status?: string;
-    interactionMode?: string;
-    compentencyEvaluation?: string; // Make fields optional for partial updates
-    // Add other fields you might want to update later, e.g., status, feedback
-}
-
 /**
 * Updates an existing simulation record.
 * @param simulationId - The ID (UUID) of the simulation to update.
@@ -157,8 +132,8 @@ export interface UpdateSimulationInput {
 * @param token - The JWT authentication token.
 * @returns A promise that resolves to the updated Simulation object.
 */
-export const updateSimulation = async (simulationId: string, updateData: UpdateSimulationInput, token: string): Promise<Simulation> => {
-    const response = await axios.put<Simulation>(`${API_URL}/v1/simulation/${simulationId}`, updateData, {
+export const updateSimulation = async (simulationId: string, updateData: SimulationAttributes, token: string): Promise<Simulation> => {
+    const response = await axios.patch<Simulation>(`${API_URL}/v1/simulation/${simulationId}`, updateData, {
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

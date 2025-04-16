@@ -71,3 +71,58 @@ export interface CoachonCueScenarioAttributes {
     avatarUrl: string;
   }
 }
+
+export interface CoachonCueScenarioAttributes {
+  id?: string;
+
+  // --- Scenario fields ---
+  scenarioType: string;
+  keyTopics: string[];
+  competenciesAndGoals: string[];
+  guidelines?: string[];
+  coachingFramework: {
+    name: string;
+    description: string;
+  };
+  supportingMaterials?: string[];
+
+  persona: {
+    name: string;
+    role: string;
+    disposition: string;
+    background: string;
+    communicationStyle: string;
+    emotionalState: string;
+    avatar: string;
+    avatarUrl: string;
+  }
+}
+
+// Define input type for creating a simulation
+export interface CreateSimulationInput {
+  scenarioId: string;
+  score?: string; // Optional score, backend might default it
+}
+
+export interface SimulationAttributes {
+  id?: string;
+  status: string;
+  interactionMode: string;
+  scenarioId: string;
+  userId: string;
+  simulationResult: {
+    competencyEvaluation: {
+      competency: string;
+      rating: string;
+      notes: string;
+    }[],
+    generalFeedback: string;
+  }
+}
+
+// Define Simulation type based on backend model (adjust if necessary)
+export interface Simulation extends SimulationAttributes {
+
+  createdAt: string; // ISO Date string
+  updatedAt: string; // ISO Date string
+}

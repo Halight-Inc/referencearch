@@ -7,8 +7,8 @@ import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
 // import { Skeleton } from "@/components/ui/skeleton";
-import { getScenario, getSimulationById } from '@/api.ts';
-import { CoachonCueScenarioAttributes } from "@/lib/schema";
+import { getScenario, getSimulationById, updateSimulation } from '@/api.ts';
+import { CoachonCueScenarioAttributes, SimulationAttributes } from "@/lib/schema";
 import axios from 'axios';
 import SimulationBuilder from "@/components/SimulationBuilder";
 import ScenarioContext from "@/components/ScenarioContext";
@@ -30,7 +30,7 @@ export default function Simulation() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
-
+  
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
   const [isBuilding, setIsBuilding] = useState(true);
   const [isContextShown, setIsContextShown] = useState(true);
@@ -56,24 +56,6 @@ export default function Simulation() {
 
     void fetchScenario();
   }, []);
-
-  // Fetch AI personality for this scenario
-  // const {
-  //   data: aiPersonalities,
-  //   isLoading: isLoadingPersonality,
-  //   error: personalityError
-  // } = useQuery<AiPersonality[]>({
-  //   queryKey: [`/api/ai-personalities/scenario/${scenarioId}`],
-  //   enabled: !!scenarioId, // Only run this query if we have a scenario ID
-  // });
-
-  // const scenario = scenarios?.find(s => s.id === scenarioId) ||
-  //   fallbackScenarios.find(s => s.id === scenarioId);
-
-  // const aiPersonality = aiPersonalities?.[0] ||
-  //   fallbackAiPersonalities.find(ai => ai.scenarioId === scenarioId);
-
-  // const isLoading = isLoadingScenarios || isLoadingPersonality;
 
   useEffect(() => {
     // Reset building state when scenario changes
@@ -342,6 +324,35 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
         console.log("API Response:", response);
 
         if (response.data && response.data.completion) {
+          setIsLoading(true);
+
+          var simulationResult = JSON.parse(response.data.completion);
+
+          const saveSimulation = async () => {
+            try {
+              const simulation: SimulationAttributes = {
+                id: simulationId,
+                interactionMode: interactionMode,
+                scenarioId: scenario.id,
+                userId: localStorage.getItem('userId') as string,
+                status: "Completed",
+                simulationResult: simulationResult
+              } as SimulationAttributes;
+              var result = await updateSimulation(simulationId, simulation, token);
+              const scenarioId = result.scenarioId as string;
+              setScenario(await getScenario(scenarioId, token));
+            } catch (error) {
+              console.error('Error fetching scenarios:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+
+          await saveSimulation();
+          // Save conversation to the server (if needed)
+          // await saveConversationToServer(messages, simulationId);
+
+          navigate(`/results/${simulationId}`);
 
           console.log(response.data.completion)
 
@@ -353,10 +364,6 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
         console.error('Error sending message:', error);
       }
 
-      // Save conversation to the server (if needed)
-      // await saveConversationToServer(messages, simulationId);
-
-      navigate(`/results/${simulationId}`);
     }
   };
 
