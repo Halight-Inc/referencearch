@@ -23,6 +23,9 @@ initItem(sequelize);
 initCoachonCueScenario(sequelize);
 initScenarioFile(sequelize);
 
+CoachonCueScenario.hasMany(ScenarioFile);
+ScenarioFile.belongsTo(CoachonCueScenario);
+
 // Final model registration (ensures Sequelize knows about them)
 sequelize.models.User = User;
 sequelize.models.Item = Item;
