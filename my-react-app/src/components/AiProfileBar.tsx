@@ -4,13 +4,13 @@ import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
 interface AiProfileBarProps {
   aiPersonality: CoachonCueScenarioAttributes['persona'];
   interactionMode: "voice" | "text";
-  onModeChange: (mode: "voice" | "text") => void;
+  // onModeChange: (mode: "voice" | "text") => void;
 }
 
 export default function AiProfileBar({
   aiPersonality,
   interactionMode,
-  onModeChange
+  // onModeChange
 }: AiProfileBarProps) {
   // Define the fallback image URL
   const fallbackAvatarUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200";
@@ -54,23 +54,10 @@ export default function AiProfileBar({
         </div>
       </div>
 
-      <div className="ml-auto flex items-center bg-neutral-100 rounded-full p-1">
-        <button
-          onClick={() => onModeChange("text")}
-          className={`py-1 px-3 text-xs rounded-full transition-colors ${interactionMode === "text" ? "bg-primary text-white" : ""
-            }`}
-          aria-pressed={interactionMode === "text"}
-        >
-          Text
-        </button>
-        <button
-          onClick={() => onModeChange("voice")}
-          className={`py-1 px-3 text-xs rounded-full transition-colors ${interactionMode === "voice" ? "bg-primary text-white" : ""
-            }`}
-          aria-pressed={interactionMode === "voice"}
-        >
-          Voice
-        </button>
+      <div className="ml-auto flex items-center">
+        <div className="px-3 py-1 bg-neutral-100 text-xs rounded-full">
+          {interactionMode === "voice" ? "Voice Mode" : "Text Mode"}
+        </div>
       </div>
     </div>
   );
