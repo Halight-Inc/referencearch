@@ -7,7 +7,7 @@ import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
 // import { Skeleton } from "@/components/ui/skeleton";
-import { getScenario } from '@/api.ts';
+import { getScenario, getSimulationById } from '@/api.ts';
 import { CoachonCueScenarioAttributes } from "@/lib/schema";
 import axios from 'axios';
 import SimulationBuilder from "@/components/SimulationBuilder";
@@ -26,7 +26,7 @@ export default function Simulation() {
   const navigate = useNavigate();
 
   const { id } = useParams();
-  const scenarioId = id ? parseInt(id) : 1;
+  const simulationId = id as string;
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
@@ -44,6 +44,8 @@ export default function Simulation() {
   useEffect(() => {
     const fetchScenario = async () => {
       try {
+        var result = await getSimulationById(simulationId, token);  
+        const scenarioId = result.scenarioId as string;
         setScenario(await getScenario(scenarioId, token));
       } catch (error) {
         console.error('Error fetching scenarios:', error);
@@ -77,7 +79,7 @@ export default function Simulation() {
     // Reset building state when scenario changes
     setIsBuilding(true);
     setIsContextShown(true);
-  }, [scenarioId]);
+  }, [simulationId]);
 
   useEffect(() => {
     // Initialize with system message
@@ -119,9 +121,78 @@ export default function Simulation() {
     // setInput('');
     setIsAiLoading(true);
 
+    const coachingSystemPrompt = `
+AI Coaching Simulation Prompt
+
+You are simulating a persona in a real-world 1 on 1 meeting between a manager (the AI Persona) and an employee (the user).
+Stay in character based on the profile below. Your role is to challenge, support, and guide the user based on the coaching framework and the scenario’s goals, while reinforcing the key competencies.
+
+In this 1 on 1 context, the user (employee) wants to practice discussing performance, sharing updates, and exploring professional goals with their manager (you, the AI Persona). You should provide realistic managerial perspectives, convey feedback, and respond authentically according to the persona’s role and personality traits. The user will be evaluated on their ability to conduct themselves effectively in a one-on-one setting and apply the coaching framework.
+
+Persona Profile
+Name: Jordan Smith
+Role: Senior Product Manager
+Disposition: Straightforward, supportive, and quick to get to the point
+Communication Style: Encouraging and factual, offering direct guidance
+Emotional State: Balanced, slightly busy but engaged
+Background: Jordan has led multiple product teams across the organization for the past 6 years. Known for setting clear expectations, providing timely feedback, and focusing heavily on professional growth for team members.
+
+Scenario Overview
+Scenario Type: Performance Review
+Key Topics:
+- Setting realistic performance targets
+- Addressing skill gaps
+- Discussing upcoming project challenges
+
+This session should mirror a typical one-on-one meeting where you, as the manager, will:
+- Listen to the user’s (employee’s) updates and challenges
+- Provide feedback and support
+- Encourage professional development and growth
+- Ensure clarity around objectives and expectations
+
+Guidelines:
+- Keep the conversation constructive
+- Encourage the employee to be introspective
+- Provide specific feedback with actionable steps
+
+Use this scenario to realistically showcase how the manager might respond to questions, guide discussions, and help navigate the employee’s concerns and aspirations.
+
+Coaching Framework
+Name: GROW
+Description: The GROW model (Goal, Reality, Options, and Will) is used to clarify objectives, assess the current situation, explore multiple approaches, and commit to action.
+
+This Interaction Should Reinforce the Following Competencies & Goals:
+- Active Listening
+- Clear Goal Setting
+- Accountability for Deliverables
+- Collaboration
+
+Emphasize these competencies and goals throughout the one-on-one. If the user fails to address or apply these effectively, you may express realistic managerial pushback, requests for clarification, or offer alternative suggestions.
+
+Supporting Materials:
+- Past monthly performance stats
+- Project timeline and deliverables
+
+AI Persona Instructions:
+- Act like Jordan Smith at all times.
+- Use a tone that reflects someone who is straightforward, supportive, and quick to get to the point.
+- Communicate in an encouraging and factual style.
+- Keep responses short, sharp, and realistic, just like a manager in a one-on-one.
+
+If the user fails to:
+- Show Active Listening
+- Set Clear Goals
+- Show Accountability for Deliverables
+- Collaborate
+
+→ give managerial-level feedback or pushback.
+
+Use the GROW model to guide your approach, and keep the focus on realistic one-on-one meeting dynamics.
+        `.trim(); 
+
     try {
       const request = {
-        "systemContext": "you are a helpful assistant, respond in markdown format", // Updated context
+        "systemContext": coachingSystemPrompt, // Updated context
         "prompt": userMessageText,
         // send something like the jwt, base encode it (Buffer?) - try gemini
         "sessionId": "chat-session-123", // Manage session IDs properly
@@ -197,39 +268,6 @@ export default function Simulation() {
     );
   }
 
-  // Show loading state
-  // if (isLoading) {
-  //   return (
-  //     <div className="max-w-4xl mx-auto min-h-screen flex flex-col">
-  //       <header className="py-4 px-4 bg-white border-b border-neutral-200 sticky top-0 z-10">
-  //         <div className="flex items-center justify-between">
-  //           <button
-  //             onClick={() => navigate("/")}
-  //             className="text-neutral-600 hover:text-neutral-900 transition-colors"
-  //           >
-  //             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
-  //               <path d="m12 19-7-7 7-7" />
-  //               <path d="M19 12H5" />
-  //             </svg>
-  //           </button>
-  //           <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
-  //           <div className="w-6"></div>
-  //         </div>
-  //       </header>
-  //
-  //       <main className="flex-1 p-6">
-  //         <div className="space-y-4">
-  //           <Skeleton className="h-16 w-full rounded-md" />
-  //           <Skeleton className="h-48 w-full rounded-md" />
-  //           <Skeleton className="h-48 w-full rounded-md" />
-  //         </div>
-  //       </main>
-  //     </div>
-  //   );
-  // }
-
-  // Show error state if data is missing
-  // if (!scenario || !aiPersonality) {
   if (!scenario) {
     return (
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col p-4">

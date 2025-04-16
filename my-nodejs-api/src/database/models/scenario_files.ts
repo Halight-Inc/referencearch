@@ -1,16 +1,16 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
 interface ScenarioFileInterface {
-  id?: number;
-  scenarioId: number;
+  id?: string;
+  scenarioId: string;
   path: string | null; // s3 path
   base64: string;
 }
 
 class ScenarioFile extends Model<ScenarioFileInterface> implements ScenarioFileInterface {
-  public id!: number;
+  public id!: string;
 
-  public scenarioId!: number;
+  public scenarioId!: string;
   public path!: string; // s3 path
   public base64!: string;
 
@@ -22,15 +22,16 @@ const initScenarioFile = (sequelize: Sequelize): void => {
   ScenarioFile.init(
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4, // Generates a random UUID
+        allowNull: false,
+        primaryKey: true
       },
       scenarioId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: 'coachoncue_scenarios',
+          model: 'scenarios',
           key: 'id',
         },
       },

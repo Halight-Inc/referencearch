@@ -47,7 +47,7 @@ export type ScenarioFormValues = z.infer<typeof scenarioSchema>;
 
 // TODO: use the same one from the api
 export interface CoachonCueScenarioAttributes {
-  id?: number;
+  id?: string;
 
   // --- Scenario fields ---
   scenarioType: string;

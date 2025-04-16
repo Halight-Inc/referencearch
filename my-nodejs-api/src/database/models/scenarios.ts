@@ -1,7 +1,7 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-interface CoachonCueScenarioAttributes {
-  id?: number;
+interface ScenarioAttributes {
+  id?: string;
 
   // --- Scenario fields ---
   scenarioType: string;
@@ -26,8 +26,8 @@ interface CoachonCueScenarioAttributes {
   }
 }
 
-class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements CoachonCueScenarioAttributes {
-  public id!: number;
+class Scenario extends Model<ScenarioAttributes> implements ScenarioAttributes {
+  public id!: string;
 
   // Scenario fields
   public scenarioType!: string;
@@ -55,14 +55,16 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
   public readonly updatedAt!: Date;
 }
 
-const initCoachonCueScenario = (sequelize: Sequelize): void => {
-  CoachonCueScenario.init(
+const initScenario = (sequelize: Sequelize): void => {
+  Scenario.init(
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4, // Generates a random UUID
+        allowNull: false,
+        unique: true,
         primaryKey: true,
-      },
+            },
 
       // Scenario fields
       scenarioType: {
@@ -95,10 +97,10 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
       },
     },
     {
-      tableName: 'coachoncue_scenarios',
+      tableName: 'scenarios',
       sequelize,
     }
   );
 };
 
-export { initCoachonCueScenario, CoachonCueScenario };
+export { initScenario, Scenario };

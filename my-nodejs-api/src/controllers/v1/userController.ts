@@ -22,7 +22,7 @@ import { User } from '../../database/models/user';
  *                 type: object
  *                 properties:
  *                   id:
- *                     type: integer
+ *                     type: UUID
  *                     description: The user's ID.
  *                   name:
  *                     type: string

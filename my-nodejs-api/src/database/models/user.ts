@@ -1,16 +1,17 @@
+import { UUID } from 'crypto';
 import { Model, DataTypes } from 'sequelize';
 import { Sequelize } from 'sequelize'; // import corrected
 
 // User interface
 interface UserAttributes {
-    id?: number; // make id optional.
+    id?: UUID; // make id optional.
     name: string;
     email: string;
     password?: string;
 }
 
 class User extends Model<UserAttributes> implements UserAttributes {
-    public id?: number;
+    public id?: UUID;
     public name!: string;
     public email!: string;
     public password!: string;
@@ -24,8 +25,10 @@ const initUser = (sequelize: Sequelize): void => {
     User.init(
         {
             id: {
-                type: DataTypes.INTEGER,
-                autoIncrement: true,
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4, // Generates a random UUID
+                allowNull: false,
+                unique: true,                
                 primaryKey: true,
             },
             name: {
