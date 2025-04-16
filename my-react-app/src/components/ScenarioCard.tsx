@@ -56,7 +56,7 @@ export default function ScenarioCard({ scenario }: ScenarioCardProps) {
             {/* <h3 className="ml-3 font-medium">{scenario.title}</h3> */}
             <h3 style={{
               fontSize: '16px',
-            }} className="ml-3 font-medium">{scenario.scenarioType}</h3>
+            }} className="ml-3 font-medium">{scenario.title}</h3>
           </div>
           <p className="text-sm text-neutral-600 mb-3">{scenario.keyTopics && scenario.keyTopics.length > 0 ? scenario.keyTopics.join(', ') : ''}</p>
           <div className="flex items-center text-sm text-neutral-500">

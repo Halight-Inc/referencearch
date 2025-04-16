@@ -1,5 +1,9 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
+interface ChatMessage {
+  sender: 'user' | 'ai' | 'system';
+  text: string;
+}
 interface SimulationAttributes {
   id?: string;
 
@@ -8,6 +12,7 @@ interface SimulationAttributes {
   interactionMode: string;
   scenarioId: string;
   userId: string;
+  chatMessages: ChatMessage[]; // Optional chat messages, backend might default it
   simulationResult: {
     competencyEvaluations: {
       competency: string;
@@ -28,6 +33,8 @@ class Simulation extends Model<SimulationAttributes> implements SimulationAttrib
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public chatMessages!: ChatMessage[]; // Optional chat messages, backend might default it
 
   public simulationResult!: {
     competencyEvaluations: {
@@ -79,6 +86,10 @@ const initSimulation = (sequelize: Sequelize): void => {
         },
       },
       simulationResult: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+      },
+      chatMessages: {
         type: DataTypes.JSONB,
         allowNull: true,
       },

@@ -18,6 +18,7 @@ const supportingMaterialSchema = z.object({
 // Define the main scenario schema
 export const scenarioSchema = z.object({
   scenarioType: z.string().min(1, "Scenario type is required"),
+  title: z.string().min(1, "Title is required"),
   keyTopics: z.array(z.string()).min(1, "At least one key topic is required"),
   competenciesAndGoals: z.array(z.string()).min(1, "At least one competency or goal is required"),
   guidelines: z.string().min(10, "Guidelines must be at least 10 characters long")
@@ -49,6 +50,7 @@ export type ScenarioFormValues = z.infer<typeof scenarioSchema>;
 export interface CoachonCueScenarioAttributes {
   id?: string;
 
+  title: string;
   // --- Scenario fields ---
   scenarioType: string;
   keyTopics: string[];
@@ -102,6 +104,11 @@ export interface CoachonCueScenarioAttributes {
 export interface CreateSimulationInput {
   scenarioId: string;
   score?: string; // Optional score, backend might default it
+}
+
+export interface ChatMessage {
+  sender: 'user' | 'ai' | 'system';
+  text: string;
 }
 
 export interface SimulationAttributes {

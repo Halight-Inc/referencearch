@@ -65,12 +65,12 @@ export default function SimulationDrawer({
   }, [open, scenario.id, token]);
 
   // Helper function to determine status based on score (example logic)
-  const getStatus = (score: string): string => {
-    const numericScore = parseInt(score, 10);
-    if (isNaN(numericScore)) return "Unknown";
-    // Adjust the threshold as needed
-    return numericScore >= 80 ? "Passed" : "Needs Improvement";
-  };
+  // const getStatus = (score: string): string => {
+  //   const numericScore = parseInt(score, 10);
+  //   if (isNaN(numericScore)) return "Unknown";
+  //   // Adjust the threshold as needed
+  //   return numericScore >= 80 ? "Passed" : "Needs Improvement";
+  // };
 
   // Helper function to format date string
   const formatDate = (dateString: string): string => {
@@ -134,7 +134,7 @@ export default function SimulationDrawer({
         {/* Content Area */}
         <div className="flex-1 py-4">
           {/* Scenario Info */}
-          <h2 className="text-lg font-semibold">{scenario.scenarioType}</h2>
+          <h2 className="text-lg font-semibold">{scenario.title}</h2>
           {/* Placeholder for duration/attempts - requires data */}
           {/* <div className="flex items-center gap-4 mt-2 text-sm text-neutral-600">
             <div>1h</div>
@@ -167,11 +167,11 @@ export default function SimulationDrawer({
               {historyItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between bg-neutral-50 p-3 rounded-md border border-neutral-200">
                   <div>
-                    <div className="font-medium">{getStatus(item.status)}</div>
+                    {/* <div className="font-medium">{item.simulationResult.generalFeedback}</div> */}
                     <div className="text-xs text-neutral-500">{formatDate(item.createdAt)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{item.status}%</div>
+                    <div className="font-semibold">{item.status}</div>
                     <Button
                       variant="link"
                       size="sm"
