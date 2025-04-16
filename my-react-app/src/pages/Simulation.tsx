@@ -8,7 +8,7 @@ import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
 // import { Skeleton } from "@/components/ui/skeleton";
 import { getScenario, getSimulationById, updateSimulation } from '@/api.ts';
-import { CoachonCueScenarioAttributes, SimulationAttributes } from "@/lib/schema";
+import { CoachonCueScenarioAttributes, SimulationAttributes, ChatMessage } from "@/lib/schema";
 import axios from 'axios';
 import SimulationBuilder from "@/components/SimulationBuilder";
 import ScenarioContext from "@/components/ScenarioContext";
@@ -16,11 +16,6 @@ import ScenarioContext from "@/components/ScenarioContext";
 const API_URL = import.meta.env.VITE_API_URL;
 
 type InteractionMode = "voice" | "text";
-
-export interface ChatMessage {
-  sender: 'user' | 'ai' | 'system';
-  text: string;
-}
 
 export default function Simulation() {
   const navigate = useNavigate();
@@ -301,7 +296,7 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
     Coach: That's a proactive approach. Let's reconvene next week to discuss how it went.
 `.trim();
 
-      try {
+try {
         const request = {
           "systemContext": coachingSystemPrompt, // Updated context
           "prompt": userPrompt,
@@ -334,6 +329,7 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
                 id: simulationId,
                 interactionMode: interactionMode,
                 scenarioId: scenario.id,
+                chatMessages: messages,
                 userId: localStorage.getItem('userId') as string,
                 status: "Completed",
                 simulationResult: simulationResult
