@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
 import { useNavigate } from 'react-router-dom';
+import { Simulation } from '@/lib/schema'; // Import Simulation type
 // Import createSimulation and Simulation type
-import { getSimulations, createSimulation, Simulation } from '@/api';
+import { getSimulations, createSimulation } from '@/api';
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast"; // Import useToast for feedback
@@ -98,7 +99,7 @@ export default function SimulationDrawer({
     try {
       // Call the API to create a new simulation record
       // The backend should associate the current user based on the token
-      const newSimulation = await createSimulation({ scenarioId: scenario.id }, token);
+      const newSimulation = await createSimulation({ scenarioId: scenario.id } as Simulation, token);
 
       // Check if we got a valid simulation ID back
       if (newSimulation && newSimulation.id) {
@@ -166,11 +167,11 @@ export default function SimulationDrawer({
               {historyItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between bg-neutral-50 p-3 rounded-md border border-neutral-200">
                   <div>
-                    <div className="font-medium">{getStatus(item.score)}</div>
+                    <div className="font-medium">{getStatus(item.status)}</div>
                     <div className="text-xs text-neutral-500">{formatDate(item.createdAt)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{item.score}%</div>
+                    <div className="font-semibold">{item.status}%</div>
                     <Button
                       variant="link"
                       size="sm"

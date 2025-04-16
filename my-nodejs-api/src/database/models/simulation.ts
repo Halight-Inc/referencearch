@@ -1,24 +1,44 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
 interface SimulationAttributes {
-  id?: number;
+  id?: string;
 
   // --- simulation fields ---
-  score: string;
-  scenarioId: number;
-  userId: number;
+  status: string;
+  interactionMode: string;
+  scenarioId: string;
+  userId: string;
+  simulationResult: {
+    competencyEvaluation: {
+      competency: string;
+      rating: string;
+      notes: string;
+    }[],
+    generalFeedback: string;
+  }
 }
 
 class Simulation extends Model<SimulationAttributes> implements SimulationAttributes {
-  public id!: number;
+  public id!: string;
 
-  public score!: string;
-  public scenarioId!: number;
-  public userId!: number;
+  public status!: string;
+  public interactionMode!: string;
+  public scenarioId!: string;
+  public userId!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public simulationResult!: {
+    competencyEvaluation: {
+      competency: string;
+      rating: string;
+      notes: string;
+    }[],
+    generalFeedback: string;
+  }
 }
+
 
 const initSimulation = (sequelize: Sequelize): void => {
   Simulation.init(
@@ -32,11 +52,15 @@ const initSimulation = (sequelize: Sequelize): void => {
       },
 
       // Scenario fields
-      score: {
+      status: {
         type: DataTypes.STRING,
         allowNull: true
-      }
-      ,
+      },
+      // Scenario fields
+      interactionMode: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       scenarioId: {
         type: DataTypes.UUID,
         allowNull: false,
@@ -53,6 +77,10 @@ const initSimulation = (sequelize: Sequelize): void => {
           model: 'users',
           key: 'id',
         },
+      },
+      simulationResult: {
+        type: DataTypes.JSONB,
+        allowNull: true,
       },
     },
     {

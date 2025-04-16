@@ -7,8 +7,8 @@ import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
 // import { Skeleton } from "@/components/ui/skeleton";
-import { getScenario, getSimulationById } from '@/api.ts';
-import { CoachonCueScenarioAttributes } from "@/lib/schema";
+import { getScenario, getSimulationById, updateSimulation } from '@/api.ts';
+import { CoachonCueScenarioAttributes, SimulationAttributes } from "@/lib/schema";
 import axios from 'axios';
 import SimulationBuilder from "@/components/SimulationBuilder";
 import ScenarioContext from "@/components/ScenarioContext";
@@ -30,7 +30,7 @@ export default function Simulation() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
-
+  
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
   const [isBuilding, setIsBuilding] = useState(true);
   const [isContextShown, setIsContextShown] = useState(true);
@@ -44,7 +44,7 @@ export default function Simulation() {
   useEffect(() => {
     const fetchScenario = async () => {
       try {
-        var result = await getSimulationById(simulationId, token);  
+        var result = await getSimulationById(simulationId, token);
         const scenarioId = result.scenarioId as string;
         setScenario(await getScenario(scenarioId, token));
       } catch (error) {
@@ -56,24 +56,6 @@ export default function Simulation() {
 
     void fetchScenario();
   }, []);
-
-  // Fetch AI personality for this scenario
-  // const {
-  //   data: aiPersonalities,
-  //   isLoading: isLoadingPersonality,
-  //   error: personalityError
-  // } = useQuery<AiPersonality[]>({
-  //   queryKey: [`/api/ai-personalities/scenario/${scenarioId}`],
-  //   enabled: !!scenarioId, // Only run this query if we have a scenario ID
-  // });
-
-  // const scenario = scenarios?.find(s => s.id === scenarioId) ||
-  //   fallbackScenarios.find(s => s.id === scenarioId);
-
-  // const aiPersonality = aiPersonalities?.[0] ||
-  //   fallbackAiPersonalities.find(ai => ai.scenarioId === scenarioId);
-
-  // const isLoading = isLoadingScenarios || isLoadingPersonality;
 
   useEffect(() => {
     // Reset building state when scenario changes
@@ -188,14 +170,14 @@ If the user fails to:
 → give managerial-level feedback or pushback.
 
 Use the GROW model to guide your approach, and keep the focus on realistic one-on-one meeting dynamics.
-        `.trim(); 
+        `.trim();
 
     try {
       const request = {
         "systemContext": coachingSystemPrompt, // Updated context
         "prompt": userMessageText,
         // send something like the jwt, base encode it (Buffer?) - try gemini
-        "sessionId": "chat-session-123", // Manage session IDs properly
+        "sessionId": simulationId, // Manage session IDs properly
         "agentType": "bedrock"
       };
 
@@ -240,11 +222,148 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
   };
 
   // Handle ending the scenario and going to results
-  const handleEndScenario = () => {
+  const handleEndScenario = async () => {
     // In a real implementation, you would save the conversation to the server
     // before navigating to the results page
+
     if (scenario) {
-      navigate(`/results/${scenario.id}`);
+
+      const coachingSystemPrompt = `
+        You are an experienced coaching evaluator specializing in professional development scenarios. Your role is to analyze conversation transcripts between a user (employee) and an AI persona (leader) to assess how effectively the user demonstrated the competencies and goals defined for the scenario.
+        You must remain objective, insightful, and supportive in your evaluation. Focus your analysis on how well the user exhibited each competency, referencing specific moments or behavior from the transcript. Use clear, concise language that offers both accountability and encouragement for growth.
+        For each listed competency:
+        Assign a performance rating using the following emoji CSAT scale: 1 (very poor), 2 (needs improvement), 3 (neutral/average), 4 (good), 5 (excellent).
+        Provide a brief rationale tied directly to the user’s dialogue or actions in the conversation.
+        At the end, summarize your overall impression and offer constructive feedback that helps the user improve in future simulations.
+        Your output must be a valid JSON object matching the structure provided. Do not include any text outside the JSON.
+        Below is the JSON structure we expect. Note that **each competency** in competenciesAndGoals will be inserted dynamically:
+        {
+          "competencyEvaluations": [
+            {{#each competenciesAndGoals}}
+            {
+              "competency": "{{this}}",
+              "rating": "",
+              "notes": ""
+            }{{#unless @last}},{{/unless}}
+            {{/each}}
+          ],
+          "generalFeedback": ""
+        }
+              `.trim();
+
+      const userPrompt = `This evaluation pertains to a training scenario focused on **conducting-1-on-1**.
+
+        Key Topics:
+        - Setting realistic performance targets
+        - Addressing skill gaps
+        - Discussing upcoming project challenges
+
+        Competencies & Goals:
+        - Maintain professionalism under pressure
+        - De-escalate tense situations
+        - Encourage collaboration
+
+        Guidelines:
+        - Do not ask the user to be extremely specific, make sure they are explaining their thought process, but do not drill down multiple times when they tell you what they have accomplished by asking for extremely specific details.
+
+        Coaching Framework:
+        - **Name**: G.R.O.W.
+        - **Description**: A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.
+
+        Persona Profile:
+        - **Name**: Alex
+        - **Role**: New Manager
+        - **Disposition**: Enthusiastic but anxious
+        - **Communication Style**: Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.
+        - **Emotional State**: Excited but nervous. Eager to prove themselves worthy of the promotion.
+        - **Background**: Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.
+
+      ### Conversation Transcript
+
+    Coach: Hi Sean, it's great to see you. How are you feeling about your new role?
+    Sean: Honestly, it's a mix of excitement and nerves. I want to do well, but I'm not sure if I'm fully prepared.​
+    Coach: That's completely natural. Let's start by clarifying what you'd like to achieve in our session today.​
+    Sean: I want to become a confident leader and set clear performance goals for my team.​
+    Coach: Great. On a scale from 1 to 10, how would you rate your current confidence in leading your team?​
+    Sean: I'd say around a 5.​
+    Coach: What factors contribute to that rating?​
+    Sean: I'm still learning how to delegate effectively and manage different personalities.​
+    Coach: What strategies have you tried so far to address these challenges?​
+    Sean: I've been holding one-on-one meetings, but I feel like I'm not asking the right questions.​
+    Coach: What options do you think could help improve these interactions?​
+    Sean: Maybe preparing a set of questions in advance or seeking feedback from my team.​
+    Coach: Those are solid ideas. Which one would you like to implement first?​
+    Sean: I'll start by preparing questions before each meeting.​
+    Coach: Excellent. When will you begin this practice?​
+    Sean: I'll prepare questions for my next meeting tomorrow.​
+    Coach: Sounds like a plan. How will you measure the effectiveness of this approach?​
+    Sean: I'll ask for feedback from my team after a few meetings to see if they find the discussions more productive.​
+    Coach: That's a proactive approach. Let's reconvene next week to discuss how it went.
+`.trim();
+
+      try {
+        const request = {
+          "systemContext": coachingSystemPrompt, // Updated context
+          "prompt": userPrompt,
+          // send something like the jwt, base encode it (Buffer?) - try gemini
+          "sessionId": simulationId, // Manage session IDs properly
+          "agentType": "bedrock"
+        };
+
+        const response = await axios.post<{ sessionId: string; completion: string }>(
+          `${API_URL}/v1/ai/run-prompt`,
+          request,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+
+        console.log("API Response:", response);
+
+        if (response.data && response.data.completion) {
+          setIsLoading(true);
+
+          var simulationResult = JSON.parse(response.data.completion);
+
+          const saveSimulation = async () => {
+            try {
+              const simulation: SimulationAttributes = {
+                id: simulationId,
+                interactionMode: interactionMode,
+                scenarioId: scenario.id,
+                userId: localStorage.getItem('userId') as string,
+                status: "Completed",
+                simulationResult: simulationResult
+              } as SimulationAttributes;
+              var result = await updateSimulation(simulationId, simulation, token);
+              const scenarioId = result.scenarioId as string;
+              setScenario(await getScenario(scenarioId, token));
+            } catch (error) {
+              console.error('Error fetching scenarios:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+
+          await saveSimulation();
+          // Save conversation to the server (if needed)
+          // await saveConversationToServer(messages, simulationId);
+
+          navigate(`/results/${simulationId}`);
+
+          console.log(response.data.completion)
+
+        } else {
+          console.error("Invalid response structure:", response.data);
+        }
+      }
+      catch (error) {
+        console.error('Error sending message:', error);
+      }
+
     }
   };
 
