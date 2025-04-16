@@ -95,7 +95,7 @@ class AIController {
    */
   async runPrompt(req: Request, res: Response, next: NextFunction) {
     try {
-      const {systemContext, prompt, sessionId, agentType } = req.body;
+      const { systemContext, prompt, sessionId, agentType, fileUrls = [] } = req.body;
 
       if (!prompt || !sessionId || !agentType) {
         return res.status(400).json({ error: 'Prompt, sessionId, and agentType are required.' });
@@ -106,7 +106,7 @@ class AIController {
         return res.status(400).json({ error: `Invalid agentType: ${agentType}` });
       }
 
-      const completion = await agent.runPrompt(systemContext, prompt, sessionId);
+      const completion = await agent.runPrompt(systemContext, prompt, sessionId, fileUrls);
       res.status(201).json({ sessionId, completion });
     } catch (error) {
       next(error);
