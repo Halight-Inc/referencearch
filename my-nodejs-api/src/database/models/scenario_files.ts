@@ -4,7 +4,7 @@ interface ScenarioFileInterface {
   id?: string;
   scenarioId: string;
   path: string | null; // s3 path
-  base64: string;
+  base64: string | null;
 }
 
 class ScenarioFile extends Model<ScenarioFileInterface> implements ScenarioFileInterface {
@@ -41,7 +41,7 @@ const initScenarioFile = (sequelize: Sequelize): void => {
       },
       base64: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {
