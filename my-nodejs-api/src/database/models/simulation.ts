@@ -9,9 +9,9 @@ interface SimulationAttributes {
   scenarioId: string;
   userId: string;
   simulationResult: {
-    competencyEvaluation: {
+    competencyEvaluations: {
       competency: string;
-      rating: string;
+      rating: number;
       notes: string;
     }[],
     generalFeedback: string;
@@ -30,9 +30,9 @@ class Simulation extends Model<SimulationAttributes> implements SimulationAttrib
   public readonly updatedAt!: Date;
 
   public simulationResult!: {
-    competencyEvaluation: {
+    competencyEvaluations: {
       competency: string;
-      rating: string;
+      rating: number;
       notes: string;
     }[],
     generalFeedback: string;

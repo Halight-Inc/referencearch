@@ -177,7 +177,7 @@ const getAllSimulation = async (req: Request, res: Response, next: NextFunction)
  *             $ref: '#/components/schemas/SimulationUpdateInput' # Define this schema if needed, or use a partial Simulation schema
  *           example:
  *             status: "Completed"
- *             simulationResult: { "competencyEvaluation": [], "generalFeedback": "Good job!" }
+ *             simulationResult: { "competencyEvaluations": [], "generalFeedback": "Good job!" }
  *     responses:
  *       200:
  *         description: Simulation updated successfully
@@ -208,7 +208,7 @@ const getAllSimulation = async (req: Request, res: Response, next: NextFunction)
  *           type: object
  *           description: The results of the simulation.
  *           properties:
- *             competencyEvaluation:
+ *             competencyEvaluations:
  *               type: array
  *               items:
  *                 type: object

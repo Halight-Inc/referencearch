@@ -111,9 +111,9 @@ export interface SimulationAttributes {
   scenarioId: string;
   userId: string;
   simulationResult: {
-    competencyEvaluation: {
+    competencyEvaluations: {
       competency: string;
-      rating: string;
+      rating: number;
       notes: string;
     }[],
     generalFeedback: string;
