@@ -1,0 +1,77 @@
+name: Builds
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:  # No branch filter = all PRs
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      api_image: ${{ steps.build_api.outputs.api_image }}
+      react_image: ${{ steps.build_react.outputs.react_image }}
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Log in to Azure using Service Principal credentials
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Create .env file for Docker build
+      - name: Create .env file
+        run: |
+          echo "NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}" >> .env
+          echo "SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "API_URL=https://dev-api.energizelms.com" >> .env
+          echo "CLIENT_URL=https://dev-app.energizelms.com" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "VITE_API_URL=https://dev-api.energizelms.com" >> .env
+          echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env
+          echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "VITE_STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
+          echo "AI_AWS_AGENTID=${{ secrets.AI_AWS_AGENTID }}" >> .env
+          echo "AI_AWS_AGENTALIASID=${{ secrets.AI_AWS_AGENTALIASID }}" >> .env
+          echo "AI_AWS_ACCESSKEYID=${{ secrets.AI_AWS_ACCESSKEYID }}" >> .env
+          echo "AI_AWS_SECRETACCESSKEY=${{ secrets.AI_AWS_SECRETACCESSKEY }}" >> .env
+          echo "AI_AZURE_APIKEY=${{ secrets.AI_AZURE_APIKEY }}" >> .env
+          echo "AI_AZURE_ENDPOINT=${{ secrets.AI_AZURE_ENDPOINT }}" >> .env
+          echo "AI_AZURE_MODEL=${{ secrets.AI_AZURE_MODEL }}" >> .env
+          echo "AI_AZURE_MODEL_VERSION=${{ secrets.AI_AZURE_MODEL_VERSION }}" >> .env
+
+      # Copy .env file to Node.js API directory
+      - name: Copy .env to Node.js API directory
+        run: |
+          cp .env ./my-nodejs-api/.env
+
+      # Copy .env file to React App directory
+      - name: Copy .env to React App directory
+        run: |
+          cp .env ./my-react-app/.env
+
+      # Build Docker image for the API service
+      - name: Build Docker image for API
+        id: build_api
+        run: |
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }} ./my-nodejs-api
+          echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      
+      # Build Docker image for the React service
+      - name: Build Docker image for React App
+        id: build_react
+        run: |
+          docker build \
+            -t ${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }} ./my-react-app
+          echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_OUTPUT"
