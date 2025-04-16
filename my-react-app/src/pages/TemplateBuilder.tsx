@@ -1,5 +1,4 @@
-// c:\code\referencearch\my-react-app\src\pages\TemplateBuilder.tsx
-import { useState, useRef } from "react"; // Added useRef
+import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -32,12 +31,20 @@ import {
 import MultiSelectInput from "@/components/MultiSelectInput";
 import FileUpload from "@/components/FileUpload";
 import JsonDisplay from "@/components/JsonDisplay";
-import { useFileParser } from "@/hooks/useFileParser";
-import { createScenario } from '@/api';
+import { useFileParser } from "@/hooks/useFileParser"; // Keep using this for txt/md
+import { createScenario, addScenarioFile } from '@/api';
+
+// Define a type for your supporting materials
+interface SupportingMaterial {
+  title: string;
+  contentType: string; // e.g., 'text/plain', 'application/pdf'
+  content: string; // Will store plain text for txt/md, Base64 Data URL for pdf
+}
 
 export default function TemplateBuilder() {
   const { toast } = useToast();
-  const { parseFile } = useFileParser();
+  const { parseFile, loading: parsingTextFile } = useFileParser();
+  const [parsingPdf, setParsingPdf] = useState(false); // Separate loading state for PDFs
   const [showJsonOutput, setShowJsonOutput] = useState(false);
   const [generatedJson, setGeneratedJson] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
@@ -45,8 +52,25 @@ export default function TemplateBuilder() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null); // State for avatar preview URL
   const avatarInputRef = useRef<HTMLInputElement>(null); // Ref for file input
 
-  // Form definition with default values
-  const form = useForm<any>({ 
+  // Update the form type to use the SupportingMaterial interface
+  const form = useForm<{
+    scenarioType: string;
+    keyTopics: string[];
+    competenciesAndGoals: string[];
+    guidelines: string;
+    coachingFramework: { name: string; description: string; };
+    supportingMaterials: SupportingMaterial[]; // Use the interface here
+    persona: {
+      name: string;
+      role: string;
+      disposition: string;
+      background: string;
+      communicationStyle: string;
+      emotionalState: string;
+      avatar: "", // Default value for avatar
+      avatarUrl: "", // Default value for avatarUrl
+    };
+  }>({ // Add the explicit type here
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       scenarioType: "",
@@ -73,32 +97,57 @@ export default function TemplateBuilder() {
   });
 
   // Handle form submission and generate JSON
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: any) => { // data will now have supportingMaterials with Base64 for PDFs
     // Format guidelines from textarea into array
     const guidelinesArray = data.guidelines
       .split("\n")
       .filter((line: string) => line.trim() !== "");
 
-    // TODO: Align supportingMaterials format with API expectation
-    // The form has [{ title: string, parsedContent: string }],
-    // but the API interface CoachonCueScenarioAttributes expects string[].
-    // You'll need to decide how to map this, e.g., just send titles or parsedContent.
-    // Example: Map to just parsed content strings
-    const apiSupportingMaterials = data.supportingMaterials?.map((m: any) => m.parsedContent);
-
     const formattedData = {
       ...data,
       guidelines: guidelinesArray,
-      supportingMaterials: apiSupportingMaterials || [], // Use the mapped array
-      // Avatar data should already be set in the form state by handleAvatarChange
     };
+
+    const pdfFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+        (material: SupportingMaterial) => material.contentType === 'application/pdf'
+        )
+      : [];
+
+    const txtFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+          (material: SupportingMaterial) => material.contentType === 'text/plain'
+        )
+      : [];
+
+    formattedData.supportingMaterials = [];
+    txtFiles.forEach((file: SupportingMaterial) => {
+      formattedData.supportingMaterials.push(file.content);
+    });
 
     const token = localStorage.getItem('jwtToken') as string;
 
     try {
-      // Assuming createScenario expects data matching CoachonCueScenarioAttributes
-      // You might need type assertion or ensure createScenario handles ScenarioFormValues
-      await createScenario(formattedData as any, token); // Use 'as any' for now, refine API call signature if needed
+      const newScenario = await createScenario({
+        ...formattedData,
+      }, token);
+
+      for (const pdfFile of pdfFiles) {
+        try {
+          console.log(`Uploading PDF: ${pdfFile.title}`);
+          const newFileResponse = await addScenarioFile({
+            scenarioId: newScenario.id, // Use the ID from the response
+            base64: pdfFile.content,    // Send the Base64 data URL
+          }, token);
+          console.log(`PDF ${pdfFile.title} uploaded successfully:`, newFileResponse);
+        } catch (fileUploadError) {
+          // Handle individual file upload errors more gracefully if needed
+          console.error(`Failed to upload file ${pdfFile.title}:`, fileUploadError);
+          // Optionally: Collect errors and report them later, or stop the process
+          // For now, we'll re-throw to be caught by the main catch block
+          throw new Error(`Failed to upload supporting file ${pdfFile.title}. Scenario might be incomplete.`);
+        }
+      }
 
       const jsonOutput = JSON.stringify(formattedData, null, 2);
       setGeneratedJson(jsonOutput);
@@ -106,7 +155,7 @@ export default function TemplateBuilder() {
 
       toast({
         title: "Success!",
-        description: "Your scenario template has been generated",
+        description: "Your scenario template has been generated and saved.",
         variant: "default",
       });
 
@@ -118,13 +167,17 @@ export default function TemplateBuilder() {
         }
       }, 100);
 
-    } catch (error) {
-       console.error("Error creating scenario:", error);
-       toast({
-         title: "Error",
-         description: "Failed to create scenario template.",
-         variant: "destructive",
-       });
+    } catch (apiError) {
+      console.error("API Error:", apiError);
+      toast({
+        title: "API Error",
+        description: "Failed to save the scenario. Please try again.",
+        variant: "destructive",
+      });
+      // Optionally display the formatted data even on API error for debugging
+      const jsonOutput = JSON.stringify(formattedData, null, 2);
+      setGeneratedJson(jsonOutput);
+      setShowJsonOutput(true);
     }
   };
 
@@ -152,7 +205,6 @@ export default function TemplateBuilder() {
     if (avatarInputRef.current) {
         avatarInputRef.current.value = ""; // Clear file input
     }
-
 
     if (selectedPersona) {
       form.setValue("persona.name", selectedPersona.name);
@@ -182,59 +234,121 @@ export default function TemplateBuilder() {
     }
   };
 
-  // Handle file upload for supporting materials
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    const materials = form.getValues("supportingMaterials") || [];
+    const currentMaterials = form.getValues("supportingMaterials") || [];
 
-    if (materials.length + files.length > 2) {
+    // Check maximum of 2 files
+    if (currentMaterials.length + files.length > 2) {
       toast({
         title: "File limit reached",
-        description: "You can only upload a maximum of 2 supporting files",
+        description: "You can only upload a maximum of 2 files",
         variant: "destructive",
       });
       return;
     }
 
+    const newMaterials: SupportingMaterial[] = [];
+    const filePromises: Promise<void>[] = [];
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
+      const fileTitle = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+
+      // Validate file type (keep this)
+      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md') && !file.name.endsWith('.pdf')) {
         toast({
           title: "Unsupported file format",
-          description: "Only .txt and .md files are accepted for supporting materials",
+          description: `Skipping ${file.name}. Only .txt, .md, and .pdf files are accepted`,
           variant: "destructive",
         });
-        continue;
+        continue; // Skip this file
       }
-      try {
-        const parsedContent = await parseFile(file);
-        const fileObject = {
-          title: file.name.replace(/\.[^/.]+$/, ""),
-          parsedContent
-        };
-        form.setValue("supportingMaterials", [...materials, fileObject]);
+
+      // Create a promise for each file processing
+      const filePromise = new Promise<void>((resolve, reject) => {
+        if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+          // Use existing useFileParser for text files
+          parseFile(file)
+            .then(parsedContent => {
+              newMaterials.push({
+                title: fileTitle,
+                contentType: file.type || 'text/plain', // Use actual file type
+                content: parsedContent // Store plain text
+              });
+              resolve();
+            })
+            .catch(err => {
+              console.error(`Error parsing text file ${file.name}:`, err);
+              toast({
+                title: "Parsing failed",
+                description: `Could not process the text file ${file.name}`,
+                variant: "destructive",
+              });
+              reject(err); // Reject the promise for this file
+            });
+        } else if (file.name.endsWith('.pdf')) {
+          // Handle PDF files using readAsDataURL
+          const reader = new FileReader();
+          setParsingPdf(true); // Indicate PDF parsing started
+
+          reader.onload = (e) => {
+            const base64Content = e.target?.result as string;
+            newMaterials.push({
+              title: fileTitle,
+              contentType: file.type || 'application/pdf', // Use actual file type
+              content: base64Content // Store Base64 Data URL
+            });
+            setParsingPdf(false);
+            resolve(); // Resolve the promise for this file
+          };
+
+          reader.onerror = (err) => {
+            console.error(`Error reading PDF file ${file.name}:`, err);
+            setParsingPdf(false);
+            toast({
+              title: "Upload failed",
+              description: `Could not read the PDF file ${file.name}`,
+              variant: "destructive",
+            });
+            reject(new Error(`Error reading PDF file ${file.name}`)); // Reject the promise
+          };
+
+          reader.readAsDataURL(file); // Read as Base64 Data URL
+        } else {
+          // Should not happen due to earlier check, but good practice
+          reject(new Error(`Unsupported file type: ${file.name}`));
+        }
+      });
+      filePromises.push(filePromise);
+    }
+
+    // Wait for all files to be processed
+    try {
+      await Promise.all(filePromises);
+      // Only update form state if all files processed successfully (or were skipped)
+      if (newMaterials.length > 0) {
+        form.setValue("supportingMaterials", [...currentMaterials, ...newMaterials]);
         toast({
-          title: "File uploaded",
-          description: `${file.name} has been successfully added`,
+          title: "Files processed",
+          description: `${newMaterials.length} file(s) added successfully.`,
           variant: "default",
         });
-      } catch (error) {
-        toast({
-          title: "Upload failed",
-          description: "Could not process the supporting file",
-          variant: "destructive",
-        });
       }
+    } catch (error) {
+      // Errors are already toasted individually, maybe log the aggregate error
+      console.error("One or more files failed to process:", error);
     }
   };
 
-  // Remove supporting material
+  // Remove supporting material - Should work as is, but ensure type safety
   const removeSupportingMaterial = (index: number) => {
-    const materials = form.getValues("supportingMaterials") || [];
+    // Use the correct type here
+    const materials: SupportingMaterial[] = form.getValues("supportingMaterials");
     const removedFile = materials[index];
     materials.splice(index, 1);
-    form.setValue("supportingMaterials", [...materials]);
+    form.setValue("supportingMaterials", [...materials]); // Spread the modified array
     toast({
       title: "File removed",
       description: `${removedFile.title} has been removed`,
@@ -281,9 +395,11 @@ export default function TemplateBuilder() {
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
       setAvatarPreview(dataUrl);
+      // @ts-ignore
       form.setValue("persona.avatar", file.name); // Store filename
       // Store data URL for preview/potential direct use.
       // In a real app, you might upload here and set a server URL.
+      // @ts-ignore
       form.setValue("persona.avatarUrl", dataUrl, { shouldValidate: true });
     };
     reader.onerror = () => {
@@ -323,6 +439,9 @@ export default function TemplateBuilder() {
 
   // Calculate progress percentage
   const progressPercentage = ((activeStep + 1) / totalSteps) * 100;
+
+  // Determine if any file is currently being processed
+  const isProcessingFile = parsingTextFile || parsingPdf;
 
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-white to-blue-50">
@@ -716,12 +835,13 @@ export default function TemplateBuilder() {
                       render={({ field }) => (
                         <>
                           <FileUpload onFilesSelected={handleFileUpload} />
+                          {isProcessingFile && <p className="text-sm text-blue-600 mt-2">Processing file...</p>}
 
                           {/* Uploaded files preview */}
                           {field.value.length > 0 && (
                             <div className="space-y-3 mt-6">
                               <p className="text-sm text-slate-600 font-medium mb-2">Uploaded files ({field.value.length}/2)</p>
-                              {field.value.map((material: any, index: number) => (
+                              {field.value.map((material: SupportingMaterial, index: number) => ( // Use interface here
                                 <div key={index} className="flex items-start bg-slate-50 rounded-lg p-4 border border-slate-200">
                                   <div className="text-slate-400 mr-3 mt-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><line x1="10" x2="8" y1="9" y2="9"></line></svg>
@@ -729,8 +849,11 @@ export default function TemplateBuilder() {
                                   <div className="flex-1 overflow-hidden">
                                     <div className="text-sm font-medium">{material.title}</div>
                                     <div className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                      {material.parsedContent.substring(0, 100)}
-                                      {material.parsedContent.length > 100 ? "..." : ""}
+                                      {/* Display differently based on type */}
+                                      {material.contentType.startsWith('text/')
+                                        ? material.content.substring(0, 100) + (material.content.length > 100 ? "..." : "")
+                                        : `(${material.contentType})` // Indicate it's binary/PDF
+                                      }
                                     </div>
                                   </div>
                                   <Button
@@ -738,6 +861,7 @@ export default function TemplateBuilder() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => removeSupportingMaterial(index)}
+                                    disabled={isProcessingFile}
                                     className="text-slate-400 hover:text-red-500 ml-2"
                                   >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
@@ -757,6 +881,7 @@ export default function TemplateBuilder() {
                       type="button"
                       onClick={goToPrevStep}
                       variant="outline"
+                      disabled={isProcessingFile}
                       className="flex items-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg>
@@ -765,6 +890,7 @@ export default function TemplateBuilder() {
                     <Button
                       type="button"
                       onClick={goToNextStep}
+                      disabled={isProcessingFile}
                       className="flex items-center gap-2"
                     >
                       Continue
@@ -780,14 +906,13 @@ export default function TemplateBuilder() {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
                   <div className="p-6 sm:p-8">
                     <div className="flex items-center mb-6">
-                      {/* ... Icon and Title ... */}
-                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user text-blue-600"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                       </div>
-                       <div>
-                         <h3 className="text-xl font-semibold">Persona</h3>
-                         <p className="text-slate-600 text-sm">Define the character for this scenario</p>
-                       </div>
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user text-blue-600"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold">Persona</h3>
+                        <p className="text-slate-600 text-sm">Define the character for this scenario</p>
+                      </div>
                     </div>
 
                     <div className="space-y-6">
@@ -884,13 +1009,13 @@ export default function TemplateBuilder() {
 
           {/* JSON Output */}
           {showJsonOutput && (
-             <div id="json-output-section" className="mt-12 flex flex-col gap-6">
-                             <div className="text-center">
+            <div id="json-output-section" className="mt-12 flex flex-col gap-6">
+              <div className="text-center">
                 <div className="inline-block p-3 rounded-full bg-blue-100 mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle text-blue-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </div>
                 <h2 className="text-2xl font-bold mb-2">Template Generated!</h2>
-                <p className="text-slate-600 max-w-md mx-auto">Your scenario has been successfully generated and is ready to use. Copy the JSON below to use in your training platform.</p>
+                <p className="text-slate-600 max-w-md mx-auto">Your scenario has been successfully generated and is ready to use. Copy the JSON below or find it saved in your templates.</p>
               </div>
 
               <JsonDisplay jsonData={generatedJson} />
@@ -910,7 +1035,7 @@ export default function TemplateBuilder() {
                   Create Another Template
                 </Button>
               </div>
-             </div>
+            </div>
           )}
         </div>
       </main>

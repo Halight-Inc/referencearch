@@ -4,6 +4,7 @@ import { initUser, User } from './models/user';
 import { initItem, Item } from './models/item';
 //import { initCoachonCuePersona, CoachonCuePersona } from './models/coachoncue_personas';
 import { initCoachonCueScenario, CoachonCueScenario } from './models/coachoncue_scenarios';
+import { initScenarioFile, ScenarioFile } from './models/scenario_files';
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
@@ -20,6 +21,10 @@ initUser(sequelize);
 initItem(sequelize);
 //initCoachonCuePersona(sequelize);
 initCoachonCueScenario(sequelize);
+initScenarioFile(sequelize);
+
+CoachonCueScenario.hasMany(ScenarioFile);
+ScenarioFile.belongsTo(CoachonCueScenario);
 
 // Final model registration (ensures Sequelize knows about them)
 sequelize.models.User = User;
@@ -32,5 +37,6 @@ export default {
   User,
   Item,
   //CoachonCuePersona,
-  CoachonCueScenario
+  CoachonCueScenario,
+  ScenarioFile
 };
