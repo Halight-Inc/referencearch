@@ -39,7 +39,7 @@ export default function ScenarioContext({
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold">{scenario.scenarioType}</h2>
+                <h2 className="text-xl font-bold">{scenario.title}</h2>
                 <div className="text-sm text-neutral-500">AI Simulation</div>
               </div>
             </div>

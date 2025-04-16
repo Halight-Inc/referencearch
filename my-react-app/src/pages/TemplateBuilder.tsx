@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+// import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +56,7 @@ export default function TemplateBuilder() {
   // Update the form type to use the SupportingMaterial interface
   const form = useForm<{
     scenarioType: string;
+    title: string;
     keyTopics: string[];
     competenciesAndGoals: string[];
     guidelines: string;
@@ -74,6 +76,7 @@ export default function TemplateBuilder() {
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       scenarioType: "",
+      title: "",
       keyTopics: [],
       competenciesAndGoals: [],
       guidelines: "",
@@ -534,13 +537,31 @@ export default function TemplateBuilder() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1 mt-6">
+                          <FormLabel className="text-slate-600">Scenario Title</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter a descriptive title for this scenario"
+                              className="h-12"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-end">
                     <Button
                       type="button"
                       onClick={goToNextStep}
-                      disabled={!form.getValues("scenarioType")}
+                      disabled={!form.getValues("scenarioType") || !form.getValues("title")}
                       className="flex items-center gap-2"
                     >
                       Continue

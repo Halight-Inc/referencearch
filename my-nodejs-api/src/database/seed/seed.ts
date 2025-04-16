@@ -48,6 +48,7 @@ const seed = async (): Promise<void> => {
 
     if (!scenarioExists) {
       await Scenario.create({
+        title: "Conducting a 1-on-1 with a New Manager",
         scenarioType: 'conducting-1-on-1',
         keyTopics: ['Active listening', 'Psychological safety', 'Empathy'],
         competenciesAndGoals: [
@@ -89,6 +90,7 @@ const seed = async (): Promise<void> => {
 
     if (!difficultTeammatesExists) {
       await Scenario.create({
+        title: 'Working with difficult teammates',
         scenarioType: 'difficult-teammates',
         keyTopics: ['Empathy', 'Setting boundaries', 'Managing emotional responses'],
         competenciesAndGoals: [
@@ -131,6 +133,7 @@ const seed = async (): Promise<void> => {
 
     if (!performanceReviewExists) {
       await Scenario.create({
+        title: 'Conducting a performance review',
         scenarioType: 'performance-review',
         keyTopics: ['Active listening', 'Setting expectations', 'Critical feedback'],
         competenciesAndGoals: [
