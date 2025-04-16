@@ -166,11 +166,11 @@ export default function SimulationDrawer({
               {historyItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between bg-neutral-50 p-3 rounded-md border border-neutral-200">
                   <div>
-                    <div className="font-medium">{getStatus(item.score)}</div>
+                    <div className="font-medium">{getStatus(item.status)}</div>
                     <div className="text-xs text-neutral-500">{formatDate(item.createdAt)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{item.score}%</div>
+                    <div className="font-semibold">{item.status}%</div>
                     <Button
                       variant="link"
                       size="sm"
