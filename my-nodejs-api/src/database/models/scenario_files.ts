@@ -3,16 +3,16 @@ import { Model, DataTypes, Sequelize } from 'sequelize';
 interface ScenarioFileInterface {
   id?: number;
   scenarioId: number;
-  path: string; // s3 path
+  path: string | null; // s3 path
   base64: string;
 }
 
 class ScenarioFile extends Model<ScenarioFileInterface> implements ScenarioFileInterface {
   public id!: number;
 
-  public scenarioId: number;
-  public path: string; // s3 path
-  public base64: string;
+  public scenarioId!: number;
+  public path!: string; // s3 path
+  public base64!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

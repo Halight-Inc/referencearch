@@ -13,7 +13,7 @@ const createScenario = async (req: Request, res: Response, next: NextFunction) =
 
 const addScenarioFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const scenarioId = req.params.scenarioId;
+    const scenarioId = Number(req.params.scenarioId);
     await db.ScenarioFile.create({
       scenarioId: scenarioId,
       path: null,
@@ -30,11 +30,11 @@ const addScenarioFile = async (req: Request, res: Response, next: NextFunction) 
 
 const getScenarioFiles = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const scenarioId = req.params.scenarioId; // Get scenarioId from URL parameter
+    const scenarioId = req.params.scenarioId;
 
     const files = await db.ScenarioFile.findAll({
       where: {
-        scenarioId: scenarioId, // Use the extracted scenarioId here
+        scenarioId: scenarioId,
       },
       // Optional: You might want to exclude the large base64 field
       // if you only need metadata (like path or id) in some contexts.

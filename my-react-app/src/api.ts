@@ -50,7 +50,7 @@ export const createScenario = async (scenario: {
 };
 
 export const addScenarioFile = async (scenario: {
-    scenarioId: number;
+    scenarioId: string;
     base64: string;
 }, token: string) => {
     const response = await axios.post(`${API_URL}/v1/scenarios/${scenario.scenarioId}/files`, {
