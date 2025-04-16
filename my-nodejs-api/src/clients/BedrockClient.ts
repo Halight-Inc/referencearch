@@ -39,21 +39,15 @@ export class BedrockClient implements IAIAgent {
 
   // --- AWS SDK Implementation ---
   async runPrompt(systemContext: string, prompt: string, sessionId: string): Promise<string> {
-    const command = new InvokeAgentCommand({
-      agentId: this.agentId,
-      agentAliasId: this.agentAliasId,
-      sessionId, // Ensure sessionId is unique per session and ideally user
-      // Combine system context and user prompt for the input text
-      // Adjust the formatting if your agent expects something different
-      inputText: `${systemContext}\n\nUser: ${prompt}`,
-      enableTrace: false, // Set to true for debugging if needed
+    const command = new InvokeInlineAgentCommand({
+      foundationModel: 'amazon.nova-pro-v1:0',
+      sessionId: sessionId, // Ensure sessionId is unique per session and ideally user
+      instruction: `${systemContext}`,
+      inputText: `${prompt}`,
+      enableTrace: true, // Set to true for debugging if needed
     });
 
-    //ORGINAL _ InvokeAgentCommand
-    //InvokeInlineAgentCommand
-    //instruction 
-    //model
-    //agentname
+    // TODO: extract Trace data and save to S3
 
     try {
       const response = await this.client.send(command);
