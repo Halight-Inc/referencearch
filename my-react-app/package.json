@@ -12,7 +12,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.787.0",
     "@coreui/chartjs": "^4.1.0",
     "@coreui/coreui": "^5.3.1",
     "@coreui/icons": "^3.0.1",
@@ -81,8 +80,7 @@
     "redux": "5.0.1",
     "simplebar-react": "^3.3.0",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
@@ -100,7 +98,6 @@
     "@types/prop-types": "^15.7.14",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitejs/plugin-react-swc": "^3.5.0",
