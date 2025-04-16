@@ -143,7 +143,7 @@ const addScenarioFile = async (req: Request, res: Response, next: NextFunction) 
     const uniqueFilename = `${uuidv4()}.${fileExtension}`;
     const s3Key = `${scenarioId}/files/${uniqueFilename}`; // Example S3 path structure
 
-    const s3BucketName = 'halight-coachoncue-scenarios';
+    const s3BucketName = config.awsS3BucketName;
     const s3Region = 'us-east-1';
 
     const putObjectParams = {

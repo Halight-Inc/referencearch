@@ -7,7 +7,7 @@ import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
 // import { Skeleton } from "@/components/ui/skeleton";
-import { getScenario, getSimulationById, updateSimulation } from '@/api.ts';
+import { getScenario, getScenarioFiles, getSimulationById, updateSimulation } from '@/api.ts';
 import { CoachonCueScenarioAttributes, SimulationAttributes, ChatMessage } from "@/lib/schema";
 import axios from 'axios';
 import SimulationBuilder from "@/components/SimulationBuilder";
@@ -25,7 +25,14 @@ export default function Simulation() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
-  
+
+  const [scenarioFiles, setScenarioFiles] = useState<Array<{
+    id: string;
+    scenarioId: string;
+    path: string | null; // s3 path
+    base64: string | null;
+  }>>([]);
+
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
   const [isBuilding, setIsBuilding] = useState(true);
   const [isContextShown, setIsContextShown] = useState(true);
@@ -42,6 +49,7 @@ export default function Simulation() {
         var result = await getSimulationById(simulationId, token);
         const scenarioId = result.scenarioId as string;
         setScenario(await getScenario(scenarioId, token));
+        setScenarioFiles(await getScenarioFiles(scenarioId, token));
       } catch (error) {
         console.error('Error fetching scenarios:', error);
       } finally {
@@ -173,7 +181,8 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
         "prompt": userMessageText,
         // send something like the jwt, base encode it (Buffer?) - try gemini
         "sessionId": simulationId, // Manage session IDs properly
-        "agentType": "bedrock"
+        "agentType": "bedrock",
+        "fileUrls": scenarioFiles.length > 0 ? scenarioFiles.map(file => file.path) : undefined,
       };
 
       const response = await axios.post<{ sessionId: string; completion: string }>(
