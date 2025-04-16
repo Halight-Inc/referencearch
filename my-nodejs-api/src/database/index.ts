@@ -3,7 +3,7 @@ import config from '../config/config';
 import { initUser, User } from './models/user';
 import { initItem, Item } from './models/item';
 //import { initCoachonCuePersona, CoachonCuePersona } from './models/coachoncue_personas';
-import { initCoachonCueScenario, CoachonCueScenario } from './models/coachoncue_scenarios';
+import { initCoachonCueScenario, CoachonCueScenario } from './models/scenarios';
 
 const sequelize = new Sequelize({
   dialect: 'postgres',

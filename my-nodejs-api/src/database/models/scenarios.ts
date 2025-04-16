@@ -1,6 +1,6 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-interface CoachonCueScenarioAttributes {
+interface ScenarioAttributes {
   id?: number;
 
   // --- Scenario fields ---
@@ -26,7 +26,7 @@ interface CoachonCueScenarioAttributes {
   }
 }
 
-class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements CoachonCueScenarioAttributes {
+class Scenario extends Model<ScenarioAttributes> implements ScenarioAttributes {
   public id!: number;
 
   // Scenario fields
@@ -55,8 +55,8 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
   public readonly updatedAt!: Date;
 }
 
-const initCoachonCueScenario = (sequelize: Sequelize): void => {
-  CoachonCueScenario.init(
+const initScenario = (sequelize: Sequelize): void => {
+  Scenario.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -95,10 +95,10 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
       },
     },
     {
-      tableName: 'coachoncue_scenarios',
+      tableName: 'scenarios',
       sequelize,
     }
   );
 };
 
-export { initCoachonCueScenario, CoachonCueScenario };
+export { initScenario, Scenario };
