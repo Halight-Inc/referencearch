@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 // import { AiPersonality } from "@shared/schema";
 import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
 import ReactMarkdown from 'react-markdown';
-import { ChatMessage } from '@/pages/Simulation.tsx';
+import { ChatMessage } from '@/lib/schema.ts';
 
 interface TextModeProps {
   messages: Array<ChatMessage>;
