@@ -30,13 +30,14 @@ export default function VoiceMode({ aiPersonality, onSendMessage }: VoiceModePro
     }
   };
 
+  const fallbackAvatarUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200";
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4">
       <div className="text-center max-w-md">
         <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4">
           <img 
-            // src={aiPersonality.avatarUrl}
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
+            src={aiPersonality.avatarUrl || fallbackAvatarUrl}
             alt={`${aiPersonality.name} avatar`}
             className="w-full h-full object-cover"
           />
