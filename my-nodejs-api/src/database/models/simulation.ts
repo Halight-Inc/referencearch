@@ -34,7 +34,7 @@ const initSimulation = (sequelize: Sequelize): void => {
       // Scenario fields
       score: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       }
       ,
       scenarioId: {
@@ -48,7 +48,7 @@ const initSimulation = (sequelize: Sequelize): void => {
       ,
       userId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'users',
           key: 'id',
@@ -62,4 +62,4 @@ const initSimulation = (sequelize: Sequelize): void => {
   );
 };
 
-export { initSimulation, Simulation };
+export { initSimulation, Simulation, SimulationAttributes };

@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import db from '../../database';
+import { WhereOptions } from 'sequelize'; // Import WhereOptions
+import { SimulationAttributes } from '../../database/models/simulation'; // Import the SimulationAttributes type
 
 /**
  * @swagger
@@ -95,11 +97,19 @@ const getSimulation = async (req: Request, res: Response, next: NextFunction) =>
  * @swagger
  * /v1/simulation:
  *   get:
- *     summary: Get all simulations
- *     description: Retrieves a list of all simulation records.
+ *     summary: Get all simulations, optionally filtered by scenarioId
+ *     description: Retrieves a list of simulation records. Can be filtered by scenario ID using a query parameter.
  *     tags: [Simulations]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: scenarioId
+ *         required: false
+ *         description: The UUID of the scenario to filter simulations by.
+ *         schema:
+ *           type: string
+ *           format: uuid
  *     responses:
  *       200:
  *         description: A list of simulations retrieved successfully.
@@ -116,7 +126,25 @@ const getSimulation = async (req: Request, res: Response, next: NextFunction) =>
  */
 const getAllSimulation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const simulations = await db.Simulation.findAll();
+        
+        const { scenarioId } = req.query; // Get scenarioId from query parameters
+
+        // Build the where clause conditionally
+        const whereClause: WhereOptions<SimulationAttributes> = {};
+        if (scenarioId) {
+            // Optional: Add validation for scenarioId format (UUID) if desired
+            whereClause.scenarioId = scenarioId as string;
+        }
+
+        // Optional: Filter by the logged-in user if your auth middleware adds user info
+        // if (req.user && req.user.id) {
+        //    whereClause.userId = req.user.id;
+        // }
+
+        const simulations = await db.Simulation.findAll({
+             where: whereClause,
+             order: [['createdAt', 'DESC']] // Order by most recent first
+        });
         res.json(simulations);
     } catch (error) {
         console.error('Error getting all simulations:', error);
