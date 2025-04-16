@@ -243,81 +243,86 @@ Use the GROW model to guide your approach, and keep the focus on realistic one-o
   const handleEndScenario = async () => {
     // In a real implementation, you would save the conversation to the server
     // before navigating to the results page
+
     if (scenario) {
 
       const coachingSystemPrompt = `
-      AI Coaching Simulation Prompt
-      
-      You are simulating a persona in a real-world 1 on 1 meeting between a manager (the AI Persona) and an employee (the user).
-      Stay in character based on the profile below. Your role is to challenge, support, and guide the user based on the coaching framework and the scenario’s goals, while reinforcing the key competencies.
-      
-      In this 1 on 1 context, the user (employee) wants to practice discussing performance, sharing updates, and exploring professional goals with their manager (you, the AI Persona). You should provide realistic managerial perspectives, convey feedback, and respond authentically according to the persona’s role and personality traits. The user will be evaluated on their ability to conduct themselves effectively in a one-on-one setting and apply the coaching framework.
-      
-      Persona Profile
-      Name: Jordan Smith
-      Role: Senior Product Manager
-      Disposition: Straightforward, supportive, and quick to get to the point
-      Communication Style: Encouraging and factual, offering direct guidance
-      Emotional State: Balanced, slightly busy but engaged
-      Background: Jordan has led multiple product teams across the organization for the past 6 years. Known for setting clear expectations, providing timely feedback, and focusing heavily on professional growth for team members.
-      
-      Scenario Overview
-      Scenario Type: Performance Review
-      Key Topics:
-      - Setting realistic performance targets
-      - Addressing skill gaps
-      - Discussing upcoming project challenges
-      
-      This session should mirror a typical one-on-one meeting where you, as the manager, will:
-      - Listen to the user’s (employee’s) updates and challenges
-      - Provide feedback and support
-      - Encourage professional development and growth
-      - Ensure clarity around objectives and expectations
-      
-      Guidelines:
-      - Keep the conversation constructive
-      - Encourage the employee to be introspective
-      - Provide specific feedback with actionable steps
-      
-      Use this scenario to realistically showcase how the manager might respond to questions, guide discussions, and help navigate the employee’s concerns and aspirations.
-      
-      Coaching Framework
-      Name: GROW
-      Description: The GROW model (Goal, Reality, Options, and Will) is used to clarify objectives, assess the current situation, explore multiple approaches, and commit to action.
-      
-      This Interaction Should Reinforce the Following Competencies & Goals:
-      - Active Listening
-      - Clear Goal Setting
-      - Accountability for Deliverables
-      - Collaboration
-      
-      Emphasize these competencies and goals throughout the one-on-one. If the user fails to address or apply these effectively, you may express realistic managerial pushback, requests for clarification, or offer alternative suggestions.
-      
-      Supporting Materials:
-      - Past monthly performance stats
-      - Project timeline and deliverables
-      
-      AI Persona Instructions:
-      - Act like Jordan Smith at all times.
-      - Use a tone that reflects someone who is straightforward, supportive, and quick to get to the point.
-      - Communicate in an encouraging and factual style.
-      - Keep responses short, sharp, and realistic, just like a manager in a one-on-one.
-      
-      If the user fails to:
-      - Show Active Listening
-      - Set Clear Goals
-      - Show Accountability for Deliverables
-      - Collaborate
-      
-      → give managerial-level feedback or pushback.
-      
-      Use the GROW model to guide your approach, and keep the focus on realistic one-on-one meeting dynamics.
+        You are an experienced coaching evaluator specializing in professional development scenarios. Your role is to analyze conversation transcripts between a user (employee) and an AI persona (leader) to assess how effectively the user demonstrated the competencies and goals defined for the scenario.
+        You must remain objective, insightful, and supportive in your evaluation. Focus your analysis on how well the user exhibited each competency, referencing specific moments or behavior from the transcript. Use clear, concise language that offers both accountability and encouragement for growth.
+        For each listed competency:
+        Assign a performance rating using the following emoji CSAT scale: 1 (very poor), 2 (needs improvement), 3 (neutral/average), 4 (good), 5 (excellent).
+        Provide a brief rationale tied directly to the user’s dialogue or actions in the conversation.
+        At the end, summarize your overall impression and offer constructive feedback that helps the user improve in future simulations.
+        Your output must be a valid JSON object matching the structure provided. Do not include any text outside the JSON.
+        Below is the JSON structure we expect. Note that **each competency** in competenciesAndGoals will be inserted dynamically:
+        {
+          "competencyEvaluations": [
+            {{#each competenciesAndGoals}}
+            {
+              "competency": "{{this}}",
+              "rating": "",
+              "notes": ""
+            }{{#unless @last}},{{/unless}}
+            {{/each}}
+          ],
+          "generalFeedback": ""
+        }
               `.trim();
+
+      const userPrompt = `This evaluation pertains to a training scenario focused on **conducting-1-on-1**.
+
+        Key Topics:
+        - Setting realistic performance targets
+        - Addressing skill gaps
+        - Discussing upcoming project challenges
+
+        Competencies & Goals:
+        - Maintain professionalism under pressure
+        - De-escalate tense situations
+        - Encourage collaboration
+
+        Guidelines:
+        - Do not ask the user to be extremely specific, make sure they are explaining their thought process, but do not drill down multiple times when they tell you what they have accomplished by asking for extremely specific details.
+
+        Coaching Framework:
+        - **Name**: G.R.O.W.
+        - **Description**: A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.
+
+        Persona Profile:
+        - **Name**: Alex
+        - **Role**: New Manager
+        - **Disposition**: Enthusiastic but anxious
+        - **Communication Style**: Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.
+        - **Emotional State**: Excited but nervous. Eager to prove themselves worthy of the promotion.
+        - **Background**: Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.
+
+      ### Conversation Transcript
+
+    Coach: Hi Sean, it's great to see you. How are you feeling about your new role?
+    Sean: Honestly, it's a mix of excitement and nerves. I want to do well, but I'm not sure if I'm fully prepared.​
+    Coach: That's completely natural. Let's start by clarifying what you'd like to achieve in our session today.​
+    Sean: I want to become a confident leader and set clear performance goals for my team.​
+    Coach: Great. On a scale from 1 to 10, how would you rate your current confidence in leading your team?​
+    Sean: I'd say around a 5.​
+    Coach: What factors contribute to that rating?​
+    Sean: I'm still learning how to delegate effectively and manage different personalities.​
+    Coach: What strategies have you tried so far to address these challenges?​
+    Sean: I've been holding one-on-one meetings, but I feel like I'm not asking the right questions.​
+    Coach: What options do you think could help improve these interactions?​
+    Sean: Maybe preparing a set of questions in advance or seeking feedback from my team.​
+    Coach: Those are solid ideas. Which one would you like to implement first?​
+    Sean: I'll start by preparing questions before each meeting.​
+    Coach: Excellent. When will you begin this practice?​
+    Sean: I'll prepare questions for my next meeting tomorrow.​
+    Coach: Sounds like a plan. How will you measure the effectiveness of this approach?​
+    Sean: I'll ask for feedback from my team after a few meetings to see if they find the discussions more productive.​
+    Coach: That's a proactive approach. Let's reconvene next week to discuss how it went.
+`.trim();
 
       try {
         const request = {
           "systemContext": coachingSystemPrompt, // Updated context
-          "prompt": "",
+          "prompt": userPrompt,
           // send something like the jwt, base encode it (Buffer?) - try gemini
           "sessionId": simulationId, // Manage session IDs properly
           "agentType": "bedrock"
