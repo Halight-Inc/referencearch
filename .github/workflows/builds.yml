@@ -1,9 +1,9 @@
 name: Builds
 
 on:
-  push:
-    branches-ignore:
-      - main
+#  push:
+#    branches-ignore:
+#      - main
   pull_request:  # No branch filter = all PRs
 
 jobs:
