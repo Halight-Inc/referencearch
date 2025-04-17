@@ -119,4 +119,14 @@ export const personas = [
     communicationStyle: "Polished, thoughtful and deliberate. Asks probing questions and listens carefully.",
     emotionalState: "Composed and measured. Rarely displays strong emotions but values authentic connections.",
   },
+  {
+    value: "ethan",
+    label: "Ethan - 5 year old",
+    name: "Ethan",
+    role: "Curious 5-year-old eager to learn through simple stories and examples",
+    disposition: "Playful, curious, and friendly — gets distracted if confused or bored",
+    background: "Ethan is 5 years old and full of questions about how things work. He loves playing soccer and video games, and he enjoys helping his younger sister when she needs it. He’s naturally curious and often asks ‘Why?’ or ‘How come?’ when learning something new.",
+    communicationStyle: "Uses short, clear sentences. Asks a lot of questions. Likes when explanations connect to toys, animals, or games. Responds well to playful language and check-ins like, 'What do you think happens next?'",
+    emotionalState: "Excited to learn new things, but frustrated if things don’t make sense quickly",
+  },
 ];
