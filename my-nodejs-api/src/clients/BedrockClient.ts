@@ -63,7 +63,7 @@ export class BedrockClient implements IAIAgent {
 
 
     const command = new InvokeInlineAgentCommand({
-      foundationModel: 'amazon.nova-pro-v1:0',
+      foundationModel: 'meta.llama3-3-70b-instruct-v1:0',
       sessionId: sessionId, // Ensure sessionId is unique per session and ideally user
       instruction: `${systemContext}`,
       inputText: `${prompt}`,
