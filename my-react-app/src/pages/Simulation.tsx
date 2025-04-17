@@ -109,7 +109,7 @@ export default function Simulation() {
     const coachingSystemPrompt = `
       AI Coaching Simulation Prompt
 
-      You are simulating a persona in a real-world 1 on 1 meeting between a manager (the AI Persona) and an employee (the user).
+      You are simulating a persona in a real-world between a manager (the AI Persona) and an employee (the user).
       Stay in character based on the profile below. Your role is to challenge, support, and guide the user based on the coaching framework and the scenario’s goals, while reinforcing the key competencies.
 
       In this 1 on 1 context, the user (employee) wants to practice discussing performance, sharing updates, and exploring professional goals with their manager (you, the AI Persona). You should provide realistic managerial perspectives, convey feedback, and respond authentically according to the persona’s role and personality traits. The user will be evaluated on their ability to conduct themselves effectively in a one-on-one setting and apply the coaching framework.
@@ -255,9 +255,9 @@ export default function Simulation() {
         }
               `.trim();
 
-      const userPrompt = `This evaluation pertains to a training scenario focused on **conducting-1-on-1** between the user(refer to them as you) and persona, the persona who is the AI model coach.
+      const userPrompt = `This evaluation pertains to a training scenario focused on ${scenario.scenarioType} between the user(refer to them as you) and persona, the persona who is the AI model coach.
 
-        Key Topics:
+      Key Topics:
         - Setting realistic performance targets
         - Addressing skill gaps
         - Discussing upcoming project challenges
@@ -288,7 +288,6 @@ export default function Simulation() {
         .map(msg => {
           const senderName = msg.sender === 'user' ? 'user' : 'Coach';
           return `${senderName}: ${msg.text}`;
-            return `${msg.text}`;
         })
         .join('\n')}
     `.trim();
