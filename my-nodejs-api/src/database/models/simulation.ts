@@ -14,9 +14,9 @@ interface SimulationAttributes {
   userId: string;
   chatMessages: ChatMessage[]; // Optional chat messages, backend might default it
   simulationResult: {
-    competencyEvaluation: {
+    competencyEvaluations: {
       competency: string;
-      rating: string;
+      rating: number;
       notes: string;
     }[],
     generalFeedback: string;
@@ -37,9 +37,9 @@ class Simulation extends Model<SimulationAttributes> implements SimulationAttrib
   public chatMessages!: ChatMessage[]; // Optional chat messages, backend might default it
 
   public simulationResult!: {
-    competencyEvaluation: {
+    competencyEvaluations: {
       competency: string;
-      rating: string;
+      rating: number;
       notes: string;
     }[],
     generalFeedback: string;
