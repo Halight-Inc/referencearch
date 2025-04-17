@@ -1100,92 +1100,115 @@ function inactiveSessionChecker(bedrockClient: NovaSonicBidirectionalStreamClien
 async function ioHandler(bedrockClient: NovaSonicBidirectionalStreamClient) {
   const io: Server = await getServerInstance();
 
-  console.log("============socket server instance received");
+  console.log("============ Socket.IO server instance received, ready for connections");
 
   io.on('connection', (socket) => {
-    console.log('============New client connected:', socket.id);
-
-    // Create a unique session ID for this client
+    // Each new connection gets a unique socket.id from Socket.IO.
+    // We use this as the session identifier for our Bedrock stream.
     const sessionId = socket.id;
+    console.log(`============ New client connected: ${sessionId}`);
 
     try {
-      // Create session with the new API
+      // --- Session Creation for the New Connection ---
+      // Create a new StreamSession linked to this specific socket connection (sessionId).
       const session = bedrockClient.createStreamSession(sessionId);
+      console.log(`============ StreamSession created for: ${sessionId}`);
 
-      bedrockClient.initiateSession(sessionId);
+      // Initiate the underlying Bedrock bidirectional stream for this session.
+      // This runs asynchronously and starts processing events added to the session queue.
+      bedrockClient.initiateSession(sessionId).catch(initError => {
+        // Handle potential errors during the async initiation
+        console.error(`Failed to initiate Bedrock session ${sessionId}:`, initError);
+        socket.emit('error', {
+          message: 'Failed to initialize backend stream session',
+          details: initError instanceof Error ? initError.message : String(initError),
+        });
+        // Disconnect the client if session initiation fails critically
+        socket.disconnect(true);
+        // Ensure cleanup even if initiation failed partially
+        bedrockClient.forceCloseSession(sessionId);
+      });
 
-      setInterval(() => {
-        const connectionCount = Object.keys(io.sockets.sockets).length;
-			// console.log(`Active socket connections: ${connectionCount}`);
-      }, 60000);
-
-      // Set up event handlers
+      // --- Event Forwarding: Bedrock -> Client ---
+      // Register handlers to forward events from the Bedrock stream (via StreamSession)
+      // back to the connected Socket.IO client.
       session.onEvent('contentStart', (data) => {
-			console.log('contentStart:', data);
+        // console.log(`[${sessionId}] contentStart:`, data);
         socket.emit('contentStart', data);
       });
 
       session.onEvent('textOutput', (data) => {
-			console.log('Text output:', data);
+        // console.log(`[${sessionId}] Text output:`, data);
         socket.emit('textOutput', data);
       });
 
       session.onEvent('audioOutput', (data) => {
-        console.log('============Audio output received, sending to client');
-        socket.emit('audioOutput', data);
+        // console.log(`[${sessionId}] Audio output received, sending to client`);
+        socket.emit('audioOutput', data); // Forward raw audio data
       });
 
       session.onEvent('error', (data) => {
-        console.error('Error in session:', data);
-        socket.emit('error', data);
+        console.error(`[${sessionId}] Error in Bedrock session:`, data);
+        socket.emit('error', data); // Forward Bedrock errors
       });
 
       session.onEvent('toolUse', (data) => {
-        console.log('============Tool use detected:', data.toolName);
+        console.log(`[${sessionId}] Tool use detected:`, data.toolName);
         socket.emit('toolUse', data);
       });
 
       session.onEvent('toolResult', (data) => {
-        console.log('============Tool result received');
+        console.log(`[${sessionId}] Tool result received`);
         socket.emit('toolResult', data);
       });
 
       session.onEvent('contentEnd', (data) => {
-        console.log('============Content end received');
+        console.log(`[${sessionId}] Content end received`);
         socket.emit('contentEnd', data);
       });
 
       session.onEvent('streamComplete', () => {
-        console.log('============Stream completed for client:', socket.id);
+        console.log(`[${sessionId}] Bedrock stream completed`);
         socket.emit('streamComplete');
+        // Optionally, you might want to disconnect the client after stream completion
+        // socket.disconnect(true);
       });
 
-      // Simplified audioInput handler without rate limiting
-      socket.on('audioInput', async (audioData) => {
-        try {
-          // Convert base64 string to Buffer
-          const audioBuffer = typeof audioData === 'string'
-            ? Buffer.from(audioData, 'base64')
-            : Buffer.from(audioData);
+      // --- Event Handling: Client -> Bedrock ---
+      // Listen for events coming *from* the Socket.IO client and interact
+      // with the corresponding StreamSession.
 
-          // Stream the audio
+      socket.on('audioInput', async (audioData) => {
+        // Basic validation: Check if the session is still active before processing
+        if (!bedrockClient.isSessionActive(sessionId)) {
+          console.warn(`[${sessionId}] Received audioInput for inactive session. Ignoring.`);
+          return;
+        }
+        try {
+          // Convert base64 string or ArrayBuffer to Buffer
+          const audioBuffer = Buffer.isBuffer(audioData)
+            ? audioData
+            : Buffer.from(audioData, typeof audioData === 'string' ? 'base64' : undefined);
+
+          // Stream the audio chunk via the session object
           await session.streamAudio(audioBuffer);
 
-        } catch(error) {
-          console.error('Error processing audio:', error);
+        } catch (error) {
+          console.error(`[${sessionId}] Error processing audioInput:`, error);
           socket.emit('error', {
-            message: 'Error processing audio',
+            message: 'Error processing audio input on server',
             details: error instanceof Error ? error.message : String(error),
           });
         }
       });
 
       socket.on('promptStart', async () => {
+        if (!bedrockClient.isSessionActive(sessionId)) return;
         try {
-          console.log('============Prompt start received');
+          console.log(`[${sessionId}] Prompt start received`);
           await session.setupPromptStart();
-        } catch(error) {
-          console.error('Error processing prompt start:', error);
+        } catch (error) {
+          console.error(`[${sessionId}] Error processing promptStart:`, error);
           socket.emit('error', {
             message: 'Error processing prompt start',
             details: error instanceof Error ? error.message : String(error),
@@ -1194,11 +1217,14 @@ async function ioHandler(bedrockClient: NovaSonicBidirectionalStreamClient) {
       });
 
       socket.on('systemPrompt', async (data) => {
+        if (!bedrockClient.isSessionActive(sessionId)) return;
         try {
-          console.log('============System prompt received', data);
-          await session.setupSystemPrompt(undefined, data);
-        } catch(error) {
-          console.error('Error processing system prompt:', error);
+          console.log(`[${sessionId}] System prompt received`);
+          // Ensure data is a string
+          const systemPromptContent = typeof data === 'string' ? data : JSON.stringify(data);
+          await session.setupSystemPrompt(undefined, systemPromptContent);
+        } catch (error) {
+          console.error(`[${sessionId}] Error processing systemPrompt:`, error);
           socket.emit('error', {
             message: 'Error processing system prompt',
             details: error instanceof Error ? error.message : String(error),
@@ -1206,12 +1232,13 @@ async function ioHandler(bedrockClient: NovaSonicBidirectionalStreamClient) {
         }
       });
 
-      socket.on('audioStart', async (data) => {
+      socket.on('audioStart', async () => {
+        if (!bedrockClient.isSessionActive(sessionId)) return;
         try {
-          console.log('============Audio start received', data);
+          console.log(`[${sessionId}] Audio start received`);
           await session.setupStartAudio();
-        } catch(error) {
-          console.error('Error processing audio start:', error);
+        } catch (error) {
+          console.error(`[${sessionId}] Error processing audioStart:`, error);
           socket.emit('error', {
             message: 'Error processing audio start',
             details: error instanceof Error ? error.message : String(error),
@@ -1220,71 +1247,101 @@ async function ioHandler(bedrockClient: NovaSonicBidirectionalStreamClient) {
       });
 
       socket.on('stopAudio', async () => {
+        if (!bedrockClient.isSessionActive(sessionId)) {
+           console.warn(`[${sessionId}] Received stopAudio for inactive session. Ignoring.`);
+           return;
+        }
         try {
-          console.log('============Stop audio requested, beginning proper shutdown sequence');
+          console.log(`[${sessionId}] Stop audio requested by client, beginning graceful shutdown sequence`);
 
-          // Chain the closing sequence
-          await Promise.all([
-            session.endAudioContent()
-              .then(() => session.endPrompt())
-              .then(() => session.close())
-              .then(() => console.log('============Session cleanup complete')),
-          ]);
-        } catch(error) {
-          console.error('Error processing streaming end events:', error);
+          // Perform the graceful shutdown sequence managed by the session/client class
+          await session.close(); // This should internally call sendContentEnd, sendPromptEnd, sendSessionEnd
+
+          console.log(`[${sessionId}] Graceful session shutdown complete via stopAudio`);
+          // Optionally disconnect after graceful shutdown
+          // socket.disconnect(true);
+        } catch (error) {
+          console.error(`[${sessionId}] Error processing stopAudio (graceful shutdown):`, error);
           socket.emit('error', {
-            message: 'Error processing streaming end events',
+            message: 'Error during graceful stream shutdown',
             details: error instanceof Error ? error.message : String(error),
           });
+          // Attempt force close if graceful shutdown fails
+          console.log(`[${sessionId}] Attempting force close after failed graceful shutdown.`);
+          bedrockClient.forceCloseSession(sessionId);
         }
       });
 
-      // Handle disconnection
-      socket.on('disconnect', async () => {
-        console.log('============Client disconnected abruptly:', socket.id);
+      // --- Disconnection Handling ---
+      socket.on('disconnect', async (reason) => {
+        // This event fires when the Socket.IO connection drops for any reason.
+        // The goal here is to clean up the Bedrock resources associated with *this specific*
+        // sessionId (which is the socket.id at the time of connection).
+        console.log(`============ Client disconnected: ${sessionId}, Reason: ${reason}`);
 
-        if(bedrockClient.isSessionActive(sessionId)) {
+        // Check if the session associated with this ID was still considered active
+        // by our Bedrock client logic when the disconnect happened.
+        if (bedrockClient.isSessionActive(sessionId)) {
+          console.log(`============ Disconnected session ${sessionId} was active. Initiating cleanup.`);
+
+          // Prevent duplicate cleanup attempts if already in progress
+          if (bedrockClient.isCleanupInProgress(sessionId)) {
+            console.log(`============ Cleanup already in progress for ${sessionId}, skipping.`);
+            return;
+          }
+
           try {
-            console.log(`============Beginning cleanup for abruptly disconnected session: ${socket.id}`);
-
-            // Add explicit timeouts to avoid hanging promises
-            const cleanupPromise = Promise.race([
-              (async () => {
-                await session.endAudioContent();
-                await session.endPrompt();
-                await session.close();
-              })(),
-              new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Session cleanup timeout')), 3000),
-              ),
-            ]);
-
-            await cleanupPromise;
-            console.log(`============Successfully cleaned up session after abrupt disconnect: ${socket.id}`);
-          } catch(error) {
-            console.error(`Error cleaning up session after disconnect: ${socket.id}`, error);
+            // Attempt a graceful shutdown first. This tries to send closing messages
+            // to Bedrock, although they might fail if the connection is truly gone.
+            // Use the bedrockClient's closeSession method which orchestrates this.
+            console.log(`============ Attempting graceful close for disconnected session: ${sessionId}`);
+            await bedrockClient.closeSession(sessionId); // This method handles the sequence and removal
+            console.log(`============ Graceful close successful for disconnected session: ${sessionId}`);
+          } catch (error) {
+            // If graceful close fails (e.g., timeout, network error sending final events),
+            // proceed to force close.
+            console.error(`Graceful close failed for disconnected session ${sessionId}:`, error);
+            console.log(`============ Attempting force close for session: ${sessionId}`);
             try {
+              // Force close immediately cleans up server-side resources without sending closing events.
               bedrockClient.forceCloseSession(sessionId);
-              console.log(`============Force closed session: ${sessionId}`);
-            } catch(e) {
-              console.error(`Failed even force close for session: ${sessionId}`, e);
-            }
-          } finally {
-            // Make sure socket is fully closed in all cases
-            if(socket.connected) {
-              socket.disconnect(true);
+              console.log(`============ Force close successful for session: ${sessionId}`);
+            } catch (forceCloseError) {
+              console.error(`Failed to force close session ${sessionId} after graceful close failure:`, forceCloseError);
+              // At this point, the inactiveSessionChecker is the final safety net.
             }
           }
+        } else {
+          // If the session was already marked inactive (e.g., due to explicit close, timeout),
+          // no further action is needed here.
+          console.log(`============ Session ${sessionId} was already inactive or cleaned up. No action needed on disconnect.`);
         }
+
+        // --- IMPORTANT ---
+        // A reconnection attempt by the *same* client will trigger the 'connection' event handler again.
+        // Socket.IO will assign a *NEW* socket.id to that new connection.
+        // This 'io.on('connection', ...)' handler will then create a *NEW* StreamSession
+        // associated with that *NEW* socket.id/sessionId.
+        // There is no server-side logic needed here to "handle the new sid" explicitly;
+        // the connection event naturally handles new connections and their IDs.
       });
 
-    } catch(error) {
-      console.error('Error creating session:', error);
+    } catch (error) {
+      // Catch errors during the initial session setup within the 'connection' handler
+      console.error(`Error setting up session for ${sessionId}:`, error);
       socket.emit('error', {
-        message: 'Failed to initialize session',
+        message: 'Failed to initialize session on server',
         details: error instanceof Error ? error.message : String(error),
       });
-      socket.disconnect();
+      // Disconnect the client if the initial setup fails critically
+      socket.disconnect(true);
+      // Ensure cleanup if session creation failed partially
+      if (sessionId && bedrockClient.isSessionActive(sessionId)) {
+         bedrockClient.forceCloseSession(sessionId);
+      }
     }
   });
+
+  // Keep the inactive session checker running
+  inactiveSessionChecker(bedrockClient);
 }
