@@ -1,16 +1,16 @@
 export class ObjectExt {
-    static exists(obj) {
+    static exists(obj: never) {
         return obj !== undefined && obj !== null;
     }
 
-    static checkArgument(condition, message) {
+    static checkArgument(condition: boolean, message: string) {
         if (!condition) {
             throw TypeError(message);
         }
     }
 
-    static checkExists(obj, message) {
-        if (ObjectsExt.exists(obj)) {
+    static checkExists(obj: never, message: string) {
+        if (ObjectExt.exists(obj)) {
             throw TypeError(message);
         }
     }
