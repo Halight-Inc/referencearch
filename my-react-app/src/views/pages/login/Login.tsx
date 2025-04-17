@@ -53,7 +53,6 @@ const Login: React.FC = () => {
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer className='bg-login'>
-        <img src="https://energizelms.com/wp-content/uploads/2025/03/logo.png" alt="EnergizeLMS Logo" />         
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>
