@@ -39,6 +39,7 @@ export default function Simulation() {
 
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isEndingScenario, setIsEndingScenario] = useState(false);
 
   const token = localStorage.getItem('jwtToken') as string;
 
@@ -263,8 +264,10 @@ export default function Simulation() {
 
   // Handle ending the scenario and going to results
   const handleEndScenario = async () => {
-    // In a real implementation, you would save the conversation to the server
-    // before navigating to the results page
+    // Prevent multiple clicks while processing
+    if (isEndingScenario) return;
+
+    setIsEndingScenario(true);
 
     if (scenario) {
 
@@ -452,6 +455,8 @@ export default function Simulation() {
       }
       catch (error) {
         console.error('Error sending message:', error);
+      } finally {
+        setIsEndingScenario(false);
       }
 
     }
@@ -511,9 +516,21 @@ export default function Simulation() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleEndScenario}
-              className="py-1.5 px-3 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded-lg transition-colors"
+              disabled={isEndingScenario} // Disable button while loading
+              className="py-1.5 px-3 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[110px]" // Added min-width for consistent size
             >
-              End Scenario
+              {isEndingScenario ? (
+                <>
+                  {/* Simple Spinner SVG */}
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Ending...
+                </>
+              ) : (
+                'End Scenario'
+              )}
             </button>
             <button
               onClick={() => setIsContextShown(true)}
