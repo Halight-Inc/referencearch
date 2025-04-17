@@ -54,22 +54,22 @@ export const competenciesAndGoals = [
 export const coachingFrameworks = [
   {
     value: "grow",
-    name: "G.R.O.W.",
+    name: "G.R.O.W. - Best used when clear goals, structured guidance, or measurable outcomes are needed.",
     description: "A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.",
   },
   {
     value: "clear",
-    name: "C.L.E.A.R.",
+    name: "C.L.E.A.R. - Best used when trust-building, open dialogue, and reflective progress are key.",
     description: "Contracting, Listening, Exploring, Action, Review. A coaching model that emphasizes establishing clear expectations and structured follow-up.",
   },
   {
     value: "oskar",
-    name: "O.S.K.A.R.",
+    name: "O.S.K.A.R. - Best used when focusing on strengths, boosting morale, or making quick progress.",
     description: "Outcome, Scaling, Know-how, Affirm & Action, Review. A solution-focused coaching approach that emphasizes positive outcomes.",
   },
   {
     value: "fuel",
-    name: "F.U.E.L.",
+    name: "F.U.E.L. - Best used when driving mindset shifts, uncovering root causes, or enabling transformation.",
     description: "Frame the conversation, Understand the current state, Explore the desired state, and Lay out a success plan. A coaching model focused on transformation.",
   },
 ];

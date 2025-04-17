@@ -99,7 +99,7 @@ export default function SimulationDrawer({
     try {
       // Call the API to create a new simulation record
       // The backend should associate the current user based on the token
-      const newSimulation = await createSimulation({ scenarioId: scenario.id } as Simulation, token);
+      const newSimulation = await createSimulation({ scenarioId: scenario.id, status: "In Progress" } as Simulation, token);
 
       // Check if we got a valid simulation ID back
       if (newSimulation && newSimulation.id) {
