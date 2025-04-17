@@ -258,32 +258,35 @@ export default function Simulation() {
       const userPrompt = `This evaluation pertains to a training scenario focused on ${scenario.scenarioType} between the user(refer to them as you) and persona, the persona who is the AI model coach.
 
       Key Topics:
-        - Setting realistic performance targets
-        - Addressing skill gaps
-        - Discussing upcoming project challenges
+      ${scenario.keyTopics
+        .map(topic => {
+          return ` - ${topic}`;
+        })
+        .join('\n')}
 
         Competencies & Goals:
-        - Maintain professionalism under pressure
-        - De-escalate tense situations
-        - Encourage collaboration
+      ${scenario.competenciesAndGoals
+        .map(compentency => {
+          return ` - ${compentency}`;
+        })
+        .join('\n')}
 
         Guidelines:
-        - Do not ask the user to be extremely specific, make sure they are explaining their thought process, but do not drill down multiple times when they tell you what they have accomplished by asking for extremely specific details.
+        ${scenario.guidelines}
         
         Persona Profile:
-        - **Name**: Alex
-        - **Role**: New Manager
-        - **Disposition**: Enthusiastic but anxious
-        - **Communication Style**: Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.
-        - **Emotional State**: Excited but nervous. Eager to prove themselves worthy of the promotion.
-        - **Background**: Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.
+        - **Name**: ${scenario.persona.name}
+        - **Role**: ${scenario.persona.role}
+        - **Disposition**: ${scenario.persona.disposition}
+        - **Communication Style**: ${scenario.persona.communicationStyle}
+        - **Emotional State**: ${scenario.persona.emotionalState}
+        - **Background**: ${scenario.persona.background}
         
         Coaching Framework:
-        - **Name**: G.R.O.W.
-        - **Description**: A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.
+        - **Name**: ${scenario.coachingFramework.name}
+        - **Description**: ${scenario.coachingFramework.description}
 
       ### Conversation Transcript
-
       ${messages
         .map(msg => {
           const senderName = msg.sender === 'user' ? 'user' : 'Coach';
