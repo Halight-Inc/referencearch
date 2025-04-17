@@ -91,7 +91,39 @@ export class BedrockClient implements IAIAgent {
         if (event.chunk?.bytes) {
           // Decode the Uint8Array bytes to a string
           completion += new TextDecoder().decode(event.chunk.bytes);
-        } else if (event.trace) {
+	  }
+	  
+	  	if (event.trace) {
+          // Handle trace part if enableTrace was true
+          // Useful for debugging agent steps
+
+
+    const uniqueFilename = `${Date.now()}-${uuidv4()}.trace`;
+    const s3Key = `trace/${uniqueFilename}`; // Example S3 path structure
+
+    const s3BucketName = config.awsS3BucketTraceName;
+    const s3Region = 'us-east-1';
+
+    const putObjectParams = {
+      Bucket: s3BucketName,
+      Key: s3Key,
+      Body: JSON.stringify(event.trace, null, 2),
+      ContentType: 'text/plain'
+      };
+
+    const s3Client = new S3Client({
+      region: s3Region,
+      credentials: {
+	accessKeyId: config.aiAwsAccessKeyId,       // Get from imported config
+	secretAccessKey: config.aiAwsSecretAccessKey // Get from imported config
+      }
+    });
+
+    console.log(`Uploading file to S3: Bucket=${s3BucketName}, Key=${s3Key}`);
+    const command = new PutObjectCommand(putObjectParams);
+    const uploadResult = await s3Client.send(command);
+    console.log("S3 Upload successful:", uploadResult); // Contains ETag, VersionId etc.
+
           // Handle trace part if enableTrace was true
           // Useful for debugging agent steps
           console.log("Trace:", JSON.stringify(event.trace, null, 2));
