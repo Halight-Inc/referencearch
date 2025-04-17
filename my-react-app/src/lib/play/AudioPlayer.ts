@@ -64,18 +64,22 @@ export class AudioPlayer {
     }
 
     stop() {
+        // @ts-ignore
         if (ObjectExt.exists(this.audioContext)) {
             this.audioContext!.close();
         }
 
+        // @ts-ignore
         if (ObjectExt.exists(this.analyser)) {
             this.analyser!.disconnect();
         }
 
+        // @ts-ignore
         if (ObjectExt.exists(this.workletNode)) {
             this.workletNode!.disconnect();
         }
 
+        // @ts-ignore
         if (ObjectExt.exists(this.recorderNode)) {
             this.recorderNode!.disconnect();
         }
