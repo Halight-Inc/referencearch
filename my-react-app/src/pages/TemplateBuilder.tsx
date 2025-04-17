@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // import { Card, CardContent } from "@/components/ui/card";
@@ -32,22 +32,51 @@ import {
 import MultiSelectInput from "@/components/MultiSelectInput";
 import FileUpload from "@/components/FileUpload";
 import JsonDisplay from "@/components/JsonDisplay";
-import { useFileParser } from "@/hooks/useFileParser";
-import { createScenario } from '@/api';
+import { useFileParser } from "@/hooks/useFileParser"; // Keep using this for txt/md
+import { createScenario, addScenarioFile } from '@/api';
+
+// Define a type for your supporting materials
+interface SupportingMaterial {
+  title: string;
+  contentType: string; // e.g., 'text/plain', 'application/pdf'
+  content: string; // Will store plain text for txt/md, Base64 Data URL for pdf
+}
 
 export default function TemplateBuilder() {
   const { toast } = useToast();
-  const { parseFile } = useFileParser();
+  const { parseFile, loading: parsingTextFile } = useFileParser();
+  const [parsingPdf, setParsingPdf] = useState(false); // Separate loading state for PDFs
   const [showJsonOutput, setShowJsonOutput] = useState(false);
   const [generatedJson, setGeneratedJson] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
   const totalSteps = 7; // Total number of steps in the form
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null); // State for avatar preview URL
+  const avatarInputRef = useRef<HTMLInputElement>(null); // Ref for file input
 
-  // Form definition with default values
-  const form = useForm<any>({
+  // Update the form type to use the SupportingMaterial interface
+  const form = useForm<{
+    scenarioType: string;
+    title: string;
+    keyTopics: string[];
+    competenciesAndGoals: string[];
+    guidelines: string;
+    coachingFramework: { name: string; description: string; };
+    supportingMaterials: SupportingMaterial[]; // Use the interface here
+    persona: {
+      name: string;
+      role: string;
+      disposition: string;
+      background: string;
+      communicationStyle: string;
+      emotionalState: string;
+      avatar: "", // Default value for avatar
+      avatarUrl: "", // Default value for avatarUrl
+    };
+  }>({ // Add the explicit type here
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       scenarioType: "",
+      title: "",
       keyTopics: [],
       competenciesAndGoals: [],
       guidelines: "",
@@ -63,13 +92,15 @@ export default function TemplateBuilder() {
         background: "",
         communicationStyle: "",
         emotionalState: "",
+        avatar: "", // Default value for avatar
+        avatarUrl: "", // Default value for avatarUrl
       },
     },
     mode: "onChange",
   });
 
   // Handle form submission and generate JSON
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: any) => { // data will now have supportingMaterials with Base64 for PDFs
     // Format guidelines from textarea into array
     const guidelinesArray = data.guidelines
       .split("\n")
@@ -80,29 +111,77 @@ export default function TemplateBuilder() {
       guidelines: guidelinesArray,
     };
 
-    const token = localStorage.getItem('jwtToken') as string;
+    const pdfFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+        (material: SupportingMaterial) => material.contentType === 'application/pdf'
+        )
+      : [];
 
-    await createScenario({
-      ...formattedData,
-    }, token);
+    const txtFiles = formattedData.supportingMaterials
+      ? formattedData.supportingMaterials.filter(
+          (material: SupportingMaterial) => material.contentType === 'text/plain'
+        )
+      : [];
 
-    const jsonOutput = JSON.stringify(formattedData, null, 2);
-    setGeneratedJson(jsonOutput);
-    setShowJsonOutput(true);
-
-    toast({
-      title: "Success!",
-      description: "Your scenario template has been generated",
-      variant: "default",
+    formattedData.supportingMaterials = [];
+    txtFiles.forEach((file: SupportingMaterial) => {
+      formattedData.supportingMaterials.push(file.content);
     });
 
-    // Scroll to JSON output
-    setTimeout(() => {
-      const jsonSection = document.getElementById("json-output-section");
-      if (jsonSection) {
-        jsonSection.scrollIntoView({ behavior: "smooth" });
+    const token = localStorage.getItem('jwtToken') as string;
+
+    try {
+      const newScenario = await createScenario({
+        ...formattedData,
+      }, token);
+
+      for (const pdfFile of pdfFiles) {
+        try {
+          console.log(`Uploading PDF: ${pdfFile.title}`);
+          const newFileResponse = await addScenarioFile({
+            scenarioId: newScenario.id, // Use the ID from the response
+            base64: pdfFile.content,    // Send the Base64 data URL
+          }, token);
+          console.log(`PDF ${pdfFile.title} uploaded successfully:`, newFileResponse);
+        } catch (fileUploadError) {
+          // Handle individual file upload errors more gracefully if needed
+          console.error(`Failed to upload file ${pdfFile.title}:`, fileUploadError);
+          // Optionally: Collect errors and report them later, or stop the process
+          // For now, we'll re-throw to be caught by the main catch block
+          throw new Error(`Failed to upload supporting file ${pdfFile.title}. Scenario might be incomplete.`);
+        }
       }
-    }, 100);
+
+      const jsonOutput = JSON.stringify(formattedData, null, 2);
+      setGeneratedJson(jsonOutput);
+      setShowJsonOutput(true);
+
+      toast({
+        title: "Success!",
+        description: "Your scenario template has been generated and saved.",
+        variant: "default",
+      });
+
+      // Scroll to JSON output
+      setTimeout(() => {
+        const jsonSection = document.getElementById("json-output-section");
+        if (jsonSection) {
+          jsonSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+
+    } catch (apiError) {
+      console.error("API Error:", apiError);
+      toast({
+        title: "API Error",
+        description: "Failed to save the scenario. Please try again.",
+        variant: "destructive",
+      });
+      // Optionally display the formatted data even on API error for debugging
+      const jsonOutput = JSON.stringify(formattedData, null, 2);
+      setGeneratedJson(jsonOutput);
+      setShowJsonOutput(true);
+    }
   };
 
   // Handle coaching framework selection
@@ -110,7 +189,6 @@ export default function TemplateBuilder() {
     const selectedFramework = CoachingFrameworks.find(
       (framework) => framework.value === value
     );
-
     if (selectedFramework) {
       form.setValue("coachingFramework.name", selectedFramework.name);
       form.setValue("coachingFramework.description", selectedFramework.description);
@@ -123,6 +201,14 @@ export default function TemplateBuilder() {
       (persona) => persona.value === value
     );
 
+    // Clear existing avatar preview and form values when changing persona
+    setAvatarPreview(null);
+    form.setValue("persona.avatar", "");
+    form.setValue("persona.avatarUrl", "");
+    if (avatarInputRef.current) {
+        avatarInputRef.current.value = ""; // Clear file input
+    }
+
     if (selectedPersona) {
       form.setValue("persona.name", selectedPersona.name);
       form.setValue("persona.role", selectedPersona.role);
@@ -130,24 +216,34 @@ export default function TemplateBuilder() {
       form.setValue("persona.background", selectedPersona.background);
       form.setValue("persona.communicationStyle", selectedPersona.communicationStyle);
       form.setValue("persona.emotionalState", selectedPersona.emotionalState);
+      // --- Set default avatar if available in Personas data ---
+      // Example: Assuming Personas have avatarUrl property
+      // if (selectedPersona.avatarUrl) {
+      //   form.setValue("persona.avatarUrl", selectedPersona.avatarUrl);
+      //   setAvatarPreview(selectedPersona.avatarUrl);
+      // }
+      // if (selectedPersona.avatar) { // If storing an identifier
+      //    form.setValue("persona.avatar", selectedPersona.avatar);
+      // }
+      // --- End default avatar handling ---
     } else if (value === "custom") {
-      form.setValue("persona.name", "");
-      form.setValue("persona.role", "");
-      form.setValue("persona.disposition", "");
-      form.setValue("persona.background", "");
-      form.setValue("persona.communicationStyle", "");
-      form.setValue("persona.emotionalState", "");
+      // Clear all fields for custom persona entry
+      form.resetField("persona"); // Resets the entire persona object to defaults
+      // Ensure defaults are set correctly after reset if needed
+       form.setValue("persona", {
+            name: "", role: "", disposition: "", background: "",
+            communicationStyle: "", emotionalState: "", avatar: "", avatarUrl: ""
+       });
     }
   };
 
-  // Handle file upload
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    const materials = form.getValues("supportingMaterials") || [];
+    const currentMaterials = form.getValues("supportingMaterials") || [];
 
     // Check maximum of 2 files
-    if (materials.length + files.length > 2) {
+    if (currentMaterials.length + files.length > 2) {
       toast({
         title: "File limit reached",
         description: "You can only upload a maximum of 2 files",
@@ -156,56 +252,180 @@ export default function TemplateBuilder() {
       return;
     }
 
+    const newMaterials: SupportingMaterial[] = [];
+    const filePromises: Promise<void>[] = [];
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const fileTitle = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
 
-      // Validate file type
-      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
+      // Validate file type (keep this)
+      if (!file.name.endsWith('.txt') && !file.name.endsWith('.md') && !file.name.endsWith('.pdf')) {
         toast({
           title: "Unsupported file format",
-          description: "Only .txt and .md files are accepted",
+          description: `Skipping ${file.name}. Only .txt, .md, and .pdf files are accepted`,
           variant: "destructive",
         });
-        continue;
+        continue; // Skip this file
       }
 
-      try {
-        const parsedContent = await parseFile(file);
-        const fileObject = {
-          title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
-          parsedContent
-        };
+      // Create a promise for each file processing
+      const filePromise = new Promise<void>((resolve, reject) => {
+        if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+          // Use existing useFileParser for text files
+          parseFile(file)
+            .then(parsedContent => {
+              newMaterials.push({
+                title: fileTitle,
+                contentType: file.type || 'text/plain', // Use actual file type
+                content: parsedContent // Store plain text
+              });
+              resolve();
+            })
+            .catch(err => {
+              console.error(`Error parsing text file ${file.name}:`, err);
+              toast({
+                title: "Parsing failed",
+                description: `Could not process the text file ${file.name}`,
+                variant: "destructive",
+              });
+              reject(err); // Reject the promise for this file
+            });
+        } else if (file.name.endsWith('.pdf')) {
+          // Handle PDF files using readAsDataURL
+          const reader = new FileReader();
+          setParsingPdf(true); // Indicate PDF parsing started
 
-        form.setValue("supportingMaterials", [...materials, fileObject]);
+          reader.onload = (e) => {
+            const base64Content = e.target?.result as string;
+            newMaterials.push({
+              title: fileTitle,
+              contentType: file.type || 'application/pdf', // Use actual file type
+              content: base64Content // Store Base64 Data URL
+            });
+            setParsingPdf(false);
+            resolve(); // Resolve the promise for this file
+          };
 
+          reader.onerror = (err) => {
+            console.error(`Error reading PDF file ${file.name}:`, err);
+            setParsingPdf(false);
+            toast({
+              title: "Upload failed",
+              description: `Could not read the PDF file ${file.name}`,
+              variant: "destructive",
+            });
+            reject(new Error(`Error reading PDF file ${file.name}`)); // Reject the promise
+          };
+
+          reader.readAsDataURL(file); // Read as Base64 Data URL
+        } else {
+          // Should not happen due to earlier check, but good practice
+          reject(new Error(`Unsupported file type: ${file.name}`));
+        }
+      });
+      filePromises.push(filePromise);
+    }
+
+    // Wait for all files to be processed
+    try {
+      await Promise.all(filePromises);
+      // Only update form state if all files processed successfully (or were skipped)
+      if (newMaterials.length > 0) {
+        form.setValue("supportingMaterials", [...currentMaterials, ...newMaterials]);
         toast({
-          title: "File uploaded",
-          description: `${file.name} has been successfully added`,
+          title: "Files processed",
+          description: `${newMaterials.length} file(s) added successfully.`,
           variant: "default",
         });
-      } catch (error) {
-        toast({
-          title: "Upload failed",
-          description: "Could not process the file",
-          variant: "destructive",
-        });
       }
+    } catch (error) {
+      // Errors are already toasted individually, maybe log the aggregate error
+      console.error("One or more files failed to process:", error);
     }
   };
 
-  // Remove supporting material
+  // Remove supporting material - Should work as is, but ensure type safety
   const removeSupportingMaterial = (index: number) => {
-    const materials = form.getValues("supportingMaterials");
+    // Use the correct type here
+    const materials: SupportingMaterial[] = form.getValues("supportingMaterials");
     const removedFile = materials[index];
     materials.splice(index, 1);
-    form.setValue("supportingMaterials", [...materials]);
-
+    form.setValue("supportingMaterials", [...materials]); // Spread the modified array
     toast({
       title: "File removed",
       description: `${removedFile.title} has been removed`,
       variant: "default",
     });
   };
+
+  // --- Handle Avatar Image Selection ---
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      // Clear if no file selected or selection cancelled
+      setAvatarPreview(null);
+      form.setValue("persona.avatar", "");
+      form.setValue("persona.avatarUrl", "");
+      return;
+    }
+
+    // Basic validation (type and size)
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a JPG, PNG, GIF, or WEBP image.",
+        variant: "destructive",
+      });
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Avatar image must be smaller than 2MB.",
+        variant: "destructive",
+      });
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    // Read file for preview and set form values
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setAvatarPreview(dataUrl);
+      // @ts-ignore
+      form.setValue("persona.avatar", file.name); // Store filename
+      // Store data URL for preview/potential direct use.
+      // In a real app, you might upload here and set a server URL.
+      // @ts-ignore
+      form.setValue("persona.avatarUrl", dataUrl, { shouldValidate: true });
+    };
+    reader.onerror = () => {
+       toast({ title: "Error reading file", variant: "destructive" });
+       setAvatarPreview(null);
+       form.setValue("persona.avatar", "");
+       form.setValue("persona.avatarUrl", "");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // --- Clear Avatar Selection ---
+  const clearAvatar = () => {
+    setAvatarPreview(null);
+    form.setValue("persona.avatar", "");
+    form.setValue("persona.avatarUrl", "");
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ""; // Clear the file input visually
+    }
+    toast({ title: "Avatar cleared" });
+  };
+  // --- End Avatar Handlers ---
+
 
   // Navigation for steps
   const goToNextStep = () => {
@@ -222,6 +442,9 @@ export default function TemplateBuilder() {
 
   // Calculate progress percentage
   const progressPercentage = ((activeStep + 1) / totalSteps) * 100;
+
+  // Determine if any file is currently being processed
+  const isProcessingFile = parsingTextFile || parsingPdf;
 
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-white to-blue-50">
@@ -271,7 +494,7 @@ export default function TemplateBuilder() {
 
           {/* Scenario Builder Form */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-8">
 
               {/* Step 1: Scenario Type */}
               {activeStep === 0 && (
@@ -314,13 +537,31 @@ export default function TemplateBuilder() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1 mt-6">
+                          <FormLabel className="text-slate-600">Scenario Title</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter a descriptive title for this scenario"
+                              className="h-12"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-end">
                     <Button
                       type="button"
                       onClick={goToNextStep}
-                      disabled={!form.getValues("scenarioType")}
+                      disabled={!form.getValues("scenarioType") || !form.getValues("title")}
                       className="flex items-center gap-2"
                     >
                       Continue
@@ -615,12 +856,13 @@ export default function TemplateBuilder() {
                       render={({ field }) => (
                         <>
                           <FileUpload onFilesSelected={handleFileUpload} />
+                          {isProcessingFile && <p className="text-sm text-blue-600 mt-2">Processing file...</p>}
 
                           {/* Uploaded files preview */}
                           {field.value.length > 0 && (
                             <div className="space-y-3 mt-6">
                               <p className="text-sm text-slate-600 font-medium mb-2">Uploaded files ({field.value.length}/2)</p>
-                              {field.value.map((material: any, index: number) => (
+                              {field.value.map((material: SupportingMaterial, index: number) => ( // Use interface here
                                 <div key={index} className="flex items-start bg-slate-50 rounded-lg p-4 border border-slate-200">
                                   <div className="text-slate-400 mr-3 mt-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><line x1="10" x2="8" y1="9" y2="9"></line></svg>
@@ -628,8 +870,11 @@ export default function TemplateBuilder() {
                                   <div className="flex-1 overflow-hidden">
                                     <div className="text-sm font-medium">{material.title}</div>
                                     <div className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                      {material.parsedContent.substring(0, 100)}
-                                      {material.parsedContent.length > 100 ? "..." : ""}
+                                      {/* Display differently based on type */}
+                                      {material.contentType.startsWith('text/')
+                                        ? material.content.substring(0, 100) + (material.content.length > 100 ? "..." : "")
+                                        : `(${material.contentType})` // Indicate it's binary/PDF
+                                      }
                                     </div>
                                   </div>
                                   <Button
@@ -637,6 +882,7 @@ export default function TemplateBuilder() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => removeSupportingMaterial(index)}
+                                    disabled={isProcessingFile}
                                     className="text-slate-400 hover:text-red-500 ml-2"
                                   >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
@@ -656,6 +902,7 @@ export default function TemplateBuilder() {
                       type="button"
                       onClick={goToPrevStep}
                       variant="outline"
+                      disabled={isProcessingFile}
                       className="flex items-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg>
@@ -664,6 +911,7 @@ export default function TemplateBuilder() {
                     <Button
                       type="button"
                       onClick={goToNextStep}
+                      disabled={isProcessingFile}
                       className="flex items-center gap-2"
                     >
                       Continue
@@ -672,6 +920,7 @@ export default function TemplateBuilder() {
                   </div>
                 </div>
               )}
+
 
               {/* Step 7: Persona */}
               {activeStep === 6 && (
@@ -688,11 +937,10 @@ export default function TemplateBuilder() {
                     </div>
 
                     <div className="space-y-6">
+                      {/* Persona Selection Dropdown */}
                       <div className="space-y-1">
                         <label className="text-slate-600 text-sm font-medium">Choose a persona</label>
-                        <Select
-                          onValueChange={handlePersonaChange}
-                        >
+                        <Select onValueChange={handlePersonaChange}>
                           <SelectTrigger className="h-12">
                             <SelectValue placeholder="Choose a persona..." />
                           </SelectTrigger>
@@ -707,124 +955,72 @@ export default function TemplateBuilder() {
                         </Select>
                       </div>
 
+                      {/* --- Avatar Upload Section --- */}
+                      <div className="space-y-2">
+                         <FormLabel className="text-slate-600">Avatar Image (Optional)</FormLabel>
+                         <div className="flex items-center gap-4">
+                           <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                             {avatarPreview ? (
+                               <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+                             ) : (
+                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image text-slate-400"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                             )}
+                           </div>
+                           <div className="flex flex-col gap-2">
+                             <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                                Upload Image
+                             </Button>
+                             {avatarPreview && (
+                                <Button type="button" variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={clearAvatar}>
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x mr-1"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+                                   Clear
+                                </Button>
+                             )}
+                             <Input
+                                ref={avatarInputRef}
+                                type="file"
+                                accept="image/png, image/jpeg, image/gif, image/webp"
+                                onChange={handleAvatarChange}
+                                className="hidden" // Hide the default input, trigger via button
+                                // We don't use FormField here as direct file input handling is often simpler
+                             />
+                             <p className="text-xs text-slate-500">Max 2MB (JPG, PNG, GIF, WEBP)</p>
+                           </div>
+                         </div>
+                         { /* @ts-ignore */}
+                         <FormMessage>{form.formState.errors.persona?.avatarUrl?.message}</FormMessage>
+                         </div>
+                      {/* --- End Avatar Upload Section --- */}
+
+
+                      {/* Persona Detail Fields */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <FormField
-                          control={form.control}
-                          name="persona.name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.role"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Role</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.disposition"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Disposition</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="persona.emotionalState"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-600">Emotional State</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <FormField control={form.control} name="persona.name" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Name</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.role" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Role</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.disposition" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Disposition</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="persona.emotionalState" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Emotional State</FormLabel> <FormControl><Input {...field} className="h-12" /></FormControl> <FormMessage /> </FormItem> )} />
                       </div>
+                      <FormField control={form.control} name="persona.background" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Background</FormLabel> <FormControl><Textarea className="min-h-[100px]" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="persona.communicationStyle" render={({ field }) => ( <FormItem> <FormLabel className="text-slate-600">Communication Style</FormLabel> <FormControl><Textarea className="min-h-[100px]" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
 
-                      <FormField
-                        control={form.control}
-                        name="persona.background"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-slate-600">Background</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                className="min-h-[100px]"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="persona.communicationStyle"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-slate-600">Communication Style</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                className="min-h-[100px]"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </div>
                   </div>
 
+                  {/* Footer with Back and Submit Buttons */}
                   <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-between">
-                    <Button
-                      type="button"
-                      onClick={goToPrevStep}
-                      variant="outline"
-                      className="flex items-center gap-2"
-                    >
+                    <Button type="button" onClick={goToPrevStep} variant="outline" className="flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg>
                       Back
                     </Button>
                     <Button
                       type="submit"
-                      disabled={
-                        !form.getValues("persona.name") ||
-                        !form.getValues("persona.role") ||
-                        !form.getValues("persona.disposition") ||
-                        !form.getValues("persona.emotionalState") ||
-                        !form.getValues("persona.background") ||
-                        !form.getValues("persona.communicationStyle")
-                      }
+                      // Disable if the form is invalid OR if it's currently submitting
+                      disabled={!form.formState.isValid || form.formState.isSubmitting}
                       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
                     >
-                      Generate Template
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>
+                      {form.formState.isSubmitting ? "Generating..." : "Generate Template"}
+                      {!form.formState.isSubmitting && <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>}
                     </Button>
                   </div>
                 </div>
@@ -840,7 +1036,7 @@ export default function TemplateBuilder() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle text-blue-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </div>
                 <h2 className="text-2xl font-bold mb-2">Template Generated!</h2>
-                <p className="text-slate-600 max-w-md mx-auto">Your scenario has been successfully generated and is ready to use. Copy the JSON below to use in your training platform.</p>
+                <p className="text-slate-600 max-w-md mx-auto">Your scenario has been successfully generated and is ready to use. Copy the JSON below or find it saved in your templates.</p>
               </div>
 
               <JsonDisplay jsonData={generatedJson} />

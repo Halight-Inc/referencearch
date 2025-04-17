@@ -1,7 +1,8 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-interface CoachonCueScenarioAttributes {
-  id?: number;
+interface ScenarioAttributes {
+  id?: string;
+  title: string;
 
   // --- Scenario fields ---
   scenarioType: string;
@@ -21,13 +22,16 @@ interface CoachonCueScenarioAttributes {
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 }
 
-class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements CoachonCueScenarioAttributes {
-  public id!: number;
+class Scenario extends Model<ScenarioAttributes> implements ScenarioAttributes {
+  public id!: string;
 
   // Scenario fields
+  public title!: string;
   public scenarioType!: string;
   public keyTopics!: string[];
   public competenciesAndGoals!: string[];
@@ -45,26 +49,31 @@ class CoachonCueScenario extends Model<CoachonCueScenarioAttributes> implements 
     background: string;
     communicationStyle: string;
     emotionalState: string;
+    avatar:string;
+    avatarUrl:string;
   }
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
 
-const initCoachonCueScenario = (sequelize: Sequelize): void => {
-  CoachonCueScenario.init(
+const initScenario = (sequelize: Sequelize): void => {
+  Scenario.init(
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-
-      // Scenario fields
-      scenarioType: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4, // Generates a random UUID
         allowNull: false,
         unique: true,
+        primaryKey: true,
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      scenarioType: {
+        type: DataTypes.STRING,
+        allowNull: false
       },
       keyTopics: {
         type: DataTypes.ARRAY(DataTypes.STRING),
@@ -92,10 +101,10 @@ const initCoachonCueScenario = (sequelize: Sequelize): void => {
       },
     },
     {
-      tableName: 'coachoncue_scenarios',
+      tableName: 'scenarios',
       sequelize,
     }
   );
 };
 
-export { initCoachonCueScenario, CoachonCueScenario };
+export { initScenario, Scenario };

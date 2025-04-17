@@ -44,3 +44,17 @@
 .read-the-docs {
   color: #888;
 }
+
+.buttonOverride {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+.btn btn-primary:hover {
+  background-color: #2563eb;
+  color: white;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb;
+}

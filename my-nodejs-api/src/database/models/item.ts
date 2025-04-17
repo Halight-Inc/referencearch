@@ -3,13 +3,13 @@ import { Sequelize } from 'sequelize'; // import corrected
 
 // Item interface
 interface ItemAttributes {
-    id?: number; // make id optional.
+    id?: string; // make id optional.
     name: string;
     description: string;
 }
 
 class Item extends Model<ItemAttributes> implements ItemAttributes {
-    public id?: number;
+    public id?: string;
     public name!: string;
     public description!: string;
     // Timestamps
@@ -22,10 +22,10 @@ const initItem = (sequelize: Sequelize): void => {
     Item.init(
         {
             id: {
-                type: DataTypes.INTEGER,
-                autoIncrement: true,
-                primaryKey: true,
-            },
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4, // Generates a random UUID
+                allowNull: false,
+                primaryKey: true            },
             name: {
                 type: DataTypes.STRING,
                 allowNull: false,

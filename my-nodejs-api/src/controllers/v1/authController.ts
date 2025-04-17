@@ -61,7 +61,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         // Create and sign a JWT token
-        const token = jwt.sign({ userId: user.id, email: user.email }, config.jwtSecret, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id, email: user.email }, config.jwtSecret, { expiresIn: '8h' });
 
         res.json({ token });
     } catch (error) {

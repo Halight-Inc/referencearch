@@ -44,7 +44,7 @@ const SidebarChat: React.FC = () => {
         "systemContext": "you are a helpful assistant, respond in markdown format", // Updated context
         "prompt": userMessageText,
         "sessionId": "chat-session-123", // Manage session IDs properly
-        "agentType": "azure"
+        "agentType": "bedrock"
       };
 
       const response = await axios.post<{ sessionId: string; completion: string }>(

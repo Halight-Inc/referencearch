@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/toaster";
 import ScenarioBrowse from '@/pages/ScenarioBrowse.tsx';
 import Simulation from '@/pages/Simulation.tsx';
 import Logout from '@/Logout.tsx';
+import Results from '@/pages/Results.tsx';
 
 const SPLIT_CLIENT_API_KEY = import.meta.env.VITE_SPLIT_API_KEY;
 
@@ -48,6 +49,10 @@ const Root = () => {
           <Route
               path="/simulation/:id"
               element={isLoggedIn ? <Simulation /> : <Navigate to="/login" replace />}
+          />
+          <Route
+              path="/results/:id"
+              element={isLoggedIn ? <Results /> : <Navigate to="/login" replace />}
           />
           <Route
               path="/admin"

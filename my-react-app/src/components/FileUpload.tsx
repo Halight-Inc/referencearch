@@ -89,6 +89,10 @@ export default function FileUpload({ onFilesSelected }: FileUploadProps) {
             <FileText className="h-3 w-3 mr-1" />
             .md files
           </div>
+          <div className="bg-blue-50 text-blue-800 text-xs font-medium py-1 px-2 rounded flex items-center">
+            <FileText className="h-3 w-3 mr-1" />
+            .pdf files
+          </div>
         </div>
         
         <div className="text-xs text-slate-500 mb-4">
@@ -99,7 +103,7 @@ export default function FileUpload({ onFilesSelected }: FileUploadProps) {
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".txt,.md"
+          accept=".txt,.md,.pdf"
           multiple
           onChange={handleFileSelect}
         />

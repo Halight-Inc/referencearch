@@ -6,30 +6,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import AiProfileBar from "@/components/AiProfileBar.tsx";
 import VoiceMode from "@/components/VoiceMode.tsx";
 import TextMode from "@/components/TextMode.tsx";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getScenario } from '@/api.ts';
-import { CoachonCueScenarioAttributes } from "@/lib/schema";
+// import { Skeleton } from "@/components/ui/skeleton";
+import { getScenario, getScenarioFiles, getSimulationById, updateSimulation } from '@/api.ts';
+import { CoachonCueScenarioAttributes, SimulationAttributes, ChatMessage } from "@/lib/schema";
 import axios from 'axios';
+import SimulationBuilder from "@/components/SimulationBuilder";
+import ScenarioContext from "@/components/ScenarioContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 type InteractionMode = "voice" | "text";
 
-export interface ChatMessage {
-  sender: 'user' | 'ai' | 'system';
-  text: string;
-}
-
 export default function Simulation() {
   const navigate = useNavigate();
 
   const { id } = useParams();
-  const scenarioId = id ? parseInt(id) : 1;
+  const simulationId = id as string;
 
   const [isLoading, setIsLoading] = useState(true);
   const [scenario, setScenario] = useState<CoachonCueScenarioAttributes | undefined>(undefined);
 
+  const [scenarioFiles, setScenarioFiles] = useState<Array<{
+    id: string;
+    scenarioId: string;
+    path: string | null; // s3 path
+    base64: string | null;
+  }>>([]);
+
   const [interactionMode, setInteractionMode] = useState<InteractionMode>("text");
+  const [isBuilding, setIsBuilding] = useState(true);
+  const [isContextShown, setIsContextShown] = useState(true);
 
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -40,7 +46,10 @@ export default function Simulation() {
   useEffect(() => {
     const fetchScenario = async () => {
       try {
+        var result = await getSimulationById(simulationId, token);
+        const scenarioId = result.scenarioId as string;
         setScenario(await getScenario(scenarioId, token));
+        setScenarioFiles(await getScenarioFiles(scenarioId, token));
       } catch (error) {
         console.error('Error fetching scenarios:', error);
       } finally {
@@ -51,24 +60,11 @@ export default function Simulation() {
     void fetchScenario();
   }, []);
 
-
-  // Fetch AI personality for this scenario
-  // const {
-  //   data: aiPersonalities,
-  //   isLoading: isLoadingPersonality,
-  //   error: personalityError
-  // } = useQuery<AiPersonality[]>({
-  //   queryKey: [`/api/ai-personalities/scenario/${scenarioId}`],
-  //   enabled: !!scenarioId, // Only run this query if we have a scenario ID
-  // });
-
-  // const scenario = scenarios?.find(s => s.id === scenarioId) ||
-  //   fallbackScenarios.find(s => s.id === scenarioId);
-
-  // const aiPersonality = aiPersonalities?.[0] ||
-  //   fallbackAiPersonalities.find(ai => ai.scenarioId === scenarioId);
-
-  // const isLoading = isLoadingScenarios || isLoadingPersonality;
+  useEffect(() => {
+    // Reset building state when scenario changes
+    setIsBuilding(true);
+    setIsContextShown(true);
+  }, [simulationId]);
 
   useEffect(() => {
     // Initialize with system message
@@ -82,7 +78,7 @@ export default function Simulation() {
         }
       ]);
     }
-  }, [scenario]);
+  }, [scenario, isBuilding, isContextShown]);
   // }, [scenario, aiPersonality]);
 
   const handleSendMessage = async (userMessageText: string) => {
@@ -110,13 +106,83 @@ export default function Simulation() {
     // setInput('');
     setIsAiLoading(true);
 
+    const coachingSystemPrompt = `
+AI Coaching Simulation Prompt
+
+You are simulating a persona in a real-world 1 on 1 meeting between a manager (the AI Persona) and an employee (the user).
+Stay in character based on the profile below. Your role is to challenge, support, and guide the user based on the coaching framework and the scenario’s goals, while reinforcing the key competencies.
+
+In this 1 on 1 context, the user (employee) wants to practice discussing performance, sharing updates, and exploring professional goals with their manager (you, the AI Persona). You should provide realistic managerial perspectives, convey feedback, and respond authentically according to the persona’s role and personality traits. The user will be evaluated on their ability to conduct themselves effectively in a one-on-one setting and apply the coaching framework.
+
+Persona Profile
+Name: Jordan Smith
+Role: Senior Product Manager
+Disposition: Straightforward, supportive, and quick to get to the point
+Communication Style: Encouraging and factual, offering direct guidance
+Emotional State: Balanced, slightly busy but engaged
+Background: Jordan has led multiple product teams across the organization for the past 6 years. Known for setting clear expectations, providing timely feedback, and focusing heavily on professional growth for team members.
+
+Scenario Overview
+Scenario Type: Performance Review
+Key Topics:
+- Setting realistic performance targets
+- Addressing skill gaps
+- Discussing upcoming project challenges
+
+This session should mirror a typical one-on-one meeting where you, as the manager, will:
+- Listen to the user’s (employee’s) updates and challenges
+- Provide feedback and support
+- Encourage professional development and growth
+- Ensure clarity around objectives and expectations
+
+Guidelines:
+- Keep the conversation constructive
+- Encourage the employee to be introspective
+- Provide specific feedback with actionable steps
+
+Use this scenario to realistically showcase how the manager might respond to questions, guide discussions, and help navigate the employee’s concerns and aspirations.
+
+Coaching Framework
+Name: GROW
+Description: The GROW model (Goal, Reality, Options, and Will) is used to clarify objectives, assess the current situation, explore multiple approaches, and commit to action.
+
+This Interaction Should Reinforce the Following Competencies & Goals:
+- Active Listening
+- Clear Goal Setting
+- Accountability for Deliverables
+- Collaboration
+
+Emphasize these competencies and goals throughout the one-on-one. If the user fails to address or apply these effectively, you may express realistic managerial pushback, requests for clarification, or offer alternative suggestions.
+
+Supporting Materials:
+- Past monthly performance stats
+- Project timeline and deliverables
+
+AI Persona Instructions:
+- Act like Jordan Smith at all times.
+- Use a tone that reflects someone who is straightforward, supportive, and quick to get to the point.
+- Communicate in an encouraging and factual style.
+- Keep responses short, sharp, and realistic, just like a manager in a one-on-one.
+
+If the user fails to:
+- Show Active Listening
+- Set Clear Goals
+- Show Accountability for Deliverables
+- Collaborate
+
+→ give managerial-level feedback or pushback.
+
+Use the GROW model to guide your approach, and keep the focus on realistic one-on-one meeting dynamics.
+        `.trim();
+
     try {
       const request = {
-        "systemContext": "you are a helpful assistant, respond in markdown format", // Updated context
+        "systemContext": coachingSystemPrompt, // Updated context
         "prompt": userMessageText,
         // send something like the jwt, base encode it (Buffer?) - try gemini
-        "sessionId": "chat-session-123", // Manage session IDs properly
-        "agentType": "azure"
+        "sessionId": simulationId, // Manage session IDs properly
+        "agentType": "bedrock",
+        "fileUrls": scenarioFiles.length > 0 ? scenarioFiles.map(file => file.path) : undefined,
       };
 
       const response = await axios.post<{ sessionId: string; completion: string }>(
@@ -150,39 +216,182 @@ export default function Simulation() {
     }
   };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto min-h-screen flex flex-col">
-        <header className="py-4 px-4 bg-white border-b border-neutral-200 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
-              className="text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
-                <path d="m12 19-7-7 7-7" />
-                <path d="M19 12H5" />
-              </svg>
-            </button>
-            <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
-            <div className="w-6"></div>
-          </div>
-        </header>
+  const handleBuildComplete = () => {
+    setIsBuilding(false);
+  };
 
-        <main className="flex-1 p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-16 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-          </div>
-        </main>
-      </div>
+  const handleSelectMode = (mode: "voice" | "text") => {
+    setInteractionMode(mode);
+    setIsContextShown(false);
+  };
+
+  // Handle ending the scenario and going to results
+  const handleEndScenario = async () => {
+    // In a real implementation, you would save the conversation to the server
+    // before navigating to the results page
+
+    if (scenario) {
+
+      const coachingSystemPrompt = `
+        You are an experienced coaching evaluator specializing in professional development scenarios. Your role is to analyze conversation transcripts between a user (employee) and an AI persona (leader) to assess how effectively the user demonstrated the competencies and goals defined for the scenario.
+        You must remain objective, insightful, and supportive in your evaluation. Focus your analysis on how well the user exhibited each competency, referencing specific moments or behavior from the transcript. Use clear, concise language that offers both accountability and encouragement for growth.
+        For each listed competency:
+        Assign a performance rating using the following emoji CSAT scale: 1 (very poor), 2 (needs improvement), 3 (neutral/average), 4 (good), 5 (excellent).
+        Provide a brief rationale tied directly to the user’s dialogue or actions in the conversation.
+        At the end, summarize your overall impression and offer constructive feedback that helps the user improve in future simulations.
+        Your output must be a valid JSON object matching the structure provided. Do not include any text outside the JSON.
+        Below is the JSON structure we expect. Note that **each competency** in competenciesAndGoals will be inserted dynamically:
+        {
+          "competencyEvaluations": [
+            {{#each competenciesAndGoals}}
+            {
+              "competency": "{{this}}",
+              "rating": "",
+              "notes": ""
+            }{{#unless @last}},{{/unless}}
+            {{/each}}
+          ],
+          "generalFeedback": ""
+        }
+              `.trim();
+
+      const userPrompt = `This evaluation pertains to a training scenario focused on **conducting-1-on-1**.
+
+        Key Topics:
+        - Setting realistic performance targets
+        - Addressing skill gaps
+        - Discussing upcoming project challenges
+
+        Competencies & Goals:
+        - Maintain professionalism under pressure
+        - De-escalate tense situations
+        - Encourage collaboration
+
+        Guidelines:
+        - Do not ask the user to be extremely specific, make sure they are explaining their thought process, but do not drill down multiple times when they tell you what they have accomplished by asking for extremely specific details.
+
+        Coaching Framework:
+        - **Name**: G.R.O.W.
+        - **Description**: A widely used coaching model focusing on Goal, Reality, Options, and Will. Encourages structured guidance and reflection.
+
+        Persona Profile:
+        - **Name**: Alex
+        - **Role**: New Manager
+        - **Disposition**: Enthusiastic but anxious
+        - **Communication Style**: Speaks quickly, asks many questions, sometimes interrupts. Often seeks validation after decisions.
+        - **Emotional State**: Excited but nervous. Eager to prove themselves worthy of the promotion.
+        - **Background**: Recently promoted from individual contributor to team manager. Wants to succeed but lacks confidence in leadership abilities.
+
+      ### Conversation Transcript
+
+    Coach: Hi Sean, it's great to see you. How are you feeling about your new role?
+    Sean: Honestly, it's a mix of excitement and nerves. I want to do well, but I'm not sure if I'm fully prepared.​
+    Coach: That's completely natural. Let's start by clarifying what you'd like to achieve in our session today.​
+    Sean: I want to become a confident leader and set clear performance goals for my team.​
+    Coach: Great. On a scale from 1 to 10, how would you rate your current confidence in leading your team?​
+    Sean: I'd say around a 5.​
+    Coach: What factors contribute to that rating?​
+    Sean: I'm still learning how to delegate effectively and manage different personalities.​
+    Coach: What strategies have you tried so far to address these challenges?​
+    Sean: I've been holding one-on-one meetings, but I feel like I'm not asking the right questions.​
+    Coach: What options do you think could help improve these interactions?​
+    Sean: Maybe preparing a set of questions in advance or seeking feedback from my team.​
+    Coach: Those are solid ideas. Which one would you like to implement first?​
+    Sean: I'll start by preparing questions before each meeting.​
+    Coach: Excellent. When will you begin this practice?​
+    Sean: I'll prepare questions for my next meeting tomorrow.​
+    Coach: Sounds like a plan. How will you measure the effectiveness of this approach?​
+    Sean: I'll ask for feedback from my team after a few meetings to see if they find the discussions more productive.​
+    Coach: That's a proactive approach. Let's reconvene next week to discuss how it went.
+`.trim();
+
+try {
+        const request = {
+          "systemContext": coachingSystemPrompt, // Updated context
+          "prompt": userPrompt,
+          // send something like the jwt, base encode it (Buffer?) - try gemini
+          "sessionId": simulationId, // Manage session IDs properly
+          "agentType": "bedrock"
+        };
+
+        const response = await axios.post<{ sessionId: string; completion: string }>(
+          `${API_URL}/v1/ai/run-prompt`,
+          request,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+
+        console.log("API Response:", response);
+
+        if (response.data && response.data.completion) {
+          setIsLoading(true);
+
+          var simulationResult = JSON.parse(response.data.completion);
+
+          const saveSimulation = async () => {
+            try {
+              const simulation: SimulationAttributes = {
+                id: simulationId,
+                interactionMode: interactionMode,
+                scenarioId: scenario.id,
+                chatMessages: messages,
+                userId: localStorage.getItem('userId') as string,
+                status: "Completed",
+                simulationResult: simulationResult
+              } as SimulationAttributes;
+              var result = await updateSimulation(simulationId, simulation, token);
+              const scenarioId = result.scenarioId as string;
+              setScenario(await getScenario(scenarioId, token));
+            } catch (error) {
+              console.error('Error fetching scenarios:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+
+          await saveSimulation();
+          // Save conversation to the server (if needed)
+          // await saveConversationToServer(messages, simulationId);
+
+          navigate(`/results/${simulationId}`);
+
+          console.log(response.data.completion)
+
+        } else {
+          console.error("Invalid response structure:", response.data);
+        }
+      }
+      catch (error) {
+        console.error('Error sending message:', error);
+      }
+
+    }
+  };
+
+  if (isLoading || isBuilding) {
+    return (
+      <SimulationBuilder
+        // scenario={scenario}
+        // aiPersonality={scenario.persona}
+        onComplete={handleBuildComplete}
+      />
     );
   }
 
-  // Show error state if data is missing
-  // if (!scenario || !aiPersonality) {
+  if (isContextShown && scenario) {
+    return (
+      <ScenarioContext
+        scenario={scenario}
+        aiPersonality={scenario.persona}
+        onSelectMode={handleSelectMode}
+      />
+    );
+  }
+
   if (!scenario) {
     return (
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col p-4">
@@ -214,13 +423,24 @@ export default function Simulation() {
             </svg>
           </button>
           <h1 className="text-lg font-semibold text-center flex-1">AI Practice Simulation</h1>
-          <button className="text-neutral-600 hover:text-neutral-900 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleEndScenario}
+              className="py-1.5 px-3 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded-lg transition-colors"
+            >
+              End Scenario
+            </button>
+            <button
+              onClick={() => setIsContextShown(true)}
+              className="text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -228,7 +448,6 @@ export default function Simulation() {
         <AiProfileBar
           aiPersonality={scenario.persona}
           interactionMode={interactionMode}
-          onModeChange={setInteractionMode}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">

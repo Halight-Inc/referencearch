@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 // import { AiPersonality } from "@shared/schema";
 import { CoachonCueScenarioAttributes } from '@/lib/schema.ts';
 import ReactMarkdown from 'react-markdown';
-import { ChatMessage } from '@/pages/Simulation.tsx';
+import { ChatMessage } from '@/lib/schema.ts';
 
 interface TextModeProps {
   messages: Array<ChatMessage>;
@@ -21,6 +21,8 @@ export default function TextMode({
   const [inputValue, setInputValue] = useState("");
   // const [isAiTyping, setIsAiTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const fallbackAvatarUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200";
   
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -71,8 +73,7 @@ export default function TextMode({
               <div key={index} className="flex items-start mb-4 fade-in">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden mr-2">
                   <img 
-                    // src={aiPersonality.avatarUrl}
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
+                    src={aiPersonality.avatarUrl || fallbackAvatarUrl}
                     alt={`${aiPersonality.name} avatar`}
                     className="w-full h-full object-cover"
                   />
@@ -93,8 +94,7 @@ export default function TextMode({
           <div className="flex items-start mb-4 fade-in">
             <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden mr-2">
               <img
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
-                // src={aiPersonality.avatarUrl}
+                src={aiPersonality.avatarUrl || fallbackAvatarUrl}
                 alt={`${aiPersonality.name} avatar`}
                 className="w-full h-full object-cover"
               />
