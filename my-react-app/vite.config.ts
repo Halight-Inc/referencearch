@@ -17,6 +17,7 @@ export default defineConfig({
         port: 5173, // Ensure Vite runs on 5173
         strictPort: true, // Prevent it from switching ports
         host: true, // Allows external access
+        hmr: false,
         allowedHosts: [
             "localhost",
             "dev-app.energizelms.com",
