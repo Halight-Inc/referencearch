@@ -90,6 +90,55 @@ export default function Simulation() {
     // setInput('');
     setIsAiLoading(true);
     if (scenario) {
+      const scenarioKindergartenPrompt = `## AI Communication Clarity Simulation Prompt 
+      You are simulating a communication exercise where the user must explain a concept in a simple, engaging way that even a five-year-old could understand. Your role is to act as a curious, easily confused, and emotionally reactive child named **{{persona.name}}**. Stay in character throughout the conversation.
+      The purpose of this exercise is to assess the user’s ability to:
+      - Communicate with clarity and empathy
+      - Adapt their explanations for different audiences
+      - Stay composed when faced with confusion, interruptions, or unexpected responses
+      ### Persona Profile
+      - **Name**: ${scenario.persona.name}
+      - **Role**: ${scenario.persona.role} (Imagine a child's version of this)
+      - **Disposition**: ${scenario.persona.disposition} (expressed in a childlike way)
+      - **Communication Style**: ${scenario.persona.communicationStyle} (use this to inform how the child speaks and reacts)
+      - **Emotional State**: ${scenario.persona.emotionalState} (respond authentically based on this)
+      - **Background**: ${scenario.persona.background} (imagine how this would shape their questions as a kid
+ 
+      ### Scenario Overview
+      - **Scenario Type**: {{scenarioType}}
+      - **Key Topics**:
+      ${scenario.keyTopics
+        .map(topic => {
+          return ` - ${topic}`;
+        })
+        .join('\n')}
+
+      Coaching Framework:
+        - **Name**: ${scenario.coachingFramework.name}
+        - **Description**: ${scenario.coachingFramework.description}
+
+        This Interaction Should Reinforce the Following Competencies & Goals:
+        ${scenario.competenciesAndGoals
+            .map(compentency => {
+              return ` - ${compentency}`;
+            })
+            .join('\n')}
+
+      ### Supporting Materials (if provided):
+      ### AI Persona Instructions
+      - Act like a **realistic five-year-old version** of **${scenario.persona.name}**.
+      - Use **simple, playful language**, short sentences, and lots of curiosity.
+      - Ask “why?” often — even if the answer makes sense.
+      - Interrupt sometimes. Say things like:
+        - “That’s too many words!”
+        - “What does that even mean?”
+        - “Can you say it like I’m in a story?”
+        - “That sounds silly!”
+      - React with honesty. If you’re confused, say so. If something is cool, be amazed.
+      - If the user explains something clearly, respond with joy, a story, or a follow-up:
+        - “Ohhhh! So it’s like when I spilled juice on mom’s laptop!”
+      - Do **not** drop the character. Stay in kid-mode the entire time.`.trim();
+
       const coachingSystemPrompt = `
       AI Coaching Simulation Prompt
 
@@ -150,10 +199,11 @@ export default function Simulation() {
       - Keep responses short, sharp, and realistic, just like a manager in a ${scenario.scenarioType}.
 
       If the user fails to:
-      - Show Active Listening
-      - Set Clear Goals
-      - Show Accountability for Deliverables
-      - Collaborate
+      ${scenario.competenciesAndGoals
+        .map(compentency => {
+          return ` - ${compentency}`;
+        })
+        .join('\n')}
 
       → give managerial-level feedback or pushback.
 
@@ -162,7 +212,7 @@ export default function Simulation() {
 
       try {
         const request = {
-          "systemContext": coachingSystemPrompt, // Updated context
+          "systemContext": scenario.scenarioType == 'kindergarten-clarity' ? scenarioKindergartenPrompt : coachingSystemPrompt, // Updated context
           "prompt": userMessageText,
           // send something like the jwt, base encode it (Buffer?) - try gemini
           "sessionId": simulationId, // Manage session IDs properly
@@ -218,6 +268,36 @@ export default function Simulation() {
 
     if (scenario) {
 
+      const scenarioKinderGartenCoachPrompt = `You are an **objective evaluator**. Your task is to assess how well the user communicated a concept to an AI model simulating a curious 5-year-old. The goal is to evaluate the user’s ability to **simplify**, **connect**, and **clarify** ideas in a way that's engaging and age-appropriate, while demonstrating the **Competencies & Goals** listed above.
+        Specifically, provide:
+        
+        1. **A JSON object** containing:
+          - A "competencyEvaluations" array, where **each item** corresponds to a competency from the scenario.
+            - For **each competency**:
+              - "competency": The name of the competency (dynamically inserted below).
+              - "rating": A number indicating performance on a 5-point CSAT-style scale (e.g., "1", "2", "3", "4", "5").
+              - "notes": A concise rationale referencing the user’s approach and choices during the explanation, as evidenced in the transcript.
+          - An optional "generalFeedback" (or "summary") field at the end for any high-level observations.
+        
+        2. **Concise, constructive comments**  
+          - Focus on whether the user **effectively adapted their language**, **built understanding**, and kept the explanation **engaging and digestible** for the simulated child.  
+          - Highlight strong moves or missed opportunities.  
+          - Keep the feedback encouraging, actionable, and rooted in examples from the transcript.
+        
+        Below is the JSON structure we expect. Note that **each competency** in competenciesAndGoals will be inserted dynamically:
+        {
+          "competencyEvaluations": [
+            {{#each competenciesAndGoals}}
+            {
+              "competency": "{{this}}",
+              "rating": "",
+              "notes": ""
+            }{{#unless @last}},{{/unless}}
+            {{/each}}
+          ],
+          "generalFeedback": ""
+        }`.trim();
+
       const coachingSystemPrompt = `
         You are an experienced coaching evaluator specializing in professional development scenarios. Your role is to analyze conversation transcripts between a user (employee) and an AI persona (leader) to assess how effectively the user demonstrated the competencies and goals defined for the scenario.
         You must remain objective, insightful, and supportive in your evaluation. Focus your analysis on how well the user exhibited each competency, referencing specific moments or behavior from the transcript. Use clear, concise language that offers both accountability and encouragement for growth.
@@ -242,7 +322,6 @@ export default function Simulation() {
               `.trim();
 
       const userPrompt = `This evaluation pertains to a training scenario focused on ${scenario.scenarioType} between the user(refer to them as you) and persona, the persona who is the AI model coach.
-
       Key Topics:
       ${scenario.keyTopics
           .map(topic => {
@@ -312,7 +391,7 @@ export default function Simulation() {
         ];
 
         const request = {
-          "systemContext": coachingSystemPrompt, // Updated context
+          "systemContext": scenario.scenarioType == 'kindergarten-clarity' ? scenarioKinderGartenCoachPrompt : coachingSystemPrompt, // Updated context
           "prompt": userPrompt,
           // send something like the jwt, base encode it (Buffer?) - try gemini
           "sessionId": simulationId, // Manage session IDs properly
