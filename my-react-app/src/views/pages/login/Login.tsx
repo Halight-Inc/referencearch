@@ -112,8 +112,7 @@ const Login: React.FC = () => {
                       <CRow>
                         <CCol xs={6}>
                           <CButton
-                            color="primary"
-                            className="px-4"
+                            className="px-4 buttonOverride"
                             onClick={handleLogin}
                           >
                             Login
