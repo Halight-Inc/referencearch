@@ -21,6 +21,10 @@ export const scenarioTypes = [
     value: "conflict-resolution",
     label: "Conflict Resolution Between Team Members",
   },
+  {
+    value: "kindergarten-clarity",
+    label: "Explaining a concept to a 5-year-old",
+  },
 ];
 
 export const keyTopics = [
