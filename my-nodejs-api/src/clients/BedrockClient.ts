@@ -1,5 +1,7 @@
 // src/clients/BedrockClient.ts
 import { IAIAgent } from './IAIAgent';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"; // Import S3 client and command
+import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
 import config from '../config/config'; // Ensure config is correctly imported and configured
 
 // --- AWS SDK Imports ---
