@@ -40,6 +40,12 @@ export const keyTopics = [
   "Managing emotional responses",
   "Critical feedback",
   "Problem-solving",
+  "Simplicity in language",
+  "Use of analogies and metaphors",
+  "Visual and emotional cues",
+  "Engaging tone and pacing",
+  "Encouraging curiosity",
+  "Responding to 'why' and 'how' questions",
 ];
 
 export const competenciesAndGoals = [
@@ -53,6 +59,13 @@ export const competenciesAndGoals = [
   "Use effective questioning techniques",
   "Show empathy and understanding",
   "Apply conflict resolution strategies",
+  "Break down complex concepts into digestible pieces",
+  "Use child-friendly language and examples",
+  "Maintain patience and emotional attunement",
+  "Adapt explanation based on simulated child’s responses",
+  "Reinforce understanding without over-explaining",
+  "Encourage curiosity and interaction",
+  "Stay focused on the core idea being explained",
 ];
 
 export const coachingFrameworks = [
