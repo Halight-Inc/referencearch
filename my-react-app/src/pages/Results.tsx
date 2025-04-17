@@ -317,7 +317,7 @@ export default function Results() {
           <div className="text-sm text-neutral-500 mb-1">Scenario</div>
           <div className="text-lg font-medium mb-3">{scenario.title}</div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-3">
             <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm flex items-center gap-1.5">
               <CheckCircle size={16} />
               <span>{simulation.status}</span>
@@ -329,9 +329,11 @@ export default function Results() {
             {/* </div> */}
           </div>
 
-          <p>
-            {simulation?.simulationResult.generalFeedback}
-          </p>
+          {simulation?.simulationResult?.generalFeedback && (
+            <p>
+              {simulation.simulationResult.generalFeedback}
+            </p>
+          )}
         </div>
         
         <div className="bg-neutral-100 rounded-lg p-4 mb-6">

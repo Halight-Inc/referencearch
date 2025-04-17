@@ -21,6 +21,10 @@ export const scenarioTypes = [
     value: "conflict-resolution",
     label: "Conflict Resolution Between Team Members",
   },
+  {
+    value: "kindergarten-clarity",
+    label: "Explaining a concept to a 5-year-old",
+  },
 ];
 
 export const keyTopics = [
@@ -36,6 +40,12 @@ export const keyTopics = [
   "Managing emotional responses",
   "Critical feedback",
   "Problem-solving",
+  "Simplicity in language",
+  "Use of analogies and metaphors",
+  "Visual and emotional cues",
+  "Engaging tone and pacing",
+  "Encouraging curiosity",
+  "Responding to 'why' and 'how' questions",
 ];
 
 export const competenciesAndGoals = [
@@ -49,6 +59,13 @@ export const competenciesAndGoals = [
   "Use effective questioning techniques",
   "Show empathy and understanding",
   "Apply conflict resolution strategies",
+  "Break down complex concepts into digestible pieces",
+  "Use child-friendly language and examples",
+  "Maintain patience and emotional attunement",
+  "Adapt explanation based on simulated child’s responses",
+  "Reinforce understanding without over-explaining",
+  "Encourage curiosity and interaction",
+  "Stay focused on the core idea being explained",
 ];
 
 export const coachingFrameworks = [
@@ -114,5 +131,15 @@ export const personas = [
     background: "C-level executive with extensive industry experience. Balances business objectives with team wellbeing.",
     communicationStyle: "Polished, thoughtful and deliberate. Asks probing questions and listens carefully.",
     emotionalState: "Composed and measured. Rarely displays strong emotions but values authentic connections.",
+  },
+  {
+    value: "ethan",
+    label: "Ethan - 5 year old",
+    name: "Ethan",
+    role: "Curious 5-year-old eager to learn through simple stories and examples",
+    disposition: "Playful, curious, and friendly — gets distracted if confused or bored",
+    background: "Ethan is 5 years old and full of questions about how things work. He loves playing soccer and video games, and he enjoys helping his younger sister when she needs it. He’s naturally curious and often asks ‘Why?’ or ‘How come?’ when learning something new.",
+    communicationStyle: "Uses short, clear sentences. Asks a lot of questions. Likes when explanations connect to toys, animals, or games. Responds well to playful language and check-ins like, 'What do you think happens next?'",
+    emotionalState: "Excited to learn new things, but frustrated if things don’t make sense quickly",
   },
 ];

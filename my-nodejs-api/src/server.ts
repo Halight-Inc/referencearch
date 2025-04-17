@@ -1,8 +1,12 @@
-import app from './app';
 import config from './config/config';
 import db from './database';
 import seed from './database/seed/seed';
 import 'newrelic';
+import * as http from 'http';
+import {Server} from 'socket.io';
+import {setServerInstance} from './serverInstance';
+import addRoutes from './app';
+import express from 'express';
 
 const MAX_RETRIES = config.dbRetries; // Maximum number of retries
 const RETRY_DELAY = 5000; // Delay between retries in milliseconds (5 seconds)
@@ -23,7 +27,7 @@ const checkDatabaseConnection = async (): Promise<void> => {
       await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       await checkDatabaseConnection();
     } else {
-      console.error('Max retries reached. Unable to connect to the database.');      
+      console.error('Max retries reached. Unable to connect to the database.');
       return;
     }
   }
@@ -33,9 +37,26 @@ const startServer = async () => {
   await checkDatabaseConnection();
   await seed(); // Run the seed script
   // The server start always
-  app.listen(config.port, () => {
+
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server, {cors: { origin: '*', credentials: true}});
+
+  io.on('connection', (socket) => {
+    console.log('user connected');
+
+    socket.on('disconnect', function () {
+      console.log('user disconnected');
+    });
+  });
+
+  addRoutes(app);
+
+  server.listen(config.port, () => {
     console.log(`API Server is running on port ${config.port}`);
   });
+
+  setServerInstance(io);
 };
 
 startServer();

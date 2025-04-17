@@ -20,14 +20,18 @@ export default function TextMode({
 }: TextModeProps) {
   const [inputValue, setInputValue] = useState("");
   // const [isAiTyping, setIsAiTyping] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  // const chatContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for scrolling
 
   const fallbackAvatarUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200";
   
   // Scroll to bottom whenever messages change
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    // if (chatContainerRef.current) {
+    //   chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    // }
+    if (messagesEndRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
   
@@ -49,7 +53,7 @@ export default function TextMode({
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div 
-        ref={chatContainerRef}
+        // ref={chatContainerRef}
         className="chat-container flex-1 overflow-y-auto p-4 space-y-4"
       >
         {messages.map((message, index) => {
@@ -108,7 +112,7 @@ export default function TextMode({
         )}
       </div>
       
-      <div className="p-3 border-t border-neutral-200 bg-white">
+      <div ref={messagesEndRef} className="p-3 border-t border-neutral-200 bg-white">
         <form className="flex items-center" onSubmit={handleSubmit}>
           <div className="flex-1 relative">
             <input 
