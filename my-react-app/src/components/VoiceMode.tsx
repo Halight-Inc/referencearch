@@ -5,7 +5,9 @@ import {io} from 'socket.io-client';
 import {AudioPlayer} from '@/lib/play/AudioPlayer.ts';
 // import ChatHistoryManager from '@/lib/play/ChatHistoryManager.ts';
 
-const socket = io('ws://localhost:3000/');
+const API_URL = import.meta.env.VITE_API_URL;
+
+const socket = io(API_URL);
 
 /* eslint-disable */
 let SYSTEM_PROMPT: string = "You are a friend. The user and you will engage in a spoken " +
