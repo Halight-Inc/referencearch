@@ -34,7 +34,7 @@ export class AudioPlayer {
         this.analyser.fftSize = 512;
 
         // Chrome caches worklet code more aggressively, so add a nocache parameter to make sure we get the latest
-        await this.audioContext.audioWorklet.addModule('http://localhost:5173/AudioPlayerProcessor.worklet.js'); // + "?nocache=" + Date.now());
+        await this.audioContext.audioWorklet.addModule('/AudioPlayerProcessor.worklet.js'); // + "?nocache=" + Date.now());
         this.workletNode = new AudioWorkletNode(this.audioContext, "audio-player-processor");
         console.log('AudioPlayer.start.worklet')
 
