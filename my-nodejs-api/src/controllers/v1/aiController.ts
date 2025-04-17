@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { IAIAgent } from '../../clients/IAIAgent';
 import { BedrockClient } from '../../clients/BedrockClient';
 import { AzureClient } from '../../clients/AzureClient';
+import {NovaSonicClass} from '../../clients/NovaSonicClient';
 
 /**
  * @swagger
@@ -32,8 +33,8 @@ import { AzureClient } from '../../clients/AzureClient';
  *           description: The session ID for the conversation.
  *         agentType:
  *           type: string
- *           enum: [bedrock, azure]
- *           description: The type of AI agent to use (bedrock or azure).
+ *           enum: [bedrock, azure, nova]
+ *           description: The type of AI agent to use (bedrock, azure or nova).
  *     AIResponse:
  *       type: object
  *       properties:
@@ -117,9 +118,11 @@ class AIController {
 // Instantiate the clients and create the controller
 const bedrockClient = new BedrockClient();
 const azureClient = new AzureClient();
+const novaSonicClient = new NovaSonicClass();
 const aiController = new AIController({
   bedrock: bedrockClient,
   azure: azureClient,
+  nova: novaSonicClient,
 });
 
 export default aiController;

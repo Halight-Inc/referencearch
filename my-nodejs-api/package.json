@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.785",
     "@aws-sdk/client-bedrock-agent-runtime": "^3.782.0",
     "@aws-sdk/client-s3": "^3.787.0",
     "@azure/identity": "^4.8.0",
@@ -30,8 +31,10 @@
     "openai": "^4.92.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
+    "rxjs": "^7.8.2",
     "sequelize": "^6.35.1",
     "sequelize-typescript": "^2.1.6",
+    "socket.io": "^4.8.1",
     "stripe": "^17.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

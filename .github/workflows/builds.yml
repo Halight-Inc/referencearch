@@ -38,6 +38,7 @@ jobs:
           echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "VITE_SPLIT_API_KEY=${{ secrets.SPLIT_API_KEY }}" >> .env
+          echo "VITE_SOCKET_URL=ws://dev-api.energizelms.com" >> .env
           echo "VITE_API_URL=https://dev-api.energizelms.com" >> .env
           echo "VITE_CLIENT_URL=https://dev-app.energizelms.com" >> .env
           echo "VITE_STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env

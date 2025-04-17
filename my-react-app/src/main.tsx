@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
+// @ts-expect-error something
 import React from 'react';
 import "./index.css";
 import App from "./App.tsx";
@@ -72,13 +73,10 @@ const Root = () => {
 };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    {/* ✅ Wrap the entire app in Provider */}
     <Provider store={store}>
       <SplitFactoryProvider config={sdkConfig}>
         <Root />
         <Toaster />
       </SplitFactoryProvider>
     </Provider>
-  </React.StrictMode>
 );
