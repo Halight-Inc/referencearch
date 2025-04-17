@@ -5,6 +5,97 @@ import { SimulationAttributes } from '../../database/models/simulation'; // Impo
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Simulation:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: The auto-generated ID of the simulation.
+ *         status:
+ *           type: string
+ *           description: The current status of the simulation (e.g., "In Progress", "Completed").
+ *         interactionMode:
+ *           type: string
+ *           description: The mode of interaction used (e.g., "text", "voice").
+ *         scenarioId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the scenario this simulation is based on.
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the user who ran the simulation.
+ *         chatMessages:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               sender:
+ *                 type: string
+ *                 enum: [user, ai, system]
+ *               text:
+ *                 type: string
+ *           description: An array containing the chat messages exchanged during the simulation.
+ *           nullable: true
+ *         simulationResult:
+ *           type: object
+ *           properties:
+ *             competencyEvaluations:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   competency:
+ *                     type: string
+ *                   rating:
+ *                     type: number
+ *                   notes:
+ *                     type: string
+ *             generalFeedback:
+ *               type: string
+ *           description: The evaluation results of the simulation.
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The timestamp when the simulation was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The timestamp when the simulation was last updated.
+ *       required:
+ *         - status
+ *         - interactionMode
+ *         - scenarioId
+ *     SimulationInput:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           description: The status of the simulation.
+ *         interactionMode:
+ *           type: string
+ *           description: The mode of interaction used.
+ *         scenarioId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the scenario this simulation is based on.
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the user who ran the simulation.
+ *       required:
+ *         - status
+ *         - interactionMode
+ *         - scenarioId
+ *         - userId
+ */
+
+/**
+ * @swagger
  * /v1/simulation:
  *   post:
  *     summary: Create a new simulation record
@@ -17,7 +108,7 @@ import { SimulationAttributes } from '../../database/models/simulation'; // Impo
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SimulationInput' # Use a specific input schema
+ *             $ref: '#/components/schemas/SimulationInput'
  *     responses:
  *       201:
  *         description: Simulation created successfully
@@ -34,8 +125,6 @@ import { SimulationAttributes } from '../../database/models/simulation'; // Impo
  */
 const createSimulation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Consider adding input validation here (e.g., using Zod or Joi)
-        // Ensure req.body matches SimulationInput schema
         const newSimulation = await db.Simulation.create(req.body);
         res.status(201).json(newSimulation);
     } catch (error) {
@@ -78,8 +167,6 @@ const createSimulation = async (req: Request, res: Response, next: NextFunction)
 const getSimulation = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const simulationId = req.params.simulationId;
-        // Optional: Add validation for simulationId format (UUID)
-
         const simulation = await db.Simulation.findByPk(simulationId);
 
         if (!simulation) {
@@ -126,24 +213,16 @@ const getSimulation = async (req: Request, res: Response, next: NextFunction) =>
  */
 const getAllSimulation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        
-        const { scenarioId } = req.query; // Get scenarioId from query parameters
-
-        // Build the where clause conditionally
+        const { scenarioId } = req.query;
         const whereClause: WhereOptions<SimulationAttributes> = {};
+
         if (scenarioId) {
-            // Optional: Add validation for scenarioId format (UUID) if desired
             whereClause.scenarioId = scenarioId as string;
         }
 
-        // Optional: Filter by the logged-in user if your auth middleware adds user info
-        // if (req.user && req.user.id) {
-        //    whereClause.userId = req.user.id;
-        // }
-
         const simulations = await db.Simulation.findAll({
-             where: whereClause,
-             order: [['createdAt', 'DESC']] // Order by most recent first
+            where: whereClause,
+            order: [['createdAt', 'DESC']],
         });
         res.json(simulations);
     } catch (error) {
@@ -174,10 +253,7 @@ const getAllSimulation = async (req: Request, res: Response, next: NextFunction)
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SimulationUpdateInput' # Define this schema if needed, or use a partial Simulation schema
- *           example:
- *             status: "Completed"
- *             simulationResult: { "competencyEvaluations": [], "generalFeedback": "Good job!" }
+ *             $ref: '#/components/schemas/SimulationInput'
  *     responses:
  *       200:
  *         description: Simulation updated successfully
@@ -193,44 +269,11 @@ const getAllSimulation = async (req: Request, res: Response, next: NextFunction)
  *         description: Simulation not found
  *       500:
  *         description: Internal server error
- * components: # Add this section if not already present at the file/controller level for Swagger
- *   schemas:
- *     SimulationUpdateInput: # Example schema for update payload
- *       type: object
- *       properties:
- *         status:
- *           type: string
- *           description: The new status of the simulation.
- *         interactionMode:
- *           type: string
- *           description: The interaction mode used.
- *         simulationResult:
- *           type: object
- *           description: The results of the simulation.
- *           properties:
- *             competencyEvaluations:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   competency:
- *                     type: string
- *                   rating:
- *                     type: string # Or number, depending on your scale
- *                   notes:
- *                     type: string
- *             generalFeedback:
- *               type: string
- *       # Add other updatable fields as needed
  */
 const updateSimulation = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const simulationId = req.params.simulationId;
         const updateData = req.body;
-
-        // Optional: Add validation for simulationId format (UUID)
-        // Optional: Add input validation for updateData (e.g., using Zod or Joi)
-        //           Ensure only allowed fields are being updated.
 
         const simulation = await db.Simulation.findByPk(simulationId);
 
@@ -238,27 +281,18 @@ const updateSimulation = async (req: Request, res: Response, next: NextFunction)
             return res.status(404).json({ message: `Simulation with ID ${simulationId} not found.` });
         }
 
-        // Prevent updating certain fields if necessary (e.g., id, scenarioId, userId)
-        delete updateData.id;
-        delete updateData.scenarioId;
-        delete updateData.userId;
-        delete updateData.createdAt; // Usually shouldn't be updated manually
-        delete updateData.updatedAt; // Sequelize handles this automatically
-
         const updatedSimulation = await simulation.update(updateData);
 
         res.status(200).json(updatedSimulation);
     } catch (error) {
         console.error(`Error updating simulation ${req.params.simulationId}:`, error);
-        // Consider more specific error handling (e.g., validation errors vs. DB errors)
         next(error);
     }
 };
-
 
 export default {
     createSimulation,
     getSimulation,
     getAllSimulation,
-    updateSimulation, // Add the new function here
+    updateSimulation,
 };

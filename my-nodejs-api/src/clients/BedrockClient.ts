@@ -41,7 +41,7 @@ export class BedrockClient implements IAIAgent {
   }
 
   // --- AWS SDK Implementation ---
-  async runPrompt(systemContext: string, prompt: string, sessionId: string, fileUrls: string[] | null | undefined = []): Promise<string> {
+  async runPrompt(systemContext: string, prompt: string, sessionId: string, fileUrls: string[] | null | undefined = [], actionGroups: [] | null | undefined = []): Promise<string> {
     const inlineSessionStateFiles: InputFile[] = [];
     if (fileUrls) {
       const s3BucketName = config.awsS3BucketName;
@@ -60,6 +60,8 @@ export class BedrockClient implements IAIAgent {
       });
     }
 
+
+
     const command = new InvokeInlineAgentCommand({
       foundationModel: 'amazon.nova-pro-v1:0',
       sessionId: sessionId, // Ensure sessionId is unique per session and ideally user
@@ -69,6 +71,7 @@ export class BedrockClient implements IAIAgent {
       inlineSessionState: {
         files: inlineSessionStateFiles.length > 0 ? inlineSessionStateFiles : undefined,
       },
+      actionGroups: actionGroups ? actionGroups : []
     });
 
     // TODO: extract Trace data and save to S3

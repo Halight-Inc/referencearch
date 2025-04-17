@@ -11,84 +11,73 @@ import v1ScenarioRoutes from './routes/v1/scenarioRoutes';
 import v1AiRoutes from './routes/v1/aiRoutes';
 import v1simulationRoutes from './routes/v1/simulationRoutes'; // New import
 
-// add this to the swagger definition in app.ts
 /**
  * @swagger
  * components:
  *   schemas:
- *     Scenario:
+ *     Simulation:
  *       type: object
  *       properties:
  *         id:
- *           type: UUID
- *           description: The auto-generated ID of the scenario.
- *         scenarioType:
  *           type: string
- *           description: The type of the scenario.
- *         keyTopics:
+ *           format: uuid
+ *           description: The auto-generated ID of the simulation.
+ *         status:
+ *           type: string
+ *           description: The current status of the simulation (e.g., "In Progress", "Completed").
+ *         interactionMode:
+ *           type: string
+ *           description: The mode of interaction used (e.g., "text", "voice").
+ *         scenarioId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the scenario this simulation is based on.
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: The ID of the user who ran the simulation.
+ *         chatMessages:
  *           type: array
  *           items:
- *             type: string
- *           description: An array of key topics covered in the scenario.
- *         competenciesAndGoals:
- *           type: array
- *           items:
- *             type: string
- *           description: An array of competencies and goals for the scenario.
- *         guidelines:
- *           type: array
- *           items:
- *             type: string
- *           description: An array of guidelines for the scenario.
- *         coachingFramework:
+ *             type: object
+ *             properties:
+ *               sender:
+ *                 type: string
+ *                 enum: [user, ai, system]
+ *               text:
+ *                 type: string
+ *           description: An array containing the chat messages exchanged during the simulation.
+ *           nullable: true
+ *         simulationResult:
  *           type: object
  *           properties:
- *             name:
+ *             competencyEvaluations:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   competency:
+ *                     type: string
+ *                   rating:
+ *                     type: number
+ *                   notes:
+ *                     type: string
+ *             generalFeedback:
  *               type: string
- *               description: The name of the coaching framework.
- *             description:
- *               type: string
- *               description: The description of the coaching framework.
- *           description: The coaching framework used in the scenario.
- *         supportingMaterials:
- *           type: array
- *           items:
- *             type: string
- *           description: An array of supporting materials for the scenario.
- *         persona:
- *           type: object
- *           properties:
- *             name:
- *               type: string
- *               description: The name of the persona.
- *             role:
- *               type: string
- *               description: The role of the persona.
- *             disposition:
- *               type: string
- *               description: The disposition of the persona.
- *             background:
- *               type: string
- *               description: The background of the persona.
- *             communicationStyle:
- *               type: string
- *               description: The communication style of the persona.
- *             emotionalState:
- *               type: string
- *               description: The emotional state of the persona.
- *             avatar:
- *               type: string
- *               description: The avatar of the persona.
- *             avatarUrl:
- *               type: string
- *               description: The avatarUrl of the persona.
- *           description: The persona details for the scenario.
+ *           description: The evaluation results of the simulation.
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The timestamp when the simulation was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The timestamp when the simulation was last updated.
  *       required:
- *         - scenarioType
- *         - keyTopics
- *         - competenciesAndGoals
- *         - coachingFramework
- *         - persona
+ *         - status
+ *         - interactionMode
+ *         - scenarioId
  */
 
 const app = express();
