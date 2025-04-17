@@ -5,7 +5,7 @@ import {io} from 'socket.io-client';
 import {AudioPlayer} from '@/lib/play/AudioPlayer.ts';
 // import ChatHistoryManager from '@/lib/play/ChatHistoryManager.ts';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_SOCKET_URL;
 
 const socket = io(API_URL);
 
