@@ -44,7 +44,7 @@ interface SimulationAttributes {
   simulationResult: {
     competencyEvaluations: {
       competency: string;
-      rating: number;
+      rating: string;
       notes: string;
     }[],
     generalFeedback: string;
@@ -225,22 +225,23 @@ export default function Results() {
   // ];
   
   // Helper function to render emoji based on score
-  const renderScoreEmoji = (selectedScore: number, currentScore: number) => {
+  const renderScoreEmoji = (selectedScore: string, currentScore: string) => {
     const isSelected = selectedScore === currentScore;
     
+    const currentScoreNum = parseInt(currentScore, 10);
     // Common classes for all emojis - increased by 30%
     const baseClasses = "w-16 h-16 rounded-full flex items-center justify-center";
     
     // Determine color based on whether this is the selected score
     const colorClasses = isSelected 
-      ? currentScore <= 2 
+      ? currentScoreNum <= 2 
         ? "bg-orange-500 text-white" 
         : "bg-green-500 text-white"
       : "bg-gray-200 text-gray-400";
     
     return (
       <div key={currentScore} className={`${baseClasses} ${colorClasses}`}>
-        {currentScore === 1 && (
+        {currentScoreNum === 1 && (
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-frown">
             <circle cx="12" cy="12" r="10" />
             <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
@@ -248,7 +249,7 @@ export default function Results() {
             <line x1="15" x2="15.01" y1="9" y2="9" />
           </svg>
         )}
-        {currentScore === 2 && (
+        {currentScoreNum === 2 && (
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-meh">
             <circle cx="12" cy="12" r="10" />
             <line x1="8" x2="16" y1="15" y2="15" />
@@ -256,7 +257,7 @@ export default function Results() {
             <line x1="15" x2="15.01" y1="9" y2="9" />
           </svg>
         )}
-        {currentScore === 3 && (
+        {currentScoreNum === 3 && (
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
             <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -264,7 +265,7 @@ export default function Results() {
             <line x1="15" x2="15.01" y1="9" y2="9" />
           </svg>
         )}
-        {currentScore === 4 && (
+        {currentScoreNum === 4 && (
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smile">
             <circle cx="12" cy="12" r="10" />
             <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -272,7 +273,7 @@ export default function Results() {
             <line x1="15" x2="15.01" y1="9" y2="9" />
           </svg>
         )}
-        {currentScore === 5 && (
+        {currentScoreNum === 5 && (
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
             <path d="M8 13a1.5 1.5 0 0 0 4 2" />
@@ -354,7 +355,7 @@ export default function Results() {
                   </button>
                   
                   <div className="flex mb-3 justify-center" style={{ gap: '15px' }}>
-                    {[1, 2, 3, 4, 5].map((score) => renderScoreEmoji(category.rating, score))}
+                    {["1", "2", "3", "4", "5"].map((score) => renderScoreEmoji(category.rating, score))}
                   </div>
                   
                   {isExpanded && (
