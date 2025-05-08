@@ -149,6 +149,8 @@ jobs:
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            APP_NAME=my-api-dev \
+            NEW_RELIC_APP_NAME=my-api-dev \
             
       # Deploy React App to Azure Container Apps (DEV)
       - name: Deploy React App to Azure Container Apps (DEV)
@@ -162,3 +164,5 @@ jobs:
             --environment my-environment \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }}
+            --env-vars NEW_RELIC_APP_NAME=my-react-app-dev \
+            --APP_NAME=my-react-app-dev \
