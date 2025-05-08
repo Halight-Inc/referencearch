@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:22-alpine
 
 # Set the working directory
 WORKDIR /usr/src/app

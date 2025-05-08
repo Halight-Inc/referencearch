@@ -1,6 +1,6 @@
 # filepath: /C:/code/referencearch/my-react-app/Dockerfile
 # Use an official Node.js runtime as a parent image
-FROM node:latest
+FROM node:22-alpine
 
 # Set the working directory
 WORKDIR /usr/src/app
