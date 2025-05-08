@@ -112,6 +112,9 @@ jobs:
       - name: Deploy PostgreSQL to Azure Container Instances (ACI)
         run: |
           az container create \
+            --registry-username ${{ secrets.DOCKER_USERNAME }} \
+            --registry-password ${{ secrets.DOCKER_PASSWORD }} \
+            --registry-login-server index.docker.io \
             --resource-group my-resource-group \
             --name my-postgres-dev \
             --image postgres:latest \
