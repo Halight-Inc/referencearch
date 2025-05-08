@@ -101,7 +101,7 @@ jobs:
         id: vars
         run: |
           echo "api_image=${{ secrets.ACR_NAME }}.azurecr.io/my-api:${{ github.sha }}" >> "$GITHUB_ENV"
-          echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "react_image=${{ secrets.ACR_NAME }}.azurecr.io/my-react-app:${{ github.sha }}" >> "$GITHUB_ENV" 
 
       - name: Log in to Azure
         uses: azure/login@v1
