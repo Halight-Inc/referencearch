@@ -163,6 +163,6 @@ jobs:
             --target-port 3000 \
             --environment my-environment \
             --registry-username ${{ secrets.ACR_USERNAME }} \
-            --registry-password ${{ secrets.ACR_PASSWORD }}
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
             --env-vars NEW_RELIC_APP_NAME=my-react-app-dev \
-            --APP_NAME=my-react-app-dev \
+            APP_NAME=my-react-app-dev \
