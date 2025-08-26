@@ -22,6 +22,7 @@ interface Config {
     aiAzureModel: string;
     aiAzureModelVersion: string;
     awsS3BucketName: string;
+    awsS3BucketTraceName: string;
 }
 
 const config: Config = {
@@ -45,6 +46,7 @@ const config: Config = {
     aiAzureModel: process.env.AI_AZURE_MODEL || 'fake',
     aiAzureModelVersion: process.env.AI_AZURE_MODEL_VERSION || 'fake',
     awsS3BucketName: process.env.AWS_S3_BUCKET_NAME || 'halight-coachoncue-scenarios',
+    awsS3BucketTraceName: process.env.AWS_S3_BUCKET_NAME || 'halight-coachoncue-traces',
 };
 
 export default config;
